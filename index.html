@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+  <meta name="theme-color" content="#16213e">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-title" content="樂透分析">
+  <title>539・大樂透分析</title>
+  <link rel="manifest" href="manifest.json">
+  <style>
+    * { box-sizing: border-box; }
+    body { margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Microsoft JhengHei", sans-serif; background: #1a1a2e; color: #eee; min-height: 100vh; padding-bottom: env(safe-area-inset-bottom); }
+    .header { background: #16213e; padding: 14px 16px; text-align: center; font-size: 1.2rem; }
+    .tabs { display: flex; background: #0f3460; }
+    .tabs button { flex: 1; padding: 14px; border: none; background: transparent; color: #aaa; font-size: 1rem; cursor: pointer; }
+    .tabs button.active { background: #e94560; color: #fff; font-weight: bold; }
+    .container { padding: 12px 16px; max-width: 480px; margin: 0 auto; }
+    label { display: block; margin: 10px 0 4px; font-size: 0.9rem; color: #bbb; }
+    input[type="number"], input[type="text"] { width: 100%; padding: 12px; font-size: 1rem; border: 1px solid #333; border-radius: 8px; background: #16213e; color: #fff; }
+    textarea { width: 100%; min-height: 120px; padding: 12px; font-size: 0.95rem; border: 1px solid #333; border-radius: 8px; background: #16213e; color: #fff; resize: vertical; }
+    .btn { display: block; width: 100%; padding: 14px; margin: 10px 0; font-size: 1rem; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; }
+    .btn-primary { background: #e94560; color: #fff; }
+    .btn-secondary { background: #0f3460; color: #fff; }
+    .btn-tertiary { background: #23395d; color: #fff; }
+    #out { background: #16213e; border: 1px solid #333; border-radius: 8px; padding: 14px; margin-top: 12px; white-space: pre-wrap; word-break: break-all; font-size: 0.9rem; line-height: 1.5; max-height: 50vh; overflow-y: auto; }
+    .help { font-size: 0.85rem; color: #888; margin-top: 8px; }
+    .how-add { background: #0f3460; padding: 14px; border-radius: 8px; margin-top: 16px; font-size: 0.9rem; }
+    .how-add summary { cursor: pointer; }
+  </style>
+</head>
+<body>
+  <div class="header">539・大樂透分析</div>
+  <div class="tabs">
+    <button type="button" id="tab539" class="active">今彩539</button>
+    <button type="button" id="tab649">大樂透</button>
+  </div>
+  <div class="container">
+    <label>貼上開獎號碼（每行一期，號碼用逗號或空格分隔）</label>
+    <textarea id="data" placeholder="今彩539 每行 5 個號碼 (1-39)&#10;例：3,6,9,31,39&#10;5,22,28,35,36"></textarea>
+    <p class="help" id="help">今彩539：每行 5 個號碼。大樂透：每行 6 個號碼。</p>
+    <label>一鍵抓取（一次設定後就能直接按）</label>
+    <input type="text" id="apiBase" placeholder="貼上你的抓取服務網址（例：https://xxx.workers.dev）">
+    <button type="button" class="btn btn-tertiary" id="btnFetch">一鍵抓取最新開獎（填入上面網址後按）</button>
+    <label>分析期數（取最近幾期）</label>
+    <input type="number" id="periods" value="20" min="5" max="200">
+    <button type="button" class="btn btn-primary" id="btnAnalyze">分析（統計＋趨勢＋推薦）</button>
+    <button type="button" class="btn btn-secondary" id="btnAI">AI 快報</button>
+    <div id="out"></div>
+    <details class="how-add">
+      <summary>如何「加到主畫面」當 App 使用？</summary>
+      <p><strong>iPhone：</strong> Safari 打開此頁 → 分享 → 「加入主畫面」。</p>
+      <p><strong>Android：</strong> Chrome 打開此頁 → 選單(⋮) → 「加入主畫面」或「安裝應用程式」。</p>
+      <p>之後從主畫面點圖示即可像 App 一樣開啟。</p>
+    </details>
+  </div>
+  <script>
+(function() {
+  const $ = id => document.getElementById(id);
+  const dataEl = $('data');
+  const periodsEl = $('periods');
+  const apiBaseEl = $('apiBase');
+  const outEl = $('out');
+  const helpEl = $('help');
+  let mode = '539';
+
+  const LS_API_BASE = 'lotto_api_base_v1';
+  const LS_LAST_539 = 'lotto_last_539_v1';
+  const LS_LAST_649 = 'lotto_last_649_v1';
+
+  apiBaseEl.value = localStorage.getItem(LS_API_BASE) || '';
+
+  function setMode(next) {
+    mode = next;
+    if (mode === '539') {
+      $('tab539').classList.add('active'); $('tab649').classList.remove('active');
+      dataEl.placeholder = '今彩539 每行 5 個號碼 (1-39)\n例：3,6,9,31,39';
+      helpEl.textContent = '今彩539：每行 5 個號碼 (1-39)。你也可以先按「一鍵抓取」。';
+      const cached = localStorage.getItem(LS_LAST_539);
+      if (cached && !dataEl.value.trim()) dataEl.value = cached;
+    } else {
+      $('tab649').classList.add('active'); $('tab539').classList.remove('active');
+      dataEl.placeholder = '大樂透 每行 6 個號碼 (1-49)\n例：1,16,22,24,47,48';
+      helpEl.textContent = '大樂透：每行 6 個號碼 (1-49)。你也可以先按「一鍵抓取」。';
+      const cached = localStorage.getItem(LS_LAST_649);
+      if (cached && !dataEl.value.trim()) dataEl.value = cached;
+    }
+  }
+
+  $('tab539').onclick = () => setMode('539');
+  $('tab649').onclick = () => setMode('649');
+  setMode('539');
+
+  function fmtDrawLines(draws) {
+    return draws.map(d => d.join(', ')).join('\n');
+  }
+
+  async function fetchDraws() {
+    const base = (apiBaseEl.value || '').trim().replace(/\/+$/, '');
+    if (!base) {
+      outEl.textContent = '請先在「一鍵抓取」欄位貼上你的抓取服務網址（一次設定即可）。\n\n我已在 web/ 放了一份 Cloudflare Worker 程式與部署說明，照著做 3~5 分鐘就能拿到網址。';
+      return;
+    }
+    localStorage.setItem(LS_API_BASE, base);
+    const n = Math.max(1, Math.min(parseInt(periodsEl.value, 10) || 20, 200));
+    outEl.textContent = `正在抓取 ${mode === '539' ? '今彩539' : '大樂透'} 最近 ${n} 期…`;
+    const url = `${base}/${mode}?periods=${encodeURIComponent(n)}`;
+    let resp;
+    try {
+      resp = await fetch(url, { method: 'GET' });
+    } catch (e) {
+      outEl.textContent = `抓取失敗：連線不到抓取服務。\n請確認網址正確、手機有網路。\n\n${String(e)}`;
+      return;
+    }
+    if (!resp.ok) {
+      const t = await resp.text().catch(() => '');
+      outEl.textContent = `抓取失敗：HTTP ${resp.status}\n${t || ''}`;
+      return;
+    }
+    let json;
+    try {
+      json = await resp.json();
+    } catch (e) {
+      outEl.textContent = `抓取失敗：回傳不是 JSON。\n${String(e)}`;
+      return;
+    }
+    const draws = Array.isArray(json.draws) ? json.draws : [];
+    if (!draws.length) {
+      outEl.textContent = '抓取成功，但沒有拿到期數資料（draws 為空）。';
+      return;
+    }
+    dataEl.value = fmtDrawLines(draws);
+    if (mode === '539') localStorage.setItem(LS_LAST_539, dataEl.value);
+    else localStorage.setItem(LS_LAST_649, dataEl.value);
+    outEl.textContent = `✅ 已抓取 ${draws.length} 期並填入。現在可以按「分析」或「AI 快報」。`;
+  }
+
+  $('btnFetch').onclick = () => { fetchDraws(); };
+
+  function parseData(text, type) {
+    const maxNum = type === '539' ? 39 : 49;
+    const need = type === '539' ? 5 : 6;
+    const lines = text.trim().split(/\n/).filter(Boolean);
+    const draws = [];
+    for (const line of lines) {
+      const nums = line.replace(/,/g, ' ').split(/\s+/).map(s => parseInt(s, 10)).filter(n => !isNaN(n) && n >= 1 && n <= maxNum);
+      const uniq = [...new Set(nums)];
+      if (uniq.length === need) draws.push(uniq.sort((a,b)=>a-b));
+    }
+    return draws;
+  }
+
+  function run539(draws, n) {
+    const use = draws.slice(0, n);
+    if (use.length < 4) return '期數至少 4 期以上。';
+    const max = 39;
+    const counts = {};
+    for (let i = 1; i <= max; i++) counts[i] = 0;
+    for (const d of use) for (const num of d) counts[num]++;
+    const sorted = Object.entries(counts).filter(([,c]) => c > 0).sort((a,b) => b[1] - a[1]);
+    const hot6 = sorted.slice(0, 6).map(([n]) => +n);
+    const cold = Object.entries(counts).sort((a,b) => a[1] - b[1]);
+    const cold6 = cold.slice(0, 6).map(([n]) => +n);
+    const half = Math.max(1, Math.floor(use.length / 2));
+    let cr = {}, co = {};
+    for (let i = 1; i <= max; i++) cr[i] = co[i] = 0;
+    for (const d of use.slice(0, half)) for (const num of d) cr[num]++;
+    for (const d of use.slice(half)) for (const num of d) co[num]++;
+    const heating = Object.keys(cr).filter(n => cr[+n] > co[+n]).map(n => +n);
+    const cooling = Object.keys(cr).filter(n => cr[+n] < co[+n]).map(n => +n);
+    const unused = Object.entries(counts).filter(([,c]) => c === 0).map(([n]) => +n).sort((a,b)=>a-b);
+    const streak = new Set();
+    for (const d of use.slice(0, 3)) d.forEach(n => streak.add(n));
+    const streakList = [...streak].sort((a,b) => counts[b] - counts[a]);
+    let pick = new Set(streakList.slice(0, 2));
+    for (const num of sorted.map(([n]) => +n)) { if (pick.size >= 4) break; pick.add(num); }
+    for (const [num] of cold) { if (pick.size >= 5) break; if (!pick.has(+num)) { pick.add(+num); break; } }
+    for (const num of sorted.map(([n]) => +n)) { if (pick.size >= 5) break; pick.add(num); }
+    const recommend = [...pick].sort((a,b)=>a-b).slice(0, 5);
+    let s = `【今彩539】最近 ${use.length} 期\n\n`;
+    s += `熱門6: ${hot6.join(',')}  冷門6: ${cold6.join(',')}\n`;
+    s += `建議5碼(連莊+熱冷): ${recommend.join(',')}\n\n`;
+    s += `升溫: ${heating.slice(0,12).join(',')}\n降溫: ${cooling.slice(0,12).join(',')}\n`;
+    s += `未開號碼: ${unused.length ? unused.join(',') : '無'}\n`;
+    return s;
+  }
+
+  function run649(draws, n) {
+    const use = draws.slice(0, n);
+    if (use.length < 4) return '期數至少 4 期以上。';
+    const max = 49;
+    const counts = {};
+    for (let i = 1; i <= max; i++) counts[i] = 0;
+    for (const d of use) for (const num of d) counts[num]++;
+    const sorted = Object.entries(counts).filter(([,c]) => c > 0).sort((a,b) => b[1] - a[1]);
+    const hot6 = sorted.slice(0, 6).map(([n]) => +n);
+    const cold = Object.entries(counts).sort((a,b) => a[1] - b[1]);
+    const cold6 = cold.slice(0, 6).map(([n]) => +n);
+    const half = Math.max(1, Math.floor(use.length / 2));
+    let cr = {}, co = {};
+    for (let i = 1; i <= max; i++) cr[i] = co[i] = 0;
+    for (const d of use.slice(0, half)) for (const num of d) cr[num]++;
+    for (const d of use.slice(half)) for (const num of d) co[num]++;
+    const heating = Object.keys(cr).filter(n => cr[+n] > co[+n]).map(n => +n);
+    const cooling = Object.keys(cr).filter(n => cr[+n] < co[+n]).map(n => +n);
+    const unused = Object.entries(counts).filter(([,c]) => c === 0).map(([n]) => +n).sort((a,b)=>a-b);
+    const streak = new Set();
+    for (const d of use.slice(0, 3)) d.forEach(n => streak.add(n));
+    const streakList = [...streak].sort((a,b) => counts[b] - counts[a]);
+    let pick = new Set(streakList.slice(0, 2));
+    for (const num of sorted.map(([n]) => +n)) { if (pick.size >= 5) break; pick.add(num); }
+    for (const [num] of cold) { if (pick.size >= 6) break; if (!pick.has(+num)) { pick.add(+num); break; } }
+    for (const num of sorted.map(([n]) => +n)) { if (pick.size >= 6) break; pick.add(num); }
+    const recommend = [...pick].sort((a,b)=>a-b).slice(0, 6);
+    let s = `【大樂透】最近 ${use.length} 期（不含二合三合）\n\n`;
+    s += `熱門6: ${hot6.join(',')}  冷門6: ${cold6.join(',')}\n`;
+    s += `建議6碼: ${recommend.join(',')}\n\n`;
+    s += `升溫: ${heating.slice(0,12).join(',')}\n降溫: ${cooling.slice(0,12).join(',')}\n`;
+    s += `未開號碼: ${unused.length ? unused.join(',') : '無'}\n`;
+    return s;
+  }
+
+  function aiBrief539(draws, n) {
+    const use = draws.slice(0, n);
+    if (use.length < 5) return '期數至少 5 期。';
+    const max = 39;
+    const total = use.length * 5;
+    const counts = {};
+    for (let i = 1; i <= max; i++) counts[i] = 0;
+    for (const d of use) for (const num of d) counts[num]++;
+    const rateList = Object.entries(counts).map(([num, c]) => [+num, 100 * c / total]).sort((a,b) => b[1] - a[1]);
+    const hot = rateList.slice(0, 5).map(([n]) => n);
+    const cold = rateList.sort((a,b) => a[1] - b[1]).slice(0, 5).map(([n]) => n);
+    const half = Math.max(1, Math.floor(use.length / 2));
+    let cr = {}, co = {};
+    for (let i = 1; i <= max; i++) cr[i] = co[i] = 0;
+    for (const d of use.slice(0, half)) for (const num of d) cr[num]++;
+    for (const d of use.slice(half)) for (const num of d) co[num]++;
+    const trendUp = Object.keys(cr).filter(n => cr[+n] > co[+n]).map(n => +n);
+    const pairs = {};
+    const triples = {};
+    for (const d of use) {
+      const arr = [...d].sort((a,b)=>a-b);
+      for (let i = 0; i < arr.length; i++) for (let j = i+1; j < arr.length; j++) {
+        const key = [arr[i], arr[j]].join(',');
+        pairs[key] = (pairs[key] || 0) + 1;
+      }
+      for (let i = 0; i < arr.length; i++) for (let j = i+1; j < arr.length; j++) for (let k = j+1; k < arr.length; k++) {
+        const key = [arr[i], arr[j], arr[k]].join(',');
+        triples[key] = (triples[key] || 0) + 1;
+      }
+    }
+    const topPairs = Object.entries(pairs).sort((a,b) => b[1] - a[1]).slice(0, 6).map(([k]) => k);
+    const topTriples = Object.entries(triples).sort((a,b) => b[1] - a[1]).slice(0, 4).map(([k]) => k);
+    let keyNums = new Set([...hot, ...rateList.slice(0, 5).map(([n]) => n)]);
+    const recommend = [...keyNums].sort((a,b)=>a-b).slice(0, 5);
+    let s = `【今彩539 AI 快報】最近 ${use.length} 期\n\n`;
+    s += `出現機率前5: ${rateList.slice(0,5).map(([n,r]) => `${n}(${r.toFixed(1)}%)`).join(' ')}\n`;
+    s += `熱門: ${hot.join(',')}  冷門: ${cold.join(',')}\n`;
+    s += `趨勢上升: ${trendUp.slice(0,8).join(',')}\n`;
+    s += `二合頻率高: ${topPairs.join(' ')}\n三合: ${topTriples.join(' ')}\n`;
+    s += `建議5碼: ${recommend.join(',')}\n※僅供娛樂。`;
+    return s;
+  }
+
+  function aiBrief649(draws, n) {
+    const use = draws.slice(0, n);
+    if (use.length < 5) return '期數至少 5 期。';
+    const max = 49;
+    const total = use.length * 6;
+    const counts = {};
+    for (let i = 1; i <= max; i++) counts[i] = 0;
+    for (const d of use) for (const num of d) counts[num]++;
+    const rateList = Object.entries(counts).map(([num, c]) => [+num, 100 * c / total]).sort((a,b) => b[1] - a[1]);
+    const hot = rateList.slice(0, 6).map(([n]) => n);
+    const cold = rateList.sort((a,b) => a[1] - b[1]).slice(0, 6).map(([n]) => n);
+    const half = Math.max(1, Math.floor(use.length / 2));
+    let cr = {}, co = {};
+    for (let i = 1; i <= max; i++) cr[i] = co[i] = 0;
+    for (const d of use.slice(0, half)) for (const num of d) cr[num]++;
+    for (const d of use.slice(half)) for (const num of d) co[num]++;
+    const trendUp = Object.keys(cr).filter(n => cr[+n] > co[+n]).map(n => +n);
+    let keyNums = new Set([...hot, ...rateList.slice(0, 6).map(([n]) => n)]);
+    const recommend = [...keyNums].sort((a,b)=>a-b).slice(0, 6);
+    let s = `【大樂透 AI 快報】最近 ${use.length} 期（不含二合三合）\n\n`;
+    s += `出現機率前6: ${rateList.slice(0,6).map(([n,r]) => `${n}(${r.toFixed(1)}%)`).join(' ')}\n`;
+    s += `熱門: ${hot.join(',')}  冷門: ${cold.join(',')}\n`;
+    s += `趨勢上升: ${trendUp.slice(0,10).join(',')}\n`;
+    s += `建議6碼: ${recommend.join(',')}\n※僅供娛樂。`;
+    return s;
+  }
+
+  $('btnAnalyze').onclick = () => {
+    const draws = parseData(dataEl.value, mode);
+    if (!draws.length) { outEl.textContent = '請貼上開獎號碼，每行一期。'; return; }
+    const n = Math.min(parseInt(periodsEl.value, 10) || 20, draws.length);
+    outEl.textContent = mode === '539' ? run539(draws, n) : run649(draws, n);
+  };
+
+  $('btnAI').onclick = () => {
+    const draws = parseData(dataEl.value, mode);
+    if (!draws.length) { outEl.textContent = '請貼上開獎號碼。'; return; }
+    const n = Math.min(parseInt(periodsEl.value, 10) || 20, draws.length);
+    outEl.textContent = mode === '539' ? aiBrief539(draws, n) : aiBrief649(draws, n);
+  };
+})();
+  </script>
+</body>
+</html>

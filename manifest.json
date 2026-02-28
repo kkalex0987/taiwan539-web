@@ -1,0 +1,10 @@
+{
+  "name": "539・大樂透分析",
+  "short_name": "樂透分析",
+  "description": "今彩539、大樂透統計與AI快報，可離線使用",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#1a1a2e",
+  "theme_color": "#16213e",
+  "orientation": "portrait"
+}
