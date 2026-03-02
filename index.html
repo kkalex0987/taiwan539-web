@@ -39,9 +39,10 @@
     <label>貼上開獎號碼（每行一期，號碼用逗號或空格分隔）</label>
     <textarea id="data" placeholder="今彩539 每行 5 個號碼 (1-39)&#10;例：3,6,9,31,39&#10;5,22,28,35,36"></textarea>
     <p class="help" id="help">今彩539：每行 5 個號碼。大樂透：每行 6 個號碼。</p>
-    <label>一鍵抓取（一次設定後就能直接按）</label>
-    <input type="text" id="apiBase" placeholder="貼上你的抓取服務網址（例：https://xxx.workers.dev）">
-    <button type="button" class="btn btn-tertiary" id="btnFetch">一鍵抓取最新開獎（填入上面網址後按）</button>
+    <p class="help" style="margin-bottom:8px;"><span id="versionBadge">免費版</span> <span id="versionDesc">請自行貼上開獎號碼，或自備抓取網址</span> <a href="#" id="linkUpgrade" style="color:#e94560;margin-left:6px;">升級付費版</a></p>
+    <label id="labelFetch">一鍵抓取（付費版已內建網址，免費版請自備網址）</label>
+    <input type="text" id="apiBase" placeholder="免費版請貼上你的抓取網址；付費版已預填">
+    <button type="button" class="btn btn-tertiary" id="btnFetch">一鍵抓取最新開獎</button>
     <label>分析期數（取最近幾期）</label>
     <input type="number" id="periods" value="20" min="5" max="200">
     <button type="button" class="btn btn-primary" id="btnAnalyze">分析（統計＋趨勢＋推薦）</button>
@@ -67,8 +68,13 @@
   const LS_API_BASE = 'lotto_api_base_v1';
   const LS_LAST_539 = 'lotto_last_539_v1';
   const LS_LAST_649 = 'lotto_last_649_v1';
+  const LS_IS_PRO = 'lotto_is_pro_v1';
 
-  apiBaseEl.value = localStorage.getItem(LS_API_BASE) || '';
+  // 付費版專用：內建一鍵抓取網址（免費版不預填，需自行貼資料或自備網址）
+  const DEFAULT_API_BASE = 'https://workers-playground-spring-fog-589c.kkalex0987.workers.dev';
+  const savedBase = localStorage.getItem(LS_API_BASE);
+  const pro = localStorage.getItem(LS_IS_PRO) === '1';
+  apiBaseEl.value = pro ? (savedBase || DEFAULT_API_BASE) : (savedBase || '');
 
   function setMode(next) {
     mode = next;
@@ -91,14 +97,43 @@
   $('tab649').onclick = () => setMode('649');
   setMode('539');
 
+  function refreshVersionUI() {
+    const pro = isPro();
+    const badge = $('versionBadge');
+    const desc = $('versionDesc');
+    const labelFetch = $('labelFetch');
+    if (badge) badge.textContent = pro ? '付費版' : '免費版';
+    if (desc) desc.textContent = pro ? '已內建一鍵抓取，直接按即可' : '請自行貼上開獎號碼，或自備抓取網址';
+    if (labelFetch) labelFetch.textContent = pro ? '一鍵抓取（已內建網址，直接按）' : '一鍵抓取（免費版請自備抓取網址）';
+    if (pro && apiBaseEl && !apiBaseEl.value.trim()) apiBaseEl.value = DEFAULT_API_BASE;
+  }
+  refreshVersionUI();
+  $('linkUpgrade').onclick = function(e) {
+    e.preventDefault();
+    if (isPro()) return;
+    if (confirm('付費版已內建一鍵抓取網址，無需自備。確定要升級嗎？（此為示範，實際付費請依您之後串接的流程）')) {
+      localStorage.setItem(LS_IS_PRO, '1');
+      apiBaseEl.value = DEFAULT_API_BASE;
+      localStorage.setItem(LS_API_BASE, DEFAULT_API_BASE);
+      refreshVersionUI();
+      outEl.textContent = '已切換為付費版，一鍵抓取網址已自動填好，可直接按「一鍵抓取最新開獎」。';
+    }
+  };
+
   function fmtDrawLines(draws) {
     return draws.map(d => d.join(', ')).join('\n');
+  }
+
+  function isPro() {
+    return localStorage.getItem(LS_IS_PRO) === '1';
   }
 
   async function fetchDraws() {
     const base = (apiBaseEl.value || '').trim().replace(/\/+$/, '');
     if (!base) {
-      outEl.textContent = '請先在「一鍵抓取」欄位貼上你的抓取服務網址（一次設定即可）。\n\n我已在 web/ 放了一份 Cloudflare Worker 程式與部署說明，照著做 3~5 分鐘就能拿到網址。';
+      outEl.textContent = isPro()
+        ? '付費版應已內建抓取網址，若仍為空請重新整理頁面或聯絡客服。'
+        : '免費版請自行貼上開獎號碼到上方欄位，或貼上你自己部署的抓取服務網址（需自備）。';
       return;
     }
     localStorage.setItem(LS_API_BASE, base);
