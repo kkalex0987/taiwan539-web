@@ -241,6 +241,39 @@
     }
     .how-add summary:hover { color: var(--text); }
     .how-add p { margin: 12px 0 0; color: var(--text-muted); }
+    .plans-preview {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin-top: 20px;
+    }
+    .plans-preview .plan-mini {
+      padding: 16px;
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--border);
+      background: var(--bg-card);
+      text-align: center;
+    }
+    .plans-preview .plan-mini .price { font-size: 1.2rem; font-weight: 700; color: var(--accent); }
+    .plans-preview .plan-mini .name { font-size: 0.85rem; color: var(--text-muted); margin-top: 4px; }
+    .plans-preview .plan-mini .feat { font-size: 0.75rem; color: var(--text-muted); margin-top: 8px; line-height: 1.4; }
+    .plans-preview .btn-upgrade {
+      display: block;
+      margin-top: 12px;
+      padding: 10px 16px;
+      font-size: 0.9rem;
+      font-weight: 600;
+      background: linear-gradient(135deg, var(--accent) 0%, #d97706 100%);
+      color: #0f172a;
+      border: none;
+      border-radius: var(--radius-sm);
+      cursor: pointer;
+      text-decoration: none;
+      text-align: center;
+      font-family: inherit;
+      transition: all 0.2s;
+    }
+    .plans-preview .btn-upgrade:hover { transform: translateY(-1px); }
   </style>
 </head>
 <body>
@@ -359,6 +392,8 @@
       linkUpgrade.textContent = t === 'pro' ? '已為專業版' : t === 'paid' ? '升級專業版' : '升級';
       linkUpgrade.style.display = t === 'pro' ? 'none' : 'inline';
     }
+    const plansPreview = document.getElementById('plansPreviewCard');
+    if (plansPreview) plansPreview.style.display = (t === 'paid' || t === 'pro') ? 'none' : 'block';
     if (t === 'free') {
       if (fetchSection) fetchSection.style.display = 'none';
       if (periodsHint) periodsHint.textContent = '（免費版最多50期）';
