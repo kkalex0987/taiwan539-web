@@ -73,11 +73,9 @@
 
   // 付費版專用：內建一鍵抓取網址（免費版不預填，需自行貼資料或自備網址）
   const DEFAULT_API_BASE = 'https://workers-playground-spring-fog-589c.kkalex0987.workers.dev';
-  // 付費頁面網址（轉帳 / 綠界 / Line Pay 三選一）
-  const PAYMENT_URL = 'https://kkalex0987.github.io/taiwan539-web/pay.html';
+  // 付費頁面網址（同一專案底下的 pay.html）
+  const PAYMENT_URL = 'pay.html';
   const savedBase = localStorage.getItem(LS_API_BASE);
-  const pro = localStorage.getItem(LS_IS_PRO) === '1';
-  apiBaseEl.value = pro ? (savedBase || DEFAULT_API_BASE) : (savedBase || '');
 
   function setMode(next) {
     mode = next;
@@ -108,7 +106,23 @@
     if (badge) badge.textContent = pro ? '付費版' : '免費版';
     if (desc) desc.textContent = pro ? '已內建一鍵抓取，直接按即可' : '請自行貼上開獎號碼，或自備抓取網址';
     if (labelFetch) labelFetch.textContent = pro ? '一鍵抓取（已內建網址，直接按）' : '一鍵抓取（免費版請自備抓取網址）';
-    if (pro && apiBaseEl && !apiBaseEl.value.trim()) apiBaseEl.value = DEFAULT_API_BASE;
+    if (apiBaseEl) {
+      if (pro) {
+        // 付費版：自動帶入官方一鍵抓取網址，並鎖定欄位避免被任意修改 / 複製
+        apiBaseEl.value = DEFAULT_API_BASE;
+        apiBaseEl.readOnly = true;
+        apiBaseEl.style.userSelect = 'none';
+        apiBaseEl.style.pointerEvents = 'none';
+        apiBaseEl.style.backgroundColor = '#111827';
+      } else {
+        // 免費版：讓使用者自行貼網址或留白
+        apiBaseEl.readOnly = false;
+        apiBaseEl.style.userSelect = '';
+        apiBaseEl.style.pointerEvents = '';
+        apiBaseEl.style.backgroundColor = '';
+        apiBaseEl.value = savedBase || '';
+      }
+    }
   }
   // 若網址有 ?paid=1 表示從付款頁導回，啟用付費版
   const urlParams = new URLSearchParams(window.location.search);
