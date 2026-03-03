@@ -3,222 +3,73 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>升級方案 - 539・大樂透分析</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <title>升級付費版 - 539・大樂透分析</title>
   <style>
-    :root {
-      --bg: #0f172a;
-      --bg-card: #1e293b;
-      --border: #334155;
-      --text: #f1f5f9;
-      --text-muted: #94a3b8;
-      --accent: #f59e0b;
-      --accent-hover: #fbbf24;
-      --radius: 12px;
-      --radius-sm: 8px;
-      --shadow: 0 4px 6px -1px rgba(0,0,0,0.3), 0 2px 4px -2px rgba(0,0,0,0.2);
-    }
     * { box-sizing: border-box; }
-    body {
-      margin: 0; padding: 0;
-      font-family: "Noto Sans TC", -apple-system, "Microsoft JhengHei", sans-serif;
-      background: linear-gradient(180deg, #0f172a 0%, #1e293b 100%);
-      color: var(--text);
-      min-height: 100vh;
-      padding: 24px 20px 40px;
-    }
-    .container { max-width: 520px; margin: 0 auto; }
-    .back {
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      margin-bottom: 24px;
-      color: var(--text-muted);
-      text-decoration: none;
-      font-size: 0.9rem;
-      font-weight: 500;
-      transition: color 0.2s;
-    }
-    .back:hover { color: var(--accent); }
-    .page-header {
-      text-align: center;
-      margin-bottom: 28px;
-    }
-    .page-header h1 {
-      margin: 0;
-      font-size: 1.6rem;
-      font-weight: 700;
-      letter-spacing: 0.02em;
-    }
-    .page-header p {
-      margin: 8px 0 0;
-      color: var(--text-muted);
-      font-size: 0.95rem;
-    }
-    .plan-row {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 16px;
-      margin-bottom: 28px;
-    }
-    .plan {
-      padding: 24px 20px;
-      border-radius: var(--radius);
-      border: 2px solid var(--border);
-      cursor: pointer;
-      text-align: center;
-      transition: all 0.25s ease;
-      background: var(--bg-card);
-    }
-    .plan:hover { border-color: #475569; }
-    .plan.selected {
-      border-color: var(--accent);
-      background: rgba(245,158,11,0.08);
-      box-shadow: 0 0 0 1px var(--accent);
-    }
-    .plan .price {
-      font-size: 2rem;
-      font-weight: 700;
-      color: var(--accent);
-      letter-spacing: -0.02em;
-    }
-    .plan .name {
-      font-size: 0.9rem;
-      font-weight: 600;
-      color: var(--text-muted);
-      margin-top: 4px;
-    }
-    .plan .feat {
-      font-size: 0.8rem;
-      color: var(--text-muted);
-      margin-top: 16px;
-      line-height: 1.6;
-      text-align: left;
-    }
-    .card {
-      background: var(--bg-card);
-      border: 1px solid var(--border);
-      border-radius: var(--radius);
-      padding: 24px;
-      margin-bottom: 20px;
-      box-shadow: var(--shadow);
-    }
-    .card h2 {
-      font-size: 1.1rem;
-      font-weight: 600;
-      margin: 0 0 12px;
-      color: var(--text);
-    }
-    .card p { margin: 0 0 12px; font-size: 0.95rem; line-height: 1.6; color: var(--text-muted); }
-    .bank-info {
-      background: #0f172a;
-      padding: 16px 20px;
-      border-radius: var(--radius-sm);
-      font-family: "JetBrains Mono", "Consolas", monospace;
-      font-size: 0.9rem;
-      white-space: pre-wrap;
-      margin: 16px 0;
-      border: 1px solid var(--border);
-      color: var(--text);
-    }
-    .btn {
-      display: block;
-      width: 100%;
-      padding: 14px 20px;
-      margin: 12px 0 0;
-      font-size: 1rem;
-      font-weight: 600;
-      border: none;
-      border-radius: var(--radius-sm);
-      cursor: pointer;
-      text-align: center;
-      text-decoration: none;
-      font-family: inherit;
-      transition: all 0.2s;
-    }
+    body { margin: 0; padding: 20px; font-family: -apple-system, "Microsoft JhengHei", sans-serif; background: #1a1a2e; color: #eee; min-height: 100vh; }
+    .container { max-width: 480px; margin: 0 auto; }
+    h1 { font-size: 1.3rem; text-align: center; margin-bottom: 24px; }
+    .card { background: #16213e; border-radius: 12px; padding: 20px; margin-bottom: 16px; border: 1px solid #333; }
+    .card h2 { font-size: 1rem; margin: 0 0 12px; color: #e94560; }
+    .card p { margin: 0 0 12px; font-size: 0.95rem; line-height: 1.6; color: #ccc; }
+    .bank-info { background: #0f3460; padding: 14px; border-radius: 8px; font-family: monospace; font-size: 0.9rem; white-space: pre-wrap; margin: 12px 0; }
+    .btn { display: block; width: 100%; padding: 14px; margin: 10px 0; font-size: 1rem; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; text-align: center; text-decoration: none; }
     .btn-line { background: #06c755; color: #fff; }
-    .btn-line:hover { background: #05a847; }
     .btn-ecpay { background: #2d4a9e; color: #fff; }
-    .btn-ecpay:hover { background: #243d85; }
-    .note { font-size: 0.85rem; color: var(--text-muted); margin-top: 12px; }
+    .back { display: inline-block; margin-bottom: 16px; color: #888; text-decoration: none; font-size: 0.9rem; }
+    .back:hover { color: #e94560; }
+    .note { font-size: 0.85rem; color: #888; margin-top: 8px; }
   </style>
 </head>
 <body>
   <div class="container">
-    <a href="index.html" class="back">← 返回主頁</a>
-    <div class="page-header">
-      <h1>選擇升級方案</h1>
-      <p>付費版已內建一鍵抓取，無需自備網址</p>
-    </div>
-
-    <div class="plan-row">
-      <div class="plan" data-plan="1" id="plan1">
-        <div class="price">$99</div>
-        <div class="name">付費版</div>
-        <div class="feat">• 任意期數分析<br>• 奇偶建議、總和落點<br>• 連號機率、包牌期望<br>• 結構分析、撞號機率<br>• AI 快報</div>
-      </div>
-      <div class="plan" data-plan="2" id="plan2">
-        <div class="price">$199</div>
-        <div class="name">專業版</div>
-        <div class="feat">• 付費版全部功能<br>• 策略模擬<br>• 回測系統<br>• 報酬模擬<br>• 群眾行為分析</div>
-      </div>
-    </div>
+    <a href="index.html" class="back">← 返回</a>
+    <h1>付費版方案</h1>
+    <p style="text-align:center;color:#888;margin-bottom:24px;">僅此一種付費方案，開通後即可使用一鍵抓取與結構分析</p>
 
     <div class="card">
       <h2>① 銀行轉帳</h2>
-      <p>轉帳完成後請加入 LINE 告知方案（付費版 $99 / 專業版 $199），我們會立即為您開通。</p>
-      <div class="bank-info">銀行代碼：012
+      <p>轉帳完成後請加入 LINE 告知，我們會立即為您開通。</p>
+      <div class="bank-info" id="bankInfo">銀行代碼：012
 銀行名稱：台灣銀行
 戶名：王小明
 帳號：12345678901234</div>
       <a href="https://line.me/ti/p/你的LINE_ID" class="btn btn-line" target="_blank" id="btnLine">我已轉帳，聯絡開通</a>
-      <p class="note">轉帳後請截圖並透過 LINE 告知方案，我們會盡快處理。</p>
+      <p class="note">轉帳後請截圖並透過 LINE 告知，我們會盡快處理。</p>
     </div>
 
     <div class="card">
       <h2>② 綠界 ECPay</h2>
       <p>使用信用卡、ATM 或超商代碼付款。</p>
       <a href="#" class="btn btn-ecpay" id="btnEcpay">前往綠界付款</a>
-      <p class="note">請在綠界後台建立兩組付款連結（$99、$199），或串接 API 後填入下方。</p>
+      <p class="note">請先在 pay.html 填入綠界付款連結。</p>
+    </div>
+
+    <div class="card">
+      <h2>③ Line Pay</h2>
+      <p>使用 Line Pay 快速付款。</p>
+      <a href="#" class="btn btn-line" id="btnLinePay">前往 Line Pay 付款</a>
+      <p class="note">請先在 pay.html 填入 Line Pay 付款連結。</p>
     </div>
   </div>
 
   <script>
 (function() {
   const urlParams = new URLSearchParams(window.location.search);
-  const baseReturn = urlParams.get('return') || 'https://kkalex0987.github.io/taiwan539-web/';
-  let selectedPlan = 1;  // 1=付費版99, 2=專業版199
+  const returnUrl = urlParams.get('return') || 'https://kkalex0987.github.io/taiwan539-web/?paid=1';
 
-  // 綠界付款連結（請到綠界後台建立兩組「付款連結」）
-  const ECPAY_URL = { 1: 'https://payment.ecpay.com.tw/...', 2: 'https://payment.ecpay.com.tw/...' };
-
+  const ECPAY_URL = 'https://payment.ecpay.com.tw/...';
+  const LINEPAY_URL = 'https://pay.line.me/...';
   const LINE_LINK = 'https://line.me/ti/p/你的LINE_ID';
 
-  const planParam = urlParams.get('plan');
-  if (planParam === '2') selectedPlan = 2;
-
-  document.querySelectorAll('.plan').forEach(el => {
-    el.onclick = () => {
-      document.querySelectorAll('.plan').forEach(p => p.classList.remove('selected'));
-      el.classList.add('selected');
-      selectedPlan = parseInt(el.dataset.plan, 10);
-    };
-  });
-  document.querySelectorAll('.plan').forEach(p => p.classList.remove('selected'));
-  document.getElementById('plan' + selectedPlan).classList.add('selected');
-
-  function getReturnUrl() { return baseReturn.replace(/\?.*$/, '') + '?paid=' + selectedPlan; }
-
   document.getElementById('btnLine').href = LINE_LINK;
-
-  const ecpay1 = ECPAY_URL[1]?.includes('...'), ecpay2 = ECPAY_URL[2]?.includes('...');
-  document.getElementById('btnEcpay').href = (!ecpay1 && !ecpay2) ? (ECPAY_URL[selectedPlan] || '#') : '#';
+  document.getElementById('btnEcpay').href = ECPAY_URL.includes('...') ? '#' : ECPAY_URL;
   document.getElementById('btnEcpay').onclick = function(e) {
-    const url = ECPAY_URL[selectedPlan];
-    if (url?.includes('...')) { e.preventDefault(); alert('請先在 pay.html 填入綠界付款連結（付費版與專業版各一組）'); return; }
-    if (url) window.location.href = url + (url.includes('?') ? '&' : '?') + 'ReturnURL=' + encodeURIComponent(getReturnUrl());
+    if (ECPAY_URL.includes('...')) { e.preventDefault(); alert('請先在 pay.html 填入綠界付款連結'); }
+  };
+  document.getElementById('btnLinePay').href = LINEPAY_URL.includes('...') ? '#' : LINEPAY_URL;
+  document.getElementById('btnLinePay').onclick = function(e) {
+    if (LINEPAY_URL.includes('...')) { e.preventDefault(); alert('請先在 pay.html 填入 Line Pay 付款連結'); }
   };
 })();
   </script>
