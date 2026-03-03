@@ -27,6 +27,7 @@
     .help { font-size: 0.85rem; color: #888; margin-top: 8px; }
     .how-add { background: #0f3460; padding: 14px; border-radius: 8px; margin-top: 16px; font-size: 0.9rem; }
     .how-add summary { cursor: pointer; }
+    #apiBase.api-base-locked { user-select: none; -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none; pointer-events: none; background: #0f3460 !important; color: #94a3b8; }
   </style>
 </head>
 <body>
@@ -108,19 +109,17 @@
     if (labelFetch) labelFetch.textContent = pro ? '一鍵抓取（已內建網址，直接按）' : '一鍵抓取（免費版請自備抓取網址）';
     if (apiBaseEl) {
       if (pro) {
-        // 付費版：自動帶入官方一鍵抓取網址，並鎖定欄位避免被任意修改 / 複製
+        // 付費版：自動帶入一鍵抓取網址，鎖住欄位不可修改、不可選取複製
         apiBaseEl.value = DEFAULT_API_BASE;
         apiBaseEl.readOnly = true;
-        apiBaseEl.style.userSelect = 'none';
-        apiBaseEl.style.pointerEvents = 'none';
-        apiBaseEl.style.backgroundColor = '#111827';
+        apiBaseEl.classList.add('api-base-locked');
+        apiBaseEl.setAttribute('readonly', 'readonly');
       } else {
-        // 免費版：讓使用者自行貼網址或留白
+        // 免費版：該行保持空白，不顯示網址
+        apiBaseEl.value = '';
         apiBaseEl.readOnly = false;
-        apiBaseEl.style.userSelect = '';
-        apiBaseEl.style.pointerEvents = '';
-        apiBaseEl.style.backgroundColor = '';
-        apiBaseEl.value = savedBase || '';
+        apiBaseEl.classList.remove('api-base-locked');
+        apiBaseEl.removeAttribute('readonly');
       }
     }
   }
