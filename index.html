@@ -92,11 +92,15 @@
     const y = parseInt(until.slice(0, 4), 10);
     const m = parseInt(until.slice(4, 6), 10);
     const d = parseInt(until.slice(6, 8), 10);
-    const expiry = new Date(y, m - 1, d);
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-    expiry.setHours(23, 59, 59, 999);
-    return today > expiry;
+    const now = new Date();
+    const thisYear = now.getFullYear();
+    const thisMonth = now.getMonth() + 1;
+    const thisDay = now.getDate();
+    if (thisYear > y) return true;
+    if (thisYear < y) return false;
+    if (thisMonth > m) return true;
+    if (thisMonth < m) return false;
+    return thisDay > d;
   }
 
   function clearPaidIfExpired() {
@@ -203,8 +207,14 @@
     localStorage.setItem(LS_API_BASE, DEFAULT_API_BASE);
     if (until && /^\d{8}$/.test(until)) {
       localStorage.setItem(LS_PAID_UNTIL, until);
+    } else {
+      var d = new Date();
+      d.setMonth(d.getMonth() + 1);
+      var y = d.getFullYear(), m = d.getMonth() + 1, day = d.getDate();
+      var defaultUntil = '' + y + (m < 10 ? '0' : '') + m + (day < 10 ? '0' : '') + day;
+      localStorage.setItem(LS_PAID_UNTIL, defaultUntil);
     }
-    history.replaceState({}, '', window.location.pathname + window.location.hash);
+    history.replaceState({}, '', window.location.pathname + (window.location.hash || ''));
   }
   var justExpired = clearPaidIfExpired();
   refreshVersionUI();
