@@ -314,6 +314,8 @@
 </head>
 <body>
   <script>
+  window.doAnalyze = function() { if (window.__doAnalyzeImpl) window.__doAnalyzeImpl(); };
+  window.doAI = function() { if (window.__doAIImpl) window.__doAIImpl(); };
   window.switchMode = function(mode) {
     var d = document.getElementById('data'), h = document.getElementById('help');
     var t539 = document.getElementById('tab539'), t649 = document.getElementById('tab649');
@@ -396,8 +398,8 @@
       <label>分析期數<span id="periodsHint"></span></label>
       <input type="number" id="periods" value="20" min="5" max="200">
       <div class="btn-grid">
-        <button type="button" class="btn btn-primary" id="btnAnalyze">開始分析</button>
-        <button type="button" class="btn btn-secondary" id="btnAI">AI 快報</button>
+        <button type="button" class="btn btn-primary" id="btnAnalyze" onclick="doAnalyze()">開始分析</button>
+        <button type="button" class="btn btn-secondary" id="btnAI" onclick="doAI()">AI 快報</button>
       </div>
     </div>
     <div class="card" id="proSection" style="display:none;">
@@ -811,23 +813,27 @@
     return s;
   }
 
-  $('btnAnalyze').onclick = () => {
+  window.__doAnalyzeImpl = function() {
     if (window.__lottoMode) mode = window.__lottoMode;
-    const draws = parseData(dataEl.value, mode);
+    var draws = parseData(dataEl ? dataEl.value : '', mode);
+    if (!outEl) return;
     if (!draws.length) { outEl.textContent = '請貼上開獎號碼，每行一期。'; return; }
-    const maxN = getTier() === 'free' ? 50 : (getTier() === 'pro' ? 500 : 200);
-    const n = Math.min(parseInt(periodsEl.value, 10) || 20, draws.length, maxN);
+    var maxN = getTier() === 'free' ? 50 : (getTier() === 'pro' ? 500 : 200);
+    var n = Math.min(parseInt(periodsEl && periodsEl.value ? periodsEl.value : 20, 10) || 20, draws.length, maxN);
     outEl.textContent = mode === '539' ? run539(draws, n, getTier()) : run649(draws, n, getTier());
   };
-
-  $('btnAI').onclick = () => {
+  window.__doAIImpl = function() {
     if (window.__lottoMode) mode = window.__lottoMode;
+    if (!outEl) return;
     if (getTier() === 'free') { outEl.textContent = 'AI 快報為付費版功能，請升級。'; return; }
-    const draws = parseData(dataEl.value, mode);
+    var draws = parseData(dataEl ? dataEl.value : '', mode);
     if (!draws.length) { outEl.textContent = '請貼上開獎號碼。'; return; }
-    const n = Math.min(parseInt(periodsEl.value, 10) || 20, draws.length);
+    var n = Math.min(parseInt(periodsEl && periodsEl.value ? periodsEl.value : 20, 10) || 20, draws.length);
     outEl.textContent = mode === '539' ? aiBrief539(draws, n) : aiBrief649(draws, n);
   };
+  var btnAnalyze = $('btnAnalyze'), btnAI = $('btnAI');
+  if (btnAnalyze) btnAnalyze.onclick = window.__doAnalyzeImpl;
+  if (btnAI) btnAI.onclick = window.__doAIImpl;
 
   function runStrategySimulate(draws, n, type) {
     const use = draws.slice(0, n);
