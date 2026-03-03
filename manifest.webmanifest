@@ -1,0 +1,10 @@
+{
+  "name": "樂透結構分析小幫手",
+  "short_name": "樂透分析",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#ffffff",
+  "lang": "zh-Hant"
+}
+

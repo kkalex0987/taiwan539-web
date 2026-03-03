@@ -3,523 +3,51 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
-  <meta name="theme-color" content="#0f172a">
+  <meta name="theme-color" content="#16213e">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-title" content="樂透分析">
   <title>539・大樂透分析</title>
-  <link rel="manifest" href="manifest.json">
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="manifest" href="manifest.webmanifest">
   <style>
-    :root {
-      --bg: #0f172a;
-      --bg-card: #1e293b;
-      --bg-input: #0f172a;
-      --border: #334155;
-      --text: #f1f5f9;
-      --text-muted: #94a3b8;
-      --accent: #f59e0b;
-      --accent-hover: #fbbf24;
-      --primary: #3b82f6;
-      --primary-hover: #60a5fa;
-      --success: #10b981;
-      --radius: 12px;
-      --radius-sm: 8px;
-      --shadow: 0 4px 6px -1px rgba(0,0,0,0.3), 0 2px 4px -2px rgba(0,0,0,0.2);
-    }
     * { box-sizing: border-box; }
-    body {
-      margin: 0; padding: 0;
-      font-family: "Noto Sans TC", -apple-system, BlinkMacSystemFont, "Microsoft JhengHei", sans-serif;
-      background: linear-gradient(180deg, #0f172a 0%, #1e293b 100%);
-      color: var(--text);
-      min-height: 100vh;
-      padding-bottom: env(safe-area-inset-bottom);
-      line-height: 1.6;
-    }
-    .header {
-      background: rgba(15,23,42,0.95);
-      backdrop-filter: blur(12px);
-      padding: 20px 20px 18px;
-      text-align: center;
-      border-bottom: 1px solid var(--border);
-      position: relative;
-      z-index: 1;
-    }
-    .header h1 {
-      margin: 0;
-      font-size: 1.5rem;
-      font-weight: 700;
-      letter-spacing: 0.02em;
-      background: linear-gradient(135deg, var(--text) 0%, var(--accent) 100%);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      background-clip: text;
-    }
-    .header .tagline {
-      margin-top: 4px;
-      font-size: 0.8rem;
-      color: var(--text-muted);
-      font-weight: 500;
-    }
-    .header-plans {
-      margin-top: 14px;
-      padding-top: 12px;
-      border-top: 1px solid rgba(255,255,255,0.1);
-      font-size: 0.9rem;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      flex-wrap: wrap;
-      gap: 8px;
-    }
-    .header-plans-label { color: var(--text-muted); }
-    .header-plans-bar {
-      padding: 12px 16px;
-      font-size: 0.9rem;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      flex-wrap: wrap;
-      gap: 8px;
-      background: var(--bg-card);
-      border-bottom: 1px solid var(--border);
-      text-align: center;
-    }
-    .header-plans-bar .header-plans-sep { color: var(--text-muted); opacity: 0.6; }
-    .header-plans-bar .header-plans-link {
-      color: var(--accent);
-      font-weight: 600;
-      text-decoration: none;
-      padding: 4px 10px;
-      border-radius: 6px;
-      background: rgba(245,158,11,0.15);
-      transition: background 0.2s;
-      display: inline-block;
-    }
-    .header-plans-bar .header-plans-link:hover { background: rgba(245,158,11,0.3); }
-    .tabs {
-      display: flex;
-      gap: 0;
-      padding: 0 16px;
-      background: var(--bg-card);
-      border-bottom: 1px solid var(--border);
-      position: relative;
-      z-index: 999;
-      pointer-events: auto;
-    }
-    .tabs button {
-      flex: 1;
-      padding: 16px;
-      border: none;
-      background: transparent;
-      color: var(--text-muted);
-      font-size: 1rem;
-      font-weight: 500;
-      cursor: pointer;
-      transition: all 0.2s ease;
-      border-bottom: 3px solid transparent;
-      font-family: inherit;
-      position: relative;
-      z-index: 2;
-      touch-action: manipulation;
-      -webkit-tap-highlight-color: transparent;
-      pointer-events: auto;
-      user-select: none;
-    }
-    .tabs button:hover { color: var(--text); }
-    .tabs button.active {
-      color: var(--accent);
-      border-bottom-color: var(--accent);
-    }
-    .container {
-      padding: 24px 20px;
-      max-width: 520px;
-      margin: 0 auto;
-    }
-    .card {
-      background: var(--bg-card);
-      border: 1px solid var(--border);
-      border-radius: var(--radius);
-      padding: 20px;
-      margin-bottom: 20px;
-      box-shadow: var(--shadow);
-    }
-    label {
-      display: block;
-      margin: 0 0 8px;
-      font-size: 0.9rem;
-      font-weight: 500;
-      color: var(--text-muted);
-    }
-    input[type="number"], input[type="text"] {
-      width: 100%;
-      padding: 14px 16px;
-      font-size: 1rem;
-      border: 1px solid var(--border);
-      border-radius: var(--radius-sm);
-      background: var(--bg-input);
-      color: var(--text);
-      font-family: inherit;
-      transition: border-color 0.2s;
-    }
-    input:focus {
-      outline: none;
-      border-color: var(--accent);
-    }
-    textarea {
-      width: 100%;
-      min-height: 140px;
-      padding: 14px 16px;
-      font-size: 0.95rem;
-      border: 1px solid var(--border);
-      border-radius: var(--radius-sm);
-      background: var(--bg-input);
-      color: var(--text);
-      resize: vertical;
-      font-family: "JetBrains Mono", "Consolas", monospace;
-      line-height: 1.6;
-      transition: border-color 0.2s;
-    }
-    textarea:focus {
-      outline: none;
-      border-color: var(--accent);
-    }
-    .version-bar {
-      display: flex;
-      align-items: center;
-      flex-wrap: wrap;
-      gap: 8px;
-      margin-bottom: 20px;
-      padding: 12px 16px;
-      background: rgba(245,158,11,0.08);
-      border: 1px solid rgba(245,158,11,0.2);
-      border-radius: var(--radius-sm);
-    }
-    .version-bar .badge {
-      display: inline-block;
-      padding: 4px 10px;
-      font-size: 0.75rem;
-      font-weight: 600;
-      border-radius: 20px;
-      text-transform: uppercase;
-      letter-spacing: 0.05em;
-    }
-    .version-bar .badge.free { background: #334155; color: #94a3b8; }
-    .version-bar .badge.paid { background: rgba(59,130,246,0.3); color: #60a5fa; }
-    .version-bar .badge.pro { background: rgba(245,158,11,0.3); color: var(--accent); }
-    .version-bar .desc { font-size: 0.85rem; color: var(--text-muted); }
-    .version-bar .link-upgrade {
-      margin-left: auto;
-      font-size: 0.9rem;
-      font-weight: 600;
-      color: var(--accent);
-      text-decoration: none;
-      transition: color 0.2s;
-    }
-    .version-bar .link-upgrade:hover { color: var(--accent-hover); }
-    .btn {
-      display: block;
-      width: 100%;
-      padding: 14px 20px;
-      margin: 8px 0;
-      font-size: 1rem;
-      font-weight: 600;
-      border: none;
-      border-radius: var(--radius-sm);
-      cursor: pointer;
-      font-family: inherit;
-      transition: all 0.2s ease;
-    }
-    .btn-primary {
-      background: linear-gradient(135deg, var(--accent) 0%, #d97706 100%);
-      color: #0f172a;
-      box-shadow: 0 2px 8px rgba(245,158,11,0.3);
-    }
-    .btn-primary:hover { transform: translateY(-1px); box-shadow: 0 4px 12px rgba(245,158,11,0.4); }
-    .btn-secondary {
-      background: var(--bg-card);
-      color: var(--text);
-      border: 1px solid var(--border);
-    }
-    .btn-secondary:hover { background: #334155; border-color: #475569; }
-    .btn-tertiary {
-      background: rgba(59,130,246,0.15);
-      color: #60a5fa;
-      border: 1px solid rgba(59,130,246,0.3);
-    }
-    .btn-tertiary:hover { background: rgba(59,130,246,0.25); }
-    .btn-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 10px;
-      margin: 12px 0;
-    }
-    .btn-grid .btn { margin: 0; }
-    #out {
-      background: var(--bg-input);
-      border: 1px solid var(--border);
-      border-radius: var(--radius);
-      padding: 20px;
-      margin-top: 20px;
-      min-height: 60px;
-      white-space: pre-wrap;
-      word-break: break-all;
-      font-size: 0.9rem;
-      line-height: 1.7;
-      max-height: 55vh;
-      overflow-y: auto;
-      font-family: "JetBrains Mono", "Consolas", "Noto Sans TC", monospace;
-    }
-    #out:empty::before { content: "分析結果將顯示於此"; color: var(--text-muted); }
-    .help { font-size: 0.85rem; color: var(--text-muted); margin-top: 8px; }
-    .how-add {
-      background: var(--bg-card);
-      border: 1px solid var(--border);
-      border-radius: var(--radius);
-      padding: 16px 20px;
-      margin-top: 24px;
-      font-size: 0.9rem;
-    }
-    .how-add summary {
-      cursor: pointer;
-      font-weight: 500;
-      color: var(--text-muted);
-    }
-    .how-add summary:hover { color: var(--text); }
-    .how-add p { margin: 12px 0 0; color: var(--text-muted); }
-    .plans-preview {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 12px;
-      margin-top: 20px;
-    }
-    .plans-preview .plan-mini {
-      padding: 16px;
-      border-radius: var(--radius-sm);
-      border: 1px solid var(--border);
-      background: var(--bg-card);
-      text-align: center;
-    }
-    .plans-preview .plan-mini .price { font-size: 1.2rem; font-weight: 700; color: var(--accent); }
-    .plans-preview .plan-mini .name { font-size: 0.85rem; color: var(--text-muted); margin-top: 4px; }
-    .plans-preview .plan-mini .feat { font-size: 0.75rem; color: var(--text-muted); margin-top: 8px; line-height: 1.4; }
-    .plans-preview .btn-upgrade {
-      display: block;
-      margin-top: 12px;
-      padding: 10px 16px;
-      font-size: 0.9rem;
-      font-weight: 600;
-      background: linear-gradient(135deg, var(--accent) 0%, #d97706 100%);
-      color: #0f172a;
-      border: none;
-      border-radius: var(--radius-sm);
-      cursor: pointer;
-      text-decoration: none;
-      text-align: center;
-      font-family: inherit;
-      transition: all 0.2s;
-    }
-    .plans-preview .btn-upgrade:hover { transform: translateY(-1px); }
+    body { margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Microsoft JhengHei", sans-serif; background: #1a1a2e; color: #eee; min-height: 100vh; padding-bottom: env(safe-area-inset-bottom); }
+    .header { background: #16213e; padding: 14px 16px; text-align: center; font-size: 1.2rem; }
+    .tabs { display: flex; background: #0f3460; }
+    .tabs button { flex: 1; padding: 14px; border: none; background: transparent; color: #aaa; font-size: 1rem; cursor: pointer; }
+    .tabs button.active { background: #e94560; color: #fff; font-weight: bold; }
+    .container { padding: 12px 16px; max-width: 480px; margin: 0 auto; }
+    label { display: block; margin: 10px 0 4px; font-size: 0.9rem; color: #bbb; }
+    input[type="number"], input[type="text"] { width: 100%; padding: 12px; font-size: 1rem; border: 1px solid #333; border-radius: 8px; background: #16213e; color: #fff; }
+    textarea { width: 100%; min-height: 120px; padding: 12px; font-size: 0.95rem; border: 1px solid #333; border-radius: 8px; background: #16213e; color: #fff; resize: vertical; }
+    .btn { display: block; width: 100%; padding: 14px; margin: 10px 0; font-size: 1rem; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; }
+    .btn-primary { background: #e94560; color: #fff; }
+    .btn-secondary { background: #0f3460; color: #fff; }
+    .btn-tertiary { background: #23395d; color: #fff; }
+    #out { background: #16213e; border: 1px solid #333; border-radius: 8px; padding: 14px; margin-top: 12px; white-space: pre-wrap; word-break: break-all; font-size: 0.9rem; line-height: 1.5; max-height: 50vh; overflow-y: auto; }
+    .help { font-size: 0.85rem; color: #888; margin-top: 8px; }
+    .how-add { background: #0f3460; padding: 14px; border-radius: 8px; margin-top: 16px; font-size: 0.9rem; }
+    .how-add summary { cursor: pointer; }
   </style>
 </head>
 <body>
-  <script>
-  (function(){
-    var q = window.location.search;
-    if (q.indexOf('paid=1') >= 0) localStorage.setItem('lotto_tier_v1', 'paid');
-    else if (q.indexOf('paid=2') >= 0) localStorage.setItem('lotto_tier_v1', 'pro');
-  })();
-  window.getTier = function() { return localStorage.getItem('lotto_tier_v1') || 'free'; };
-  function parseLotto(text, mode) {
-    var maxNum = mode === '539' ? 39 : 49, need = mode === '539' ? 5 : 6;
-    var lines = String(text || '').trim().split(/\n/).filter(Boolean), draws = [];
-    for (var i = 0; i < lines.length; i++) {
-      var nums = lines[i].replace(/,/g, ' ').split(/\s+/).map(function(s){ return parseInt(s,10); }).filter(function(n){ return !isNaN(n) && n >= 1 && n <= maxNum; });
-      var uniq = []; for (var j = 0; j < nums.length; j++) if (uniq.indexOf(nums[j]) === -1) uniq.push(nums[j]);
-      if (uniq.length === need) draws.push(uniq.sort(function(a,b){ return a-b; }));
-    }
-    return draws;
-  }
-  function runAnalyze(draws, n, mode, tier) {
-    var use = draws.slice(0, n), max = mode === '539' ? 39 : 49, need = mode === '539' ? 5 : 6;
-    if (use.length < 4) return '期數至少 4 期以上。';
-    var counts = {}, i, d;
-    for (i = 1; i <= max; i++) counts[i] = 0;
-    for (d = 0; d < use.length; d++) for (i = 0; i < use[d].length; i++) counts[use[d][i]]++;
-    var sorted = Object.keys(counts).map(function(k){ return [parseInt(k,10), counts[k]]; }).filter(function(x){ return x[1] > 0; }).sort(function(a,b){ return b[1] - a[1]; });
-    var cold = Object.keys(counts).map(function(k){ return [parseInt(k,10), counts[k]]; }).sort(function(a,b){ return a[1] - b[1]; });
-    var hotN = sorted.slice(0, 6).map(function(x){ return x[0]; }), coldN = cold.slice(0, 6).map(function(x){ return x[0]; });
-    var pick = [], j; for (j = 0; j < hotN.length && pick.length < need; j++) if (pick.indexOf(hotN[j]) === -1) pick.push(hotN[j]);
-    for (j = 0; j < cold.length && pick.length < need; j++) if (pick.indexOf(cold[j][0]) === -1) { pick.push(cold[j][0]); break; }
-    for (j = 0; j < hotN.length && pick.length < need; j++) if (pick.indexOf(hotN[j]) === -1) pick.push(hotN[j]);
-    pick = pick.sort(function(a,b){ return a-b; }).slice(0, need);
-    var s = '【' + (mode === '539' ? '今彩539' : '大樂透') + '】最近 ' + use.length + ' 期\n\n';
-    s += '熱門6: ' + hotN.join(',') + '  冷門6: ' + coldN.join(',') + '\n';
-    s += '建議' + need + '碼: ' + pick.join(',') + '\n';
-    var oddT = 0, evT = 0;
-    for (d = 0; d < use.length; d++) for (i = 0; i < use[d].length; i++) if (use[d][i] % 2) oddT++; else evT++;
-    var total = use.length * need;
-    s += '\n【奇偶比例】奇 ' + oddT + ' (' + (100*oddT/total).toFixed(1) + '%) : 偶 ' + evT + ' (' + (100*evT/total).toFixed(1) + '%)\n';
-    if (mode === '539') s += '【區間比例】1-10、11-20、21-30、31-39 各區間出現率\n';
-    else s += '【區間比例】1-10、11-20、21-30、31-40、41-49 各區間出現率\n';
-    if (tier === 'free') return s + '\n※升級付費版可看結構分析、策略建議、撞號機率';
-    return s + '\n※僅供娛樂';
-  }
-  function runAIBrief(draws, n, mode) {
-    var use = draws.slice(0, n), max = mode === '539' ? 39 : 49, need = mode === '539' ? 5 : 6;
-    if (use.length < 5) return '期數至少 5 期。';
-    var total = use.length * need, counts = {};
-    for (var i = 1; i <= max; i++) counts[i] = 0;
-    for (var d = 0; d < use.length; d++) for (var j = 0; j < use[d].length; j++) counts[use[d][j]]++;
-    var rateList = Object.keys(counts).map(function(k){ return [parseInt(k,10), 100*counts[k]/total]; }).sort(function(a,b){ return b[1] - a[1]; });
-    var hot = rateList.slice(0, need).map(function(x){ return x[0]; }), cold = rateList.sort(function(a,b){ return a[1] - b[1]; }).slice(0, need).map(function(x){ return x[0]; });
-    var s = '【' + (mode === '539' ? '今彩539' : '大樂透') + ' AI 快報】最近 ' + use.length + ' 期\n\n';
-    s += '出現機率前' + need + ': ' + rateList.slice(0, need).map(function(x){ return x[0]+'('+x[1].toFixed(1)+'%)'; }).join(' ') + '\n';
-    s += '熱門: ' + hot.join(',') + '  冷門: ' + cold.join(',') + '\n';
-    s += '建議' + need + '碼: ' + hot.slice(0, need).join(',') + '\n※僅供娛樂。';
-    return s;
-  }
-  window.doAnalyze = function() {
-    var data = document.getElementById('data'), out = document.getElementById('out'), per = document.getElementById('periods');
-    var mode = (window.__lottoMode === '649') ? '649' : '539', tier = window.getTier();
-    if (!out) return;
-    var draws = parseLotto(data ? data.value : '', mode);
-    if (!draws.length) { out.textContent = '請貼上開獎號碼，每行一期。'; out.scrollIntoView({ block: 'nearest' }); return; }
-    var maxN = tier === 'free' ? 50 : (tier === 'pro' ? 500 : 200);
-    var n = Math.min(parseInt(per && per.value ? per.value : 20, 10) || 20, draws.length, maxN);
-    out.textContent = runAnalyze(draws, n, mode, tier);
-    out.scrollIntoView({ block: 'nearest' });
-  };
-  window.doStructureScore = function() {
-    if (window.__doStructureScoreImpl) { window.__doStructureScoreImpl(); return; }
-    var out = document.getElementById('out');
-    if (out) { out.textContent = '結構評分為付費版功能，請升級。'; out.scrollIntoView({ block: 'nearest' }); }
-  };
-  window.doAI = function() {
-    var data = document.getElementById('data'), out = document.getElementById('out'), per = document.getElementById('periods');
-    var tier = window.getTier();
-    if (!out) return;
-    if (tier === 'free') { out.textContent = 'AI 快報為付費版功能，請升級。'; out.scrollIntoView({ block: 'nearest' }); return; }
-    var mode = (window.__lottoMode === '649') ? '649' : '539';
-    var draws = parseLotto(data ? data.value : '', mode);
-    if (!draws.length) { out.textContent = '請貼上開獎號碼。'; out.scrollIntoView({ block: 'nearest' }); return; }
-    var n = Math.min(parseInt(per && per.value ? per.value : 20, 10) || 20, draws.length);
-    out.textContent = runAIBrief(draws, n, mode);
-    out.scrollIntoView({ block: 'nearest' });
-  };
-  window.switchMode = function(mode) {
-    var d = document.getElementById('data'), h = document.getElementById('help');
-    var t539 = document.getElementById('tab539'), t649 = document.getElementById('tab649');
-    if (t539) t539.classList.toggle('active', mode === '539');
-    if (t649) t649.classList.toggle('active', mode === '649');
-    if (d) d.placeholder = mode === '539' ? '今彩539 每行 5 個號碼 (1-39)\n例：3,6,9,31,39' : '大樂透 每行 6 個號碼 (1-49)\n例：1,16,22,24,47,48';
-    if (h) h.textContent = mode === '539' ? '今彩539：每行 5 個號碼 (1-39)。你也可以先按「一鍵抓取」。' : '大樂透：每行 6 個號碼 (1-49)。你也可以先按「一鍵抓取」。';
-    window.__lottoMode = mode;
-  };
-  window.doFetch = function() {
-    var api = document.getElementById('apiBase'), out = document.getElementById('out'), per = document.getElementById('periods');
-    var mode = (window.__lottoMode === '649') ? '649' : '539';
-    var base = (api && api.value) ? String(api.value).trim().replace(/\/+$/, '') : '';
-    if (!base) { if (out) { out.textContent = '請在上方欄位貼上 Worker 網址後再按一鍵抓取。'; out.scrollIntoView({ block: 'nearest' }); } return; }
-    var n = 50;
-    if (per && per.value) n = Math.min(Math.max(1, parseInt(per.value, 10) || 50), 50);
-    if (out) { out.textContent = '正在抓取 ' + (mode === '539' ? '今彩539' : '大樂透') + ' 最近 ' + n + ' 期…'; out.scrollIntoView({ block: 'nearest' }); }
-    var url = base + '/' + mode + '?periods=' + n;
-    fetch(url).then(function(r) { return r.json(); }).then(function(j) {
-      var draws = j && j.draws;
-      if (!draws || !draws.length) { if (out) out.textContent = '沒有拿到期數資料'; return; }
-      var data = document.getElementById('data');
-      if (data) data.value = draws.map(function(row) { return row.join(', '); }).join('\n');
-      if (out) out.textContent = '✅ 已抓取 ' + draws.length + ' 期並填入。現在可以按「開始分析」。';
-    }).catch(function(e) { if (out) out.textContent = '抓取失敗：' + String(e); });
-  };
-  </script>
-  <header class="header">
-    <h1>539・大樂透分析</h1>
-    <p class="tagline">數據驅動・智能統計</p>
-  </header>
+  <div class="header">539・大樂透分析</div>
   <div class="tabs">
-    <button type="button" id="tab539" class="active" onclick="switchMode('539')">今彩539</button>
-    <button type="button" id="tab649" onclick="switchMode('649')">大樂透</button>
-  </div>
-  <div class="header-plans-bar">
-    <span class="header-plans-label">方案：</span>
-    <span id="headerPlanLabel">免費版</span>
-    <span class="header-plans-sep">|</span>
-    <a href="https://kkalex0987.github.io/taiwan539-web/pay.html?plan=1" class="header-plans-link">付費版 $99</a>
-    <span class="header-plans-sep">|</span>
-    <a href="https://kkalex0987.github.io/taiwan539-web/pay.html?plan=2" class="header-plans-link">專業版 $199</a>
+    <button type="button" id="tab539" class="active">今彩539</button>
+    <button type="button" id="tab649">大樂透</button>
   </div>
   <div class="container">
-    <div class="card" id="plansPreviewCard">
-      <label>升級方案</label>
-      <p class="help" style="margin-top:0;">付費版 $99 與專業版 $199 解鎖更多分析功能</p>
-      <div class="plans-preview">
-        <div class="plan-mini">
-          <div class="price">$99</div>
-          <div class="name">付費版</div>
-          <div class="feat">任意期數・一鍵抓取<br>奇偶建議・總和落點<br>連號機率・包牌期望<br>結構分析・AI 快報</div>
-          <a href="https://kkalex0987.github.io/taiwan539-web/pay.html?plan=1" class="btn-upgrade">選擇付費版</a>
-        </div>
-        <div class="plan-mini">
-          <div class="price">$199</div>
-          <div class="name">專業版</div>
-          <div class="feat">付費版全部<br>+ 策略模擬<br>+ 回測系統<br>+ 報酬模擬<br>+ 群眾行為</div>
-          <a href="https://kkalex0987.github.io/taiwan539-web/pay.html?plan=2" class="btn-upgrade">選擇專業版</a>
-        </div>
-      </div>
-    </div>
-    <div class="card">
-      <label>開獎號碼</label>
-      <p class="help" style="margin-top:0;">每行一期，號碼用逗號或空格分隔</p>
-      <textarea id="data" placeholder="今彩539 每行 5 個號碼 (1-39)&#10;例：3,6,9,31,39&#10;5,22,28,35,36"></textarea>
-      <p class="help" id="help">今彩539：每行 5 個號碼 (1-39)。大樂透：每行 6 個號碼 (1-49)。</p>
-    </div>
-    <div class="version-bar">
-      <span class="badge free" id="versionBadge">免費版</span>
-      <span class="desc" id="versionDesc"></span>
-      <a href="https://kkalex0987.github.io/taiwan539-web/pay.html" class="link-upgrade" id="linkUpgrade"></a>
-    </div>
-    <details class="help test-tier" style="margin-bottom:16px;">
-      <summary>🧪 測試切換版本（僅供開發測試）</summary>
-      <p style="margin-top:8px;">點下列連結會重新載入頁面並切換為該版本，方便測試功能（無需真的付款）：</p>
-      <p style="margin:8px 0 4px;">
-        <a href="https://kkalex0987.github.io/taiwan539-web/?paid=1" style="color:var(--accent);">切換為付費版</a> &nbsp;
-        <a href="https://kkalex0987.github.io/taiwan539-web/?paid=2" style="color:var(--accent);">切換為專業版</a> &nbsp;
-        <a href="https://kkalex0987.github.io/taiwan539-web/" style="color:var(--text-muted);">還原免費版</a>
-      </p>
-    </details>
-    <div class="card" id="fetchSection">
-      <label id="labelFetch">一鍵抓取</label>
-      <input type="text" id="apiBase" placeholder="付費版以上已內建">
-      <button type="button" class="btn btn-tertiary" id="btnFetch" style="min-height:48px;" onclick="doFetch()">一鍵抓取最新開獎</button>
-    </div>
-    <div class="card">
-      <label>分析期數<span id="periodsHint"></span></label>
-      <input type="number" id="periods" value="20" min="5" max="200">
-      <div class="btn-grid">
-        <button type="button" class="btn btn-primary" id="btnAnalyze" onclick="doAnalyze()">開始分析</button>
-        <button type="button" class="btn btn-secondary" id="btnAI" onclick="doAI()">AI 快報</button>
-        <button type="button" class="btn btn-secondary" id="btnStructure" onclick="doStructureScore()">結構評分</button>
-      </div>
-      <details class="help" style="margin-top:12px;">
-        <summary>功能說明</summary>
-        <p><strong>開始分析：</strong>依您貼上的開獎號碼，統計熱門冷門、建議號碼、奇偶與區間比例；付費版另含結構分析、撞號機率、總和落點等。</p>
-        <p><strong>AI 快報：</strong>付費版功能。依機率與趨勢給出建議號碼；539 另有二合三合頻率。</p>
-        <p><strong>結構評分：</strong>付費版功能。五維／六維評分（區間平衡、奇偶、總和、連號、撞號風險等），總分 100，並標示「結構優化型／均衡型／偏態型／高風險集中型」。本系統不預測中獎號碼，僅提供統計結構優化建議。</p>
-      </details>
-    </div>
-    <div class="card" id="proSection" style="display:none;">
-      <label>專業工具</label>
-      <div class="btn-grid">
-        <button type="button" class="btn btn-secondary" id="btnSimulate">策略模擬</button>
-        <button type="button" class="btn btn-secondary" id="btnBacktest">回測系統</button>
-        <button type="button" class="btn btn-secondary" id="btnROI">報酬模擬</button>
-        <button type="button" class="btn btn-secondary" id="btnCrowd">群眾行為</button>
-      </div>
-    </div>
+    <label>貼上開獎號碼（每行一期，號碼用逗號或空格分隔）</label>
+    <textarea id="data" placeholder="今彩539 每行 5 個號碼 (1-39)&#10;例：3,6,9,31,39&#10;5,22,28,35,36"></textarea>
+    <p class="help" id="help">今彩539：每行 5 個號碼。大樂透：每行 6 個號碼。</p>
+    <p class="help" style="margin-bottom:8px;"><span id="versionBadge">免費版</span> <span id="versionDesc">請自行貼上開獎號碼，或自備抓取網址</span> <a href="#" id="linkUpgrade" style="color:#e94560;margin-left:6px;">升級付費版</a></p>
+    <label id="labelFetch">一鍵抓取（付費版已內建網址，免費版請自備網址）</label>
+    <input type="text" id="apiBase" placeholder="免費版請貼上你的抓取網址；付費版已預填">
+    <button type="button" class="btn btn-tertiary" id="btnFetch">一鍵抓取最新開獎</button>
+    <label>分析期數（取最近幾期）</label>
+    <input type="number" id="periods" value="20" min="5" max="200">
+    <button type="button" class="btn btn-primary" id="btnAnalyze">分析（統計＋趨勢＋推薦）</button>
+    <button type="button" class="btn btn-secondary" id="btnAI">AI 快報</button>
+    <button type="button" class="btn btn-secondary" id="btnProStructure">專業結構分析（付費版）</button>
     <div id="out"></div>
     <details class="how-add">
       <summary>如何「加到主畫面」當 App 使用？</summary>
@@ -530,7 +58,7 @@
   </div>
   <script>
 (function() {
-  const $ = function(id) { return document.getElementById(id); };
+  const $ = id => document.getElementById(id);
   const dataEl = $('data');
   const periodsEl = $('periods');
   const apiBaseEl = $('apiBase');
@@ -541,157 +69,114 @@
   const LS_API_BASE = 'lotto_api_base_v1';
   const LS_LAST_539 = 'lotto_last_539_v1';
   const LS_LAST_649 = 'lotto_last_649_v1';
-  const LS_TIER = 'lotto_tier_v1';
+  const LS_IS_PRO = 'lotto_is_pro_v1';
+
+  // 付費版專用：內建一鍵抓取網址（免費版不預填，需自行貼資料或自備網址）
   const DEFAULT_API_BASE = 'https://workers-playground-spring-fog-589c.kkalex0987.workers.dev';
+  // 付費頁面網址（轉帳 / 綠界 / Line Pay 三選一）
   const PAYMENT_URL = 'https://kkalex0987.github.io/taiwan539-web/pay.html';
   const savedBase = localStorage.getItem(LS_API_BASE);
-  const tier = localStorage.getItem(LS_TIER) || 'free';
-  if (apiBaseEl) apiBaseEl.value = (tier === 'paid' || tier === 'pro') ? (savedBase || DEFAULT_API_BASE) : (savedBase || '');
+  const pro = localStorage.getItem(LS_IS_PRO) === '1';
+  apiBaseEl.value = pro ? (savedBase || DEFAULT_API_BASE) : (savedBase || '');
 
   function setMode(next) {
     mode = next;
-    window.__lottoMode = next;
-    var t539 = $('tab539'), t649 = $('tab649');
-    if (t539) t539.classList.toggle('active', mode === '539');
-    if (t649) t649.classList.toggle('active', mode === '649');
-    if (dataEl) {
-      dataEl.placeholder = mode === '539' ? '今彩539 每行 5 個號碼 (1-39)\n例：3,6,9,31,39' : '大樂透 每行 6 個號碼 (1-49)\n例：1,16,22,24,47,48';
-      if (mode === '539') { var c = localStorage.getItem(LS_LAST_539); if (c && !dataEl.value.trim()) dataEl.value = c; }
-      else { var c2 = localStorage.getItem(LS_LAST_649); if (c2 && !dataEl.value.trim()) dataEl.value = c2; }
+    if (mode === '539') {
+      $('tab539').classList.add('active'); $('tab649').classList.remove('active');
+      dataEl.placeholder = '今彩539 每行 5 個號碼 (1-39)\n例：3,6,9,31,39';
+      helpEl.textContent = '今彩539：每行 5 個號碼 (1-39)。你也可以先按「一鍵抓取」。';
+      const cached = localStorage.getItem(LS_LAST_539);
+      if (cached && !dataEl.value.trim()) dataEl.value = cached;
+    } else {
+      $('tab649').classList.add('active'); $('tab539').classList.remove('active');
+      dataEl.placeholder = '大樂透 每行 6 個號碼 (1-49)\n例：1,16,22,24,47,48';
+      helpEl.textContent = '大樂透：每行 6 個號碼 (1-49)。你也可以先按「一鍵抓取」。';
+      const cached = localStorage.getItem(LS_LAST_649);
+      if (cached && !dataEl.value.trim()) dataEl.value = cached;
     }
-    if (helpEl) helpEl.textContent = mode === '539' ? '今彩539：每行 5 個號碼 (1-39)。你也可以先按「一鍵抓取」。' : '大樂透：每行 6 個號碼 (1-49)。你也可以先按「一鍵抓取」。';
   }
 
-  if (window.__lottoMode) mode = window.__lottoMode;
+  $('tab539').onclick = () => setMode('539');
+  $('tab649').onclick = () => setMode('649');
   setMode('539');
 
-  function getTier() { return localStorage.getItem(LS_TIER) || 'free'; }
-  function isPaidOrPro() { const t = getTier(); return t === 'paid' || t === 'pro'; }
-  function isPro() { return getTier() === 'pro'; }
-
   function refreshVersionUI() {
-    const t = getTier();
+    const pro = isPro();
     const badge = $('versionBadge');
-    const headerPlanLabel = $('headerPlanLabel');
     const desc = $('versionDesc');
     const labelFetch = $('labelFetch');
-    const fetchSection = $('fetchSection');
-    const periodsHint = $('periodsHint');
-    const proSection = $('proSection');
-    const btnAI = $('btnAI');
-    const btnStructure = $('btnStructure');
-    const linkUpgrade = $('linkUpgrade');
-    const tierText = t === 'pro' ? '專業版' : t === 'paid' ? '付費版' : '免費版';
-    if (badge) {
-      badge.textContent = tierText;
-      badge.className = 'badge ' + t;
-    }
-    if (headerPlanLabel) headerPlanLabel.textContent = tierText;
-    if (desc) desc.textContent = t === 'pro' ? '策略模擬、回測、報酬模擬、群眾行為' : t === 'paid' ? '奇偶建議、總和落點、連號機率、包牌期望、結構分析' : '50期、熱冷門、奇偶區間比例、手動輸入';
-    if (linkUpgrade) {
-      linkUpgrade.textContent = t === 'pro' ? '已為專業版' : t === 'paid' ? '升級專業版' : '升級';
-      linkUpgrade.style.display = t === 'pro' ? 'none' : 'inline';
-      linkUpgrade.href = 'https://kkalex0987.github.io/taiwan539-web/pay.html' + (t === 'paid' ? '?plan=2' : '');
-    }
-    if (t === 'free') {
-      if (fetchSection) fetchSection.style.display = 'block';
-      if (labelFetch) labelFetch.textContent = '一鍵抓取（免費版請貼上 Worker 網址）';
-      if (apiBaseEl && !apiBaseEl.value.trim()) apiBaseEl.placeholder = '貼上 https://xxx.workers.dev';
-      if (periodsHint) periodsHint.textContent = '（免費版最多50期）';
-      if (periodsEl) periodsEl.max = 50;
-      if (periodsEl && parseInt(periodsEl.value, 10) > 50) periodsEl.value = 50;
-      if (btnAI) btnAI.style.display = 'none';
-      if (btnStructure) btnStructure.style.display = 'none';
-      if (proSection) proSection.style.display = 'none';
-    } else {
-      if (fetchSection) fetchSection.style.display = 'block';
-      if (labelFetch) labelFetch.textContent = '一鍵抓取（已內建網址）';
-      if (periodsHint) periodsHint.textContent = t === 'pro' ? '（專業版無上限）' : '（付費版最多200期）';
-      if (periodsEl) periodsEl.max = t === 'pro' ? 500 : 200;
-      if (btnAI) btnAI.style.display = 'block';
-      if (btnStructure) btnStructure.style.display = 'block';
-      if (apiBaseEl && !apiBaseEl.value.trim()) apiBaseEl.value = DEFAULT_API_BASE;
-      if (proSection) proSection.style.display = t === 'pro' ? 'block' : 'none';
-    }
+    if (badge) badge.textContent = pro ? '付費版' : '免費版';
+    if (desc) desc.textContent = pro ? '已內建一鍵抓取，直接按即可' : '請自行貼上開獎號碼，或自備抓取網址';
+    if (labelFetch) labelFetch.textContent = pro ? '一鍵抓取（已內建網址，直接按）' : '一鍵抓取（免費版請自備抓取網址）';
+    if (pro && apiBaseEl && !apiBaseEl.value.trim()) apiBaseEl.value = DEFAULT_API_BASE;
   }
+  // 若網址有 ?paid=1 表示從付款頁導回，啟用付費版
   const urlParams = new URLSearchParams(window.location.search);
   if (urlParams.get('paid') === '1') {
-    localStorage.setItem(LS_TIER, 'paid');
+    localStorage.setItem(LS_IS_PRO, '1');
     apiBaseEl.value = DEFAULT_API_BASE;
     localStorage.setItem(LS_API_BASE, DEFAULT_API_BASE);
-    history.replaceState({}, '', window.location.pathname);
-  } else if (urlParams.get('paid') === '2') {
-    localStorage.setItem(LS_TIER, 'pro');
-    apiBaseEl.value = DEFAULT_API_BASE;
-    localStorage.setItem(LS_API_BASE, DEFAULT_API_BASE);
-    history.replaceState({}, '', window.location.pathname);
+    history.replaceState({}, '', window.location.pathname);  // 移除 ?paid=1
   }
   refreshVersionUI();
-  var linkUpgrade = $('linkUpgrade');
-  if (linkUpgrade) linkUpgrade.onclick = function(e) {
+  $('linkUpgrade').onclick = function(e) {
     e.preventDefault();
-    var t = getTier();
-    var returnUrl = encodeURIComponent(window.location.origin + window.location.pathname);
-    var url = PAYMENT_URL + (PAYMENT_URL.indexOf('?') >= 0 ? '&' : '?') + 'return=' + returnUrl;
-    if (t === 'paid') url += '&plan=2';
-    window.location.href = url;
+    if (isPro()) return;
+    const returnUrl = encodeURIComponent(window.location.origin + window.location.pathname + '?paid=1');
+    window.location.href = PAYMENT_URL + (PAYMENT_URL.includes('?') ? '&' : '?') + 'return=' + returnUrl;
   };
 
   function fmtDrawLines(draws) {
     return draws.map(d => d.join(', ')).join('\n');
   }
 
-  async function fetchDraws() {
-    function show(msg) {
-      if (outEl) { outEl.textContent = msg; outEl.scrollIntoView({ behavior: 'smooth', block: 'nearest' }); }
-    }
-    const base = (apiBaseEl.value || '').trim().replace(/\/+$/, '');
-    if (!base) {
-      show(isPaidOrPro()
-        ? '應已內建抓取網址，若仍為空請重新整理頁面。'
-        : '請在上方欄位貼上 Worker 網址後再按一鍵抓取。');
-      return;
-    }
-    try {
-      localStorage.setItem(LS_API_BASE, base);
-      const maxP = getTier() === 'pro' ? 500 : (getTier() === 'paid' ? 200 : 50);
-      const n = Math.max(1, Math.min(parseInt(periodsEl.value, 10) || 20, maxP));
-      show(`正在抓取 ${mode === '539' ? '今彩539' : '大樂透'} 最近 ${n} 期…`);
-      const url = `${base}/${mode}?periods=${encodeURIComponent(n)}`;
-      let resp;
-      try {
-        resp = await fetch(url, { method: 'GET' });
-      } catch (e) {
-        show('抓取失敗：無法連線（可能是 CORS 或網址錯誤）。\n\n' + String(e));
-        return;
-      }
-      if (!resp.ok) {
-        const t = await resp.text().catch(() => '');
-        show('抓取失敗：HTTP ' + resp.status + '\n' + (t || ''));
-        return;
-      }
-      let json;
-      try {
-        json = await resp.json();
-      } catch (e) {
-        show('抓取失敗：回傳不是 JSON。\n' + String(e));
-        return;
-      }
-      const draws = Array.isArray(json.draws) ? json.draws : [];
-      if (!draws.length) {
-        show('抓取成功，但沒有拿到期數資料（draws 為空）。');
-        return;
-      }
-      dataEl.value = fmtDrawLines(draws);
-      if (mode === '539') localStorage.setItem(LS_LAST_539, dataEl.value);
-      else localStorage.setItem(LS_LAST_649, dataEl.value);
-      show('✅ 已抓取 ' + draws.length + ' 期並填入。現在可以按「開始分析」。');
-    } catch (err) {
-      show('發生錯誤：' + String(err));
-    }
+  function isPro() {
+    return localStorage.getItem(LS_IS_PRO) === '1';
   }
 
-  window.fetchDraws = fetchDraws;
+  async function fetchDraws() {
+    const base = (apiBaseEl.value || '').trim().replace(/\/+$/, '');
+    if (!base) {
+      outEl.textContent = isPro()
+        ? '付費版應已內建抓取網址，若仍為空請重新整理頁面或聯絡客服。'
+        : '免費版請自行貼上開獎號碼到上方欄位，或貼上你自己部署的抓取服務網址（需自備）。';
+      return;
+    }
+    localStorage.setItem(LS_API_BASE, base);
+    const n = Math.max(1, Math.min(parseInt(periodsEl.value, 10) || 20, 200));
+    outEl.textContent = `正在抓取 ${mode === '539' ? '今彩539' : '大樂透'} 最近 ${n} 期…`;
+    const url = `${base}/${mode}?periods=${encodeURIComponent(n)}`;
+    let resp;
+    try {
+      resp = await fetch(url, { method: 'GET' });
+    } catch (e) {
+      outEl.textContent = `抓取失敗：連線不到抓取服務。\n請確認網址正確、手機有網路。\n\n${String(e)}`;
+      return;
+    }
+    if (!resp.ok) {
+      const t = await resp.text().catch(() => '');
+      outEl.textContent = `抓取失敗：HTTP ${resp.status}\n${t || ''}`;
+      return;
+    }
+    let json;
+    try {
+      json = await resp.json();
+    } catch (e) {
+      outEl.textContent = `抓取失敗：回傳不是 JSON。\n${String(e)}`;
+      return;
+    }
+    const draws = Array.isArray(json.draws) ? json.draws : [];
+    if (!draws.length) {
+      outEl.textContent = '抓取成功，但沒有拿到期數資料（draws 為空）。';
+      return;
+    }
+    dataEl.value = fmtDrawLines(draws);
+    if (mode === '539') localStorage.setItem(LS_LAST_539, dataEl.value);
+    else localStorage.setItem(LS_LAST_649, dataEl.value);
+    outEl.textContent = `✅ 已抓取 ${draws.length} 期並填入。現在可以按「分析」或「AI 快報」。`;
+  }
+
+  $('btnFetch').onclick = () => { fetchDraws(); };
 
   function parseData(text, type) {
     const maxNum = type === '539' ? 39 : 49;
@@ -706,7 +191,7 @@
     return draws;
   }
 
-  function run539(draws, n, tier) {
+  function run539(draws, n) {
     const use = draws.slice(0, n);
     if (use.length < 4) return '期數至少 4 期以上。';
     const max = 39;
@@ -735,54 +220,13 @@
     const recommend = [...pick].sort((a,b)=>a-b).slice(0, 5);
     let s = `【今彩539】最近 ${use.length} 期\n\n`;
     s += `熱門6: ${hot6.join(',')}  冷門6: ${cold6.join(',')}\n`;
-    s += `建議5碼: ${recommend.join(',')}\n`;
-    if (tier === 'free') {
-      let oddTotal = 0, evenTotal = 0;
-      for (const d of use) for (const x of d) (x % 2 ? oddTotal : evenTotal)++;
-      const zones = [[1,10],[11,20],[21,30],[31,39]];
-      const zoneCounts = zones.map(([lo,hi]) => {
-        let c = 0;
-        for (const d of use) for (const x of d) if (x >= lo && x <= hi) c++;
-        return c;
-      });
-      const total = use.length * 5;
-      const zonePct = zoneCounts.map(c => (100 * c / total).toFixed(1));
-      s += `\n【奇偶比例】奇 ${oddTotal} (${(100*oddTotal/total).toFixed(1)}%) : 偶 ${evenTotal} (${(100*evenTotal/total).toFixed(1)}%)\n`;
-      s += `【區間比例】1-10:${zonePct[0]}% 11-20:${zonePct[1]}% 21-30:${zonePct[2]}% 31-39:${zonePct[3]}%\n`;
-      return s + '\n※升級付費版可看結構分析、策略建議、撞號機率';
-    }
-    s += `\n升溫: ${heating.slice(0,12).join(',')}\n降溫: ${cooling.slice(0,12).join(',')}\n未開: ${unused.length ? unused.slice(0,15).join(',') + (unused.length > 15 ? '...' : '') : '無'}\n`;
-    if (tier === 'paid' || tier === 'pro') {
-      const last = use[0];
-      let odd = 0, big = 0;
-      for (const x of last) { if (x % 2) odd++; if (x > max / 2) big++; }
-      s += `\n【結構分析】奇偶比 ${odd}:${5-odd}  大小比 ${big}:${5-big}\n`;
-      s += `【策略建議】熱門為主、冷門補1碼，連莊號可考慮\n`;
-      const overlap = use.length >= 2 ? last.filter(x => use[1].includes(x)).length : 0;
-      s += `【撞號機率】上期重複 ${overlap} 碼，歷史平均約 1~2 碼\n`;
-      const oddRatios = use.map(d => { let o = 0; for (const x of d) if (x % 2) o++; return `${o}:${5-o}`; });
-      const oddFreq = {};
-      oddRatios.forEach(r => { oddFreq[r] = (oddFreq[r] || 0) + 1; });
-      const topOdd = Object.entries(oddFreq).sort((a,b) => b[1] - a[1])[0];
-      s += `【奇偶建議】歷史常見 ${topOdd[0]}（${(100*topOdd[1]/use.length).toFixed(0)}%），本期可參考\n`;
-      const sums = use.map(d => d.reduce((a,b)=>a+b,0));
-      const sumMin = Math.min(...sums), sumMax = Math.max(...sums);
-      const sumAvg = (sums.reduce((a,b)=>a+b,0) / use.length).toFixed(0);
-      s += `【總和落點】歷史 ${sumMin}~${sumMax}，平均約 ${sumAvg}，建議區間 ${Math.max(60, sumMin-20)}~${Math.min(200, sumMax+20)}\n`;
-      let consecCount = 0;
-      for (const d of use) {
-        const arr = [...d].sort((a,b)=>a-b);
-        for (let i = 1; i < arr.length; i++) if (arr[i] - arr[i-1] === 1) { consecCount++; break; }
-      }
-      const consecPct = (100 * consecCount / use.length).toFixed(0);
-      s += `【連號機率】近${use.length}期有連號 ${consecCount} 次（${consecPct}%），本期可留意\n`;
-      const comb = 575757;
-      s += `【包牌期望】全包 ${comb.toLocaleString()} 注×50元，頭獎機率 1/${comb.toLocaleString()}，期望值依獎金結構而定\n※僅供娛樂`;
-    }
+    s += `建議5碼(連莊+熱冷): ${recommend.join(',')}\n\n`;
+    s += `升溫: ${heating.slice(0,12).join(',')}\n降溫: ${cooling.slice(0,12).join(',')}\n`;
+    s += `未開號碼: ${unused.length ? unused.join(',') : '無'}\n`;
     return s;
   }
 
-  function run649(draws, n, tier) {
+  function run649(draws, n) {
     const use = draws.slice(0, n);
     if (use.length < 4) return '期數至少 4 期以上。';
     const max = 49;
@@ -809,52 +253,11 @@
     for (const [num] of cold) { if (pick.size >= 6) break; if (!pick.has(+num)) { pick.add(+num); break; } }
     for (const num of sorted.map(([n]) => +n)) { if (pick.size >= 6) break; pick.add(num); }
     const recommend = [...pick].sort((a,b)=>a-b).slice(0, 6);
-    let s = `【大樂透】最近 ${use.length} 期\n\n`;
+    let s = `【大樂透】最近 ${use.length} 期（不含二合三合）\n\n`;
     s += `熱門6: ${hot6.join(',')}  冷門6: ${cold6.join(',')}\n`;
-    s += `建議6碼: ${recommend.join(',')}\n`;
-    if (tier === 'free') {
-      let oddTotal = 0, evenTotal = 0;
-      for (const d of use) for (const x of d) (x % 2 ? oddTotal : evenTotal)++;
-      const zones = [[1,10],[11,20],[21,30],[31,40],[41,49]];
-      const zoneCounts = zones.map(([lo,hi]) => {
-        let c = 0;
-        for (const d of use) for (const x of d) if (x >= lo && x <= hi) c++;
-        return c;
-      });
-      const total = use.length * 6;
-      const zonePct = zoneCounts.map(c => (100 * c / total).toFixed(1));
-      s += `\n【奇偶比例】奇 ${oddTotal} (${(100*oddTotal/total).toFixed(1)}%) : 偶 ${evenTotal} (${(100*evenTotal/total).toFixed(1)}%)\n`;
-      s += `【區間比例】1-10:${zonePct[0]}% 11-20:${zonePct[1]}% 21-30:${zonePct[2]}% 31-40:${zonePct[3]}% 41-49:${zonePct[4]}%\n`;
-      return s + '\n※升級付費版可看結構分析、策略建議、撞號機率';
-    }
-    s += `\n升溫: ${heating.slice(0,12).join(',')}\n降溫: ${cooling.slice(0,12).join(',')}\n未開: ${unused.length ? unused.slice(0,15).join(',') + (unused.length > 15 ? '...' : '') : '無'}\n`;
-    if (tier === 'paid' || tier === 'pro') {
-      const last = use[0];
-      let odd = 0, big = 0;
-      for (const x of last) { if (x % 2) odd++; if (x > max / 2) big++; }
-      s += `\n【結構分析】奇偶比 ${odd}:${6-odd}  大小比 ${big}:${6-big}\n`;
-      s += `【策略建議】熱門為主、冷門補1碼\n`;
-      const overlap = use.length >= 2 ? last.filter(x => use[1].includes(x)).length : 0;
-      s += `【撞號機率】上期重複 ${overlap} 碼\n`;
-      const oddRatios = use.map(d => { let o = 0; for (const x of d) if (x % 2) o++; return `${o}:${6-o}`; });
-      const oddFreq = {};
-      oddRatios.forEach(r => { oddFreq[r] = (oddFreq[r] || 0) + 1; });
-      const topOdd = Object.entries(oddFreq).sort((a,b) => b[1] - a[1])[0];
-      s += `【奇偶建議】歷史常見 ${topOdd[0]}（${(100*topOdd[1]/use.length).toFixed(0)}%），本期可參考\n`;
-      const sums = use.map(d => d.reduce((a,b)=>a+b,0));
-      const sumMin = Math.min(...sums), sumMax = Math.max(...sums);
-      const sumAvg = (sums.reduce((a,b)=>a+b,0) / use.length).toFixed(0);
-      s += `【總和落點】歷史 ${sumMin}~${sumMax}，平均約 ${sumAvg}，建議區間 ${Math.max(21, sumMin-30)}~${Math.min(294, sumMax+30)}\n`;
-      let consecCount = 0;
-      for (const d of use) {
-        const arr = [...d].sort((a,b)=>a-b);
-        for (let i = 1; i < arr.length; i++) if (arr[i] - arr[i-1] === 1) { consecCount++; break; }
-      }
-      const consecPct = (100 * consecCount / use.length).toFixed(0);
-      s += `【連號機率】近${use.length}期有連號 ${consecCount} 次（${consecPct}%），本期可留意\n`;
-      const comb = 13983816;
-      s += `【包牌期望】全包 ${comb.toLocaleString()} 注×50元，頭獎機率 1/${comb.toLocaleString()}，期望值依獎金結構而定\n※僅供娛樂`;
-    }
+    s += `建議6碼: ${recommend.join(',')}\n\n`;
+    s += `升溫: ${heating.slice(0,12).join(',')}\n降溫: ${cooling.slice(0,12).join(',')}\n`;
+    s += `未開號碼: ${unused.length ? unused.join(',') : '無'}\n`;
     return s;
   }
 
@@ -928,265 +331,198 @@
     return s;
   }
 
-  window.__doAnalyzeImpl = function() {
-    if (window.__lottoMode) mode = window.__lottoMode;
-    var draws = parseData(dataEl ? dataEl.value : '', mode);
-    if (!outEl) return;
+  // ===== 新的「專業結構分析」：從 Python PremiumLotteryAnalyzer 移植 =====
+
+  function zone3(nums) {
+    let low = 0, mid = 0, high = 0;
+    for (const n of nums) {
+      if (n <= 13) low++;
+      else if (n <= 26) mid++;
+      else high++;
+    }
+    const arr = [low, mid, high].slice().sort((a, b) => a - b);
+    if (arr[0] === 1 && arr[1] === 2 && arr[2] === 2) {
+      return [20, '號碼分布蠻平均，整體算是很健康。'];
+    } else if ([low, mid, high].some(v => v === 3)) {
+      return [15, '號碼有一點擠在同一區，不過還在可以接受的範圍。'];
+    }
+    return [8, '號碼比較集中在某一區，可以考慮換幾個位置試試看。'];
+  }
+
+  function zone4(nums) {
+    let z1 = 0, z2 = 0, z3 = 0, z4 = 0;
+    for (const n of nums) {
+      if (n <= 12) z1++;
+      else if (n <= 24) z2++;
+      else if (n <= 36) z3++;
+      else z4++;
+    }
+    const zones = [z1, z2, z3, z4];
+    if (zones.every(z => z <= 2)) {
+      return [20, '號碼在四個區間分得還不錯，看起來蠻平均。'];
+    } else if (zones.some(z => z >= 3)) {
+      return [12, '有一兩個區間的號碼比較多，整體還算可以。'];
+    }
+    return [8, '號碼有點擠在某幾個區，可以下次換幾顆到別區看看。'];
+  }
+
+  function oddEvenScore(nums, total) {
+    const odd = nums.filter(n => n % 2 === 1).length;
+    if (total === 5) {
+      if (odd === 2 || odd === 3) return [20, '單雙數量搭配得不錯，算是中規中矩。'];
+      if (odd === 1 || odd === 4) return [10, '單雙有一點偏，但整體還可以。'];
+      return [5, '單雙有點太偏，可以考慮下次多換一兩顆。'];
+    } else if (total === 6) {
+      if (odd === 3) return [20, '單雙各半，屬於比較常見、比較穩的組合。'];
+      if (odd === 2 || odd === 4) return [12, '單雙稍微偏一點，不過還算可以接受。'];
+      return [5, '單雙比例偏比較多，下次可以試著調整看看。'];
+    }
+    return [0, ''];
+  }
+
+  function sumScore(nums, idealLow, idealHigh, extremeLow, extremeHigh) {
+    const total = nums.reduce((a, b) => a + b, 0);
+    if (total >= idealLow && total <= idealHigh) {
+      return [20, `號碼加起來的總和在常見範圍內，整體走勢算穩。（${total}）`];
+    } else if (total >= extremeLow && total <= extremeHigh) {
+      return [12, `總和稍微高一點或低一點，還在勉強可以接受的區間。（${total}）`];
+    }
+    return [5, `總和比較偏一邊，是屬於比較極端的排列，下次可以試著調整。 （${total}）`];
+  }
+
+  function consecutiveScore(nums) {
+    let count = 0;
+    for (let i = 0; i < nums.length - 1; i++) {
+      if (nums[i + 1] === nums[i] + 1) count++;
+    }
+    if (count <= 1) return [15, '連在一起的號碼不多，整體看起來還算順。'];
+    if (count === 2) return [8, '有幾顆連在一起，算是中間偏多一點點。'];
+    return [5, '連在一起的號碼比較多，下次可以考慮拆開一兩組。'];
+  }
+
+  function collisionPercentile(nums) {
+    const birthdayCount = nums.filter(n => n <= 31).length;
+    const percentile = Math.max(10, 100 - birthdayCount * 15);
+    return `撞號風險低於 ${percentile}% 玩家`;
+  }
+
+  function generateOptimizedNumbers(gameType) {
+    const max = gameType === '539' ? 39 : 49;
+    const need = gameType === '539' ? 5 : 6;
+    const set = new Set();
+    while (set.size < need) {
+      const n = Math.floor(Math.random() * max) + 1;
+      set.add(n);
+    }
+    return Array.from(set).sort((a, b) => a - b);
+  }
+
+  function packageSimulation(gameType) {
+    const totalCombinations = gameType === '539' ? 575757 : 13983816;
+    return {
+      buy_1_ticket_chance: `1 / ${totalCombinations}`,
+      buy_10_ticket_chance: `約 10 / ${totalCombinations}`,
+      note: '包牌可提高機率，但成本等比例增加'
+    };
+  }
+
+  function buildBasicResult(nums, totalScore, zoneMsg, oddMsg, sumMsg, conMsg) {
+    let summary;
+    if (totalScore >= 70) summary = '整體結構算是不錯，可以當作參考方向。';
+    else if (totalScore >= 50) summary = '結構普通，還可以再微調一點會更理想。';
+    else summary = '這組號碼的結構比較辛苦，建議下次調整一下搭配。';
+    return {
+      numbers: nums,
+      total_score: totalScore,
+      summary,
+      analysis: {
+        zone: zoneMsg,
+        odd_even: oddMsg,
+        sum: sumMsg,
+        consecutive: conMsg
+      }
+    };
+  }
+
+  function premiumAnalyzeOne(nums, gameType, isPremium) {
+    const numbers = [...nums].sort((a, b) => a - b);
+    if (gameType !== '539' && gameType !== 'lotto') {
+      throw new Error("game_type must be '539' or 'lotto'");
+    }
+    let zoneScore, zoneMsg, oddScore, oddMsg, sumScoreVal, sumMsg, conScore, conMsg;
+    if (gameType === '539') {
+      [zoneScore, zoneMsg] = zone3(numbers);
+      [oddScore, oddMsg] = oddEvenScore(numbers, 5);
+      [sumScoreVal, sumMsg] = sumScore(numbers, 80, 120, 60, 140);
+      [conScore, conMsg] = consecutiveScore(numbers);
+    } else {
+      [zoneScore, zoneMsg] = zone4(numbers);
+      [oddScore, oddMsg] = oddEvenScore(numbers, 6);
+      [sumScoreVal, sumMsg] = sumScore(numbers, 130, 170, 100, 200);
+      [conScore, conMsg] = consecutiveScore(numbers);
+    }
+    const totalScore = zoneScore + oddScore + sumScoreVal + conScore;
+    const result = buildBasicResult(numbers, totalScore, zoneMsg, oddMsg, sumMsg, conMsg);
+    if (isPremium) {
+      const gt = gameType === '539' ? '539' : 'lotto';
+      result.premium = {
+        collision_percentile: collisionPercentile(numbers),
+        optimized_suggestion: generateOptimizedNumbers(gt),
+        package_simulation: packageSimulation(gt)
+      };
+    }
+    return result;
+  }
+
+  function proStructureText(draws, type) {
+    if (!draws.length) return '請先貼上開獎號碼，每行一組。';
+    const nums = draws[0]; // 取第一行號碼作為範例分析
+    const internalType = type === '539' ? '539' : 'lotto';
+    const r = premiumAnalyzeOne(nums, internalType, true);
+    const base = r.analysis || {};
+    let text = `【專業結構分析】\n這一組號碼：${r.numbers.join(', ')}\n`;
+    text += `綜合評分：${r.total_score} 分\n整體看法：${r.summary}\n\n`;
+    text += `區間分佈感覺：${base.zone || ''}\n`;
+    text += `單雙搭配感覺：${base.odd_even || ''}\n`;
+    text += `總和高低感覺：${base.sum || ''}\n`;
+    text += `連號多寡感覺：${base.consecutive || ''}\n`;
+    if (r.premium) {
+      const p = r.premium;
+      const pkg = p.package_simulation || {};
+      text += `\n【進階提醒，給想多看一點的朋友】\n`;
+      text += `撞號風險：${p.collision_percentile || ''}\n`;
+      text += `系統隨機幫你配的一組參考號碼：${Array.isArray(p.optimized_suggestion) ? p.optimized_suggestion.join(', ') : ''}\n`;
+      text += `如果考慮多買幾注：單注機會約 ${pkg.buy_1_ticket_chance || ''}，十注大約是 ${pkg.buy_10_ticket_chance || ''}\n`;
+      if (pkg.note) text += `小提醒：${pkg.note}\n`;
+    }
+    text += '\n※以上只是幫忙看結構、做參考用就好，還是要量力而為，不要影響生活。';
+    return text;
+  }
+
+  $('btnAnalyze').onclick = () => {
+    const draws = parseData(dataEl.value, mode);
     if (!draws.length) { outEl.textContent = '請貼上開獎號碼，每行一期。'; return; }
-    var maxN = getTier() === 'free' ? 50 : (getTier() === 'pro' ? 500 : 200);
-    var n = Math.min(parseInt(periodsEl && periodsEl.value ? periodsEl.value : 20, 10) || 20, draws.length, maxN);
-    outEl.textContent = mode === '539' ? run539(draws, n, getTier()) : run649(draws, n, getTier());
+    const n = Math.min(parseInt(periodsEl.value, 10) || 20, draws.length);
+    outEl.textContent = mode === '539' ? run539(draws, n) : run649(draws, n);
   };
-  window.__doAIImpl = function() {
-    if (window.__lottoMode) mode = window.__lottoMode;
-    if (!outEl) return;
-    if (getTier() === 'free') { outEl.textContent = 'AI 快報為付費版功能，請升級。'; return; }
-    var draws = parseData(dataEl ? dataEl.value : '', mode);
+
+  $('btnAI').onclick = () => {
+    const draws = parseData(dataEl.value, mode);
     if (!draws.length) { outEl.textContent = '請貼上開獎號碼。'; return; }
-    var n = Math.min(parseInt(periodsEl && periodsEl.value ? periodsEl.value : 20, 10) || 20, draws.length);
+    const n = Math.min(parseInt(periodsEl.value, 10) || 20, draws.length);
     outEl.textContent = mode === '539' ? aiBrief539(draws, n) : aiBrief649(draws, n);
   };
-  var btnAnalyze = $('btnAnalyze'), btnAI = $('btnAI');
-  if (btnAnalyze) btnAnalyze.onclick = window.__doAnalyzeImpl;
-  if (btnAI) btnAI.onclick = window.__doAIImpl;
 
-  function score539Structure(nums) {
-    if (!nums || nums.length !== 5) return null;
-    var arr = nums.slice().sort(function(a,b){ return a-b; });
-    var low = 0, mid = 0, high = 0, i, part, sum = 0, odd = 0;
-    for (i = 0; i < arr.length; i++) {
-      if (arr[i] <= 13) low++; else if (arr[i] <= 26) mid++; else high++;
-      sum += arr[i];
-      if (arr[i] % 2) odd++;
+  $('btnProStructure').onclick = () => {
+    if (!isPro()) {
+      outEl.textContent = '「專業結構分析」為付費版功能，請先在上方點「升級付費版」完成後再使用。';
+      return;
     }
-    var zoneKey = low + '-' + mid + '-' + high;
-    var zoneScore = (zoneKey === '2-2-1' || zoneKey === '2-1-2' || zoneKey === '1-2-2') ? 20 : (zoneKey === '3-1-1' || zoneKey === '1-3-1' || zoneKey === '1-1-3') ? 15 : (zoneKey === '4-1-0' || zoneKey === '4-0-1' || zoneKey === '1-4-0' || zoneKey === '0-4-1' || zoneKey === '1-0-4' || zoneKey === '0-1-4') ? 8 : 0;
-    var oddEvenScore = (odd === 2 || odd === 3) ? 15 : (odd === 1 || odd === 4) ? 8 : 0;
-    var sumScore = (sum >= 85 && sum <= 115) ? 20 : (sum >= 70 && sum <= 130) ? 12 : 5;
-    var consec = 0;
-    for (i = 1; i < arr.length; i++) if (arr[i] - arr[i-1] === 1) consec++;
-    var consecScore = consec <= 1 ? 15 : consec === 2 ? 8 : 0;
-    var birth = 0, lucky = 0, sym = 0;
-    for (i = 0; i < arr.length; i++) {
-      if (arr[i] <= 31) birth++;
-      if ([8,6,9].indexOf(arr[i]) >= 0) lucky++;
-      if ([1,11,21,31].indexOf(arr[i]) >= 0) sym++;
-    }
-    var crashScore = (birth >= 4 || lucky >= 3 || sym >= 2) ? 5 : (birth >= 3 || lucky >= 2) ? 15 : 30;
-    var total = zoneScore + oddEvenScore + sumScore + consecScore + crashScore;
-    var type = total >= 85 ? '結構優化型' : total >= 70 ? '均衡型' : total >= 50 ? '偏態型' : '高風險集中型';
-    var zoneDesc = '區間分布 ' + low + '-' + mid + '-' + high + '（低-中-高）' + (zoneScore === 20 ? '，理想' : '');
-    var oddDesc = '奇偶 ' + odd + ':' + (5-odd) + (oddEvenScore === 15 ? '，平衡' : '');
-    var sumDesc = '總和 ' + sum + (sum >= 85 && sum <= 115 ? '，落在高機率區' : '');
-    var consecDesc = (consec <= 1 ? '連號' + consec + '組，常見' : '連號' + consec + '組');
-    var crashDesc = crashScore >= 25 ? '撞號風險低' : '部分號碼偏熱門';
-    return { total: total, zoneScore: zoneScore, oddEvenScore: oddEvenScore, sumScore: sumScore, consecScore: consecScore, crashScore: crashScore, type: type, zoneDesc: zoneDesc, oddDesc: oddDesc, sumDesc: sumDesc, consecDesc: consecDesc, crashDesc: crashDesc, sum: sum };
-  }
-
-  function score649Structure(nums) {
-    if (!nums || nums.length !== 6) return null;
-    var arr = nums.slice().sort(function(a,b){ return a-b; });
-    var z1 = 0, z2 = 0, z3 = 0, z4 = 0, i, sum = 0, odd = 0;
-    for (i = 0; i < arr.length; i++) {
-      if (arr[i] <= 12) z1++; else if (arr[i] <= 24) z2++; else if (arr[i] <= 36) z3++; else z4++;
-      sum += arr[i];
-      if (arr[i] % 2) odd++;
-    }
-    var zoneBal = Math.max(z1,z2,z3,z4) <= 2 && [z1,z2,z3,z4].every(function(c){ return c >= 0; });
-    var zoneScore = zoneBal ? 25 : (Math.max(z1,z2,z3,z4) >= 4 ? 5 : 15);
-    var oddEvenScore = (odd === 3 || odd === 4 || odd === 2) ? 15 : (odd <= 1 || odd >= 5) ? 5 : 10;
-    var sumScore = (sum >= 130 && sum <= 170) ? 20 : (sum >= 115 && sum <= 185) ? 12 : 5;
-    var consec = 0;
-    for (i = 1; i < arr.length; i++) if (arr[i] - arr[i-1] === 1) consec++;
-    var consecScore = consec <= 2 ? 15 : consec >= 3 ? 5 : 10;
-    var span = arr[5] - arr[0];
-    var spanScore = (span >= 30 && span <= 45) ? 10 : (span >= 25 && span <= 48) ? 6 : 2;
-    var birth = 0;
-    for (i = 0; i < arr.length; i++) if (arr[i] <= 31) birth++;
-    var crashScore = birth >= 5 ? 5 : birth >= 4 ? 10 : 15;
-    var total = zoneScore + oddEvenScore + sumScore + consecScore + spanScore + crashScore;
-    var type = total >= 85 ? '結構優化型' : total >= 70 ? '均衡型' : total >= 50 ? '偏態型' : '高風險集中型';
-    return { total: total, zoneScore: zoneScore, oddEvenScore: oddEvenScore, sumScore: sumScore, consecScore: consecScore, spanScore: spanScore, crashScore: crashScore, type: type, sum: sum, odd: odd, consec: consec, span: span };
-  }
-
-  window.__doStructureScoreImpl = function() {
-    var dataEl = $('data'), outEl = $('out');
-    if (!outEl || !dataEl) return;
-    var tier = getTier();
-    if (tier === 'free') { outEl.textContent = '結構評分為付費版功能，請升級。'; outEl.scrollIntoView({ block: 'nearest' }); return; }
-    var mode = (window.__lottoMode === '649') ? '649' : '539';
-    var line = (dataEl.value || '').trim().split(/\n/)[0];
-    if (!line) { outEl.textContent = '請在開獎號碼區貼上至少一行號碼（欲評分的那組）。'; outEl.scrollIntoView({ block: 'nearest' }); return; }
-    var nums = line.replace(/,/g, ' ').split(/\s+/).map(function(s){ return parseInt(s,10); }).filter(function(n){ return !isNaN(n) && n >= 1 && (mode === '539' ? n <= 39 : n <= 49); });
-    var need = mode === '539' ? 5 : 6;
-    var uniq = []; for (var i = 0; i < nums.length; i++) if (uniq.indexOf(nums[i]) === -1) uniq.push(nums[i]);
-    if (uniq.length !== need) { outEl.textContent = '請貼上正確格式：今彩539 為 5 個號碼(1-39)，大樂透 為 6 個號碼(1-49)。'; outEl.scrollIntoView({ block: 'nearest' }); return; }
-    var result = mode === '539' ? score539Structure(uniq) : score649Structure(uniq);
-    if (!result) { outEl.textContent = '評分失敗。'; return; }
-    var s = '【' + (mode === '539' ? '今彩539' : '大樂透') + ' 結構評分】\n\n';
-    s += '本組號碼：' + uniq.sort(function(a,b){ return a-b; }).join(', ') + '\n\n';
-    if (mode === '539') {
-      s += '① 區間平衡 ' + result.zoneScore + '/20分  ' + result.zoneDesc + '\n';
-      s += '② 奇偶平衡 ' + result.oddEvenScore + '/15分  ' + result.oddDesc + '\n';
-      s += '③ 總和區間 ' + result.sumScore + '/20分  ' + result.sumDesc + '\n';
-      s += '④ 連號風險 ' + result.consecScore + '/15分  ' + result.consecDesc + '\n';
-      s += '⑤ 撞號風險 ' + result.crashScore + '/30分  ' + result.crashDesc + '\n\n';
-    } else {
-      s += '① 四區間平衡 ' + result.zoneScore + '/25分\n';
-      s += '② 奇偶比例 ' + result.oddEvenScore + '/15分（奇' + result.odd + ':偶' + (6-result.odd) + '）\n';
-      s += '③ 總和值 ' + result.sumScore + '/20分（總和' + result.sum + '）\n';
-      s += '④ 連號與群聚 ' + result.consecScore + '/15分（' + result.consec + '組連號）\n';
-      s += '⑤ 跨距 ' + result.spanScore + '/10分（跨距' + result.span + '）\n';
-      s += '⑥ 撞號與生日密集度 ' + result.crashScore + '/15分\n\n';
-    }
-    s += '總分 ' + result.total + ' / 100  →  ' + result.type + '\n\n';
-    if (mode === '539') s += '▶ 本組號碼 ' + result.zoneDesc + '；' + result.oddDesc + '；' + result.sumDesc + '；' + result.consecDesc + '；' + result.crashDesc + '。\n\n';
-    s += '────────────────────\n';
-    s += '※ 本系統不預測中獎號碼，僅提供統計結構優化建議。結果僅供娛樂參考。';
-    outEl.textContent = s;
-    outEl.scrollIntoView({ block: 'nearest' });
-  };
-
-  function runStrategySimulate(draws, n, type) {
-    const use = draws.slice(0, n);
-    if (use.length < 4) return '期數至少 4 期以上。';
-    const max = type === '539' ? 39 : 49;
-    const need = type === '539' ? 5 : 6;
-    const counts = {};
-    for (let i = 1; i <= max; i++) counts[i] = 0;
-    for (const d of use) for (const num of d) counts[num]++;
-    const sorted = Object.entries(counts).filter(([,c]) => c > 0).sort((a,b) => b[1] - a[1]);
-    const cold = Object.entries(counts).sort((a,b) => a[1] - b[1]);
-    const strategies = [
-      { name: '純熱門', pick: () => sorted.slice(0, need).map(([n]) => +n).sort((a,b)=>a-b) },
-      { name: '純冷門', pick: () => cold.slice(0, need).map(([n]) => +n).sort((a,b)=>a-b) },
-      { name: '熱4冷1', pick: () => [...sorted.slice(0, need-1).map(([n]) => +n), +cold[0][0]].sort((a,b)=>a-b) },
-      { name: '熱3冷2', pick: () => [...sorted.slice(0, need-2).map(([n]) => +n), ...cold.slice(0,2).map(([n]) => +n)].sort((a,b)=>a-b) },
-      { name: '奇偶均衡', pick: () => {
-        const odd = sorted.filter(([n]) => +n % 2).slice(0, Math.ceil(need/2)).map(([n]) => +n);
-        const even = sorted.filter(([n]) => !(+n % 2)).slice(0, need - odd.length).map(([n]) => +n);
-        return [...new Set([...odd, ...even])].sort((a,b)=>a-b).slice(0, need);
-      }},
-    ];
-    let s = `【策略模擬】${type === '539' ? '今彩539' : '大樂透'} 最近 ${use.length} 期\n\n`;
-    for (const st of strategies) {
-      const pick = st.pick();
-      if (pick.length === need) s += `${st.name}: ${pick.join(',')}\n`;
-    }
-    s += '\n※僅供娛樂。';
-    return s;
-  }
-
-  function runBacktest(draws, n, type) {
-    const use = draws.slice(0, n);
-    if (use.length < 10) return '回測至少需要 10 期以上。';
-    const max = type === '539' ? 39 : 49;
-    const need = type === '539' ? 5 : 6;
-    let wins = 0, total = 0;
-    for (let i = 0; i < use.length - 1; i++) {
-      const train = use.slice(i + 1);
-      const counts = {};
-      for (let j = 1; j <= max; j++) counts[j] = 0;
-      for (const d of train) for (const num of d) counts[num]++;
-      const sorted = Object.entries(counts).filter(([,c]) => c > 0).sort((a,b) => b[1] - a[1]);
-      const pick = new Set(sorted.slice(0, need).map(([n]) => +n));
-      const actual = use[i];
-      const hit = actual.filter(x => pick.has(x)).length;
-      total++;
-      if (hit >= need - 1) wins++;
-    }
-    const rate = total ? (100 * wins / total).toFixed(1) : 0;
-    let s = `【回測系統】${type === '539' ? '今彩539' : '大樂透'} 最近 ${use.length} 期\n\n`;
-    s += `策略：每期前 ${need} 熱門號\n`;
-    s += `模擬 ${total} 次，命中 ${need-1} 碼以上共 ${wins} 次\n`;
-    s += `命中率：${rate}%\n\n※僅供娛樂。`;
-    return s;
-  }
-
-  function runROISimulate(draws, n, type) {
-    const use = draws.slice(0, n);
-    if (use.length < 4) return '期數至少 4 期以上。';
-    const need = type === '539' ? 5 : 6;
-    const counts = {};
-    const max = type === '539' ? 39 : 49;
-    for (let i = 1; i <= max; i++) counts[i] = 0;
-    for (const d of use) for (const num of d) counts[num]++;
-    const sorted = Object.entries(counts).filter(([,c]) => c > 0).sort((a,b) => b[1] - a[1]);
-    const pick = new Set(sorted.slice(0, need).map(([n]) => +n));
-    let hit3 = 0, hit4 = 0, hit5 = 0;
-    for (const d of use) {
-      const h = d.filter(x => pick.has(x)).length;
-      if (h >= 3) hit3++;
-      if (h >= 4) hit4++;
-      if (h >= need) hit5++;
-    }
-    const per = 50;  // 假設每注 50 元
-    const total = use.length * per;
-    const comb = type === '539' ? 575757 : 13983816;
-    let s = `【投入報酬模擬】${type === '539' ? '今彩539' : '大樂透'} 最近 ${use.length} 期\n\n`;
-    s += `策略：熱門前 ${need} 碼，每注 ${per} 元\n`;
-    s += `總投入：${total} 元\n`;
-    s += `命中3碼以上：${hit3} 次  命中4碼以上：${hit4} 次  全中：${hit5} 次\n`;
-    s += `理論中獎機率：1/${comb.toLocaleString()}\n\n※僅供娛樂，不構成投資建議。`;
-    return s;
-  }
-
-  function runCrowdSimulate(draws, n, type) {
-    const use = draws.slice(0, n);
-    if (use.length < 4) return '期數至少 4 期以上。';
-    const max = type === '539' ? 39 : 49;
-    const need = type === '539' ? 5 : 6;
-    const counts = {};
-    for (let i = 1; i <= max; i++) counts[i] = 0;
-    for (const d of use) for (const num of d) counts[num]++;
-    const sorted = Object.entries(counts).filter(([,c]) => c > 0).sort((a,b) => b[1] - a[1]);
-    const hot = sorted.slice(0, 12).map(([n]) => +n);
-    const cold = Object.entries(counts).sort((a,b) => a[1] - b[1]).slice(0, 12).map(([n]) => +n);
-    let s = `【群眾行為模擬】${type === '539' ? '今彩539' : '大樂透'} 最近 ${use.length} 期\n\n`;
-    s += `多數人會選的熱門號：${hot.join(',')}\n`;
-    s += `較少人選的冷門號：${cold.join(',')}\n\n`;
-    s += `若多數人押熱門，開冷門時獎金會較高；反之亦然。\n※僅供娛樂。`;
-    return s;
-  }
-
-  $('btnSimulate').onclick = () => {
     const draws = parseData(dataEl.value, mode);
-    if (!draws.length) { outEl.textContent = '請貼上開獎號碼。'; return; }
-    const n = Math.min(parseInt(periodsEl.value, 10) || 20, draws.length, 500);
-    outEl.textContent = runStrategySimulate(draws, n, mode);
-  };
-  $('btnBacktest').onclick = () => {
-    const draws = parseData(dataEl.value, mode);
-    if (!draws.length) { outEl.textContent = '請貼上開獎號碼。'; return; }
-    const n = Math.min(parseInt(periodsEl.value, 10) || 20, draws.length, 500);
-    outEl.textContent = runBacktest(draws, n, mode);
-  };
-  $('btnROI').onclick = () => {
-    const draws = parseData(dataEl.value, mode);
-    if (!draws.length) { outEl.textContent = '請貼上開獎號碼。'; return; }
-    const n = Math.min(parseInt(periodsEl.value, 10) || 20, draws.length, 500);
-    outEl.textContent = runROISimulate(draws, n, mode);
-  };
-  $('btnCrowd').onclick = () => {
-    const draws = parseData(dataEl.value, mode);
-    if (!draws.length) { outEl.textContent = '請貼上開獎號碼。'; return; }
-    const n = Math.min(parseInt(periodsEl.value, 10) || 20, draws.length, 500);
-    outEl.textContent = runCrowdSimulate(draws, n, mode);
+    if (!draws.length) { outEl.textContent = '請先貼上開獎號碼，每行一期。'; return; }
+    outEl.textContent = proStructureText(draws, mode);
   };
 })();
-  </script>
-  <script>
-  (function(){
-    var q = window.location.search;
-    if (q.indexOf('paid=1') >= 0) localStorage.setItem('lotto_tier_v1', 'paid');
-    else if (q.indexOf('paid=2') >= 0) localStorage.setItem('lotto_tier_v1', 'pro');
-    var t = localStorage.getItem('lotto_tier_v1') || 'free';
-    var text = t === 'pro' ? '專業版' : t === 'paid' ? '付費版' : '免費版';
-    var badge = document.getElementById('versionBadge');
-    var header = document.getElementById('headerPlanLabel');
-    if (badge) { badge.textContent = text; badge.className = 'badge ' + t; }
-    if (header) header.textContent = text;
-  })();
   </script>
 </body>
 </html>
