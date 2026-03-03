@@ -326,6 +326,11 @@
 </head>
 <body>
   <script>
+  (function(){
+    var q = window.location.search;
+    if (q.indexOf('paid=1') >= 0) localStorage.setItem('lotto_tier_v1', 'paid');
+    else if (q.indexOf('paid=2') >= 0) localStorage.setItem('lotto_tier_v1', 'pro');
+  })();
   window.getTier = function() { return localStorage.getItem('lotto_tier_v1') || 'free'; };
   function parseLotto(text, mode) {
     var maxNum = mode === '539' ? 39 : 49, need = mode === '539' ? 5 : 6;
@@ -441,7 +446,7 @@
   </div>
   <div class="header-plans-bar">
     <span class="header-plans-label">方案：</span>
-    <span>免費版</span>
+    <span id="headerPlanLabel">免費版</span>
     <span class="header-plans-sep">|</span>
     <a href="https://kkalex0987.github.io/taiwan539-web/pay.html?plan=1" class="header-plans-link">付費版 $99</a>
     <span class="header-plans-sep">|</span>
@@ -477,6 +482,15 @@
       <span class="desc" id="versionDesc"></span>
       <a href="https://kkalex0987.github.io/taiwan539-web/pay.html" class="link-upgrade" id="linkUpgrade"></a>
     </div>
+    <details class="help test-tier" style="margin-bottom:16px;">
+      <summary>🧪 測試切換版本（僅供開發測試）</summary>
+      <p style="margin-top:8px;">點下列連結會重新載入頁面並切換為該版本，方便測試功能（無需真的付款）：</p>
+      <p style="margin:8px 0 4px;">
+        <a href="https://kkalex0987.github.io/taiwan539-web/?paid=1" style="color:var(--accent);">切換為付費版</a> &nbsp;
+        <a href="https://kkalex0987.github.io/taiwan539-web/?paid=2" style="color:var(--accent);">切換為專業版</a> &nbsp;
+        <a href="https://kkalex0987.github.io/taiwan539-web/" style="color:var(--text-muted);">還原免費版</a>
+      </p>
+    </details>
     <div class="card" id="fetchSection">
       <label id="labelFetch">一鍵抓取</label>
       <input type="text" id="apiBase" placeholder="付費版以上已內建">
@@ -558,6 +572,7 @@
   function refreshVersionUI() {
     const t = getTier();
     const badge = $('versionBadge');
+    const headerPlanLabel = $('headerPlanLabel');
     const desc = $('versionDesc');
     const labelFetch = $('labelFetch');
     const fetchSection = $('fetchSection');
@@ -566,10 +581,12 @@
     const btnAI = $('btnAI');
     const btnStructure = $('btnStructure');
     const linkUpgrade = $('linkUpgrade');
+    const tierText = t === 'pro' ? '專業版' : t === 'paid' ? '付費版' : '免費版';
     if (badge) {
-      badge.textContent = t === 'pro' ? '專業版' : t === 'paid' ? '付費版' : '免費版';
+      badge.textContent = tierText;
       badge.className = 'badge ' + t;
     }
+    if (headerPlanLabel) headerPlanLabel.textContent = tierText;
     if (desc) desc.textContent = t === 'pro' ? '策略模擬、回測、報酬模擬、群眾行為' : t === 'paid' ? '奇偶建議、總和落點、連號機率、包牌期望、結構分析' : '50期、熱冷門、奇偶區間比例、手動輸入';
     if (linkUpgrade) {
       linkUpgrade.textContent = t === 'pro' ? '已為專業版' : t === 'paid' ? '升級專業版' : '升級';
@@ -1157,6 +1174,19 @@
     outEl.textContent = runCrowdSimulate(draws, n, mode);
   };
 })();
+  </script>
+  <script>
+  (function(){
+    var q = window.location.search;
+    if (q.indexOf('paid=1') >= 0) localStorage.setItem('lotto_tier_v1', 'paid');
+    else if (q.indexOf('paid=2') >= 0) localStorage.setItem('lotto_tier_v1', 'pro');
+    var t = localStorage.getItem('lotto_tier_v1') || 'free';
+    var text = t === 'pro' ? '專業版' : t === 'paid' ? '付費版' : '免費版';
+    var badge = document.getElementById('versionBadge');
+    var header = document.getElementById('headerPlanLabel');
+    if (badge) { badge.textContent = text; badge.className = 'badge ' + t; }
+    if (header) header.textContent = text;
+  })();
   </script>
 </body>
 </html>
