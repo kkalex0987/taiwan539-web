@@ -42,13 +42,13 @@
     <p class="help" id="help">今彩539：每行 5 個號碼。大樂透：每行 6 個號碼。</p>
     <p class="help" style="margin-bottom:8px;"><span id="versionBadge">免費版</span> <span id="versionDesc">請自行貼上開獎號碼，或自備抓取網址</span> <a href="pay.html" id="linkUpgrade" style="color:#e94560;margin-left:6px;">升級付費版</a></p>
     <label id="labelFetch">一鍵抓取（付費版已內建網址，免費版請自備抓取網址）</label>
-    <input type="text" id="apiBase" placeholder="免費版請自行貼上開獎號碼或留空；付費版由系統帶入" value="">
+    <input type="text" id="apiBase" placeholder="免費版請自行貼上開獎號碼或留空；付費版由系統帶入" value="" autocomplete="off">
     <button type="button" class="btn btn-tertiary" id="btnFetch">一鍵抓取最新開獎</button>
     <label>分析期數（取最近幾期）</label>
     <input type="number" id="periods" value="20" min="5" max="200">
     <button type="button" class="btn btn-primary" id="btnAnalyze">分析（統計＋趨勢＋推薦）</button>
     <button type="button" class="btn btn-secondary" id="btnAI">AI 快報</button>
-    <button type="button" class="btn btn-secondary" id="btnProStructure">專業結構分析（付費版）</button>
+    <button type="button" class="btn btn-secondary" id="btnProStructure">結構分析（付費版）</button>
     <div id="out"></div>
     <details class="how-add">
       <summary>如何「加到主畫面」當 App 使用？</summary>
@@ -78,7 +78,7 @@
   const PAYMENT_URL = 'pay.html';
   const savedBase = localStorage.getItem(LS_API_BASE);
 
-  // 一載入就依是否付費決定「一鍵抓取」欄位：免費版空白、付費版帶入網址並鎖住
+  // 一載入就依是否付費決定「一鍵抓取」欄位：免費版強制空白且不儲存網址，付費版帶入網址並鎖住
   function applyApiBaseByPro() {
     const pro = localStorage.getItem(LS_IS_PRO) === '1';
     if (!apiBaseEl) return;
@@ -92,6 +92,7 @@
       apiBaseEl.readOnly = false;
       apiBaseEl.classList.remove('api-base-locked');
       apiBaseEl.removeAttribute('readonly');
+      localStorage.removeItem(LS_API_BASE);
     }
   }
   applyApiBaseByPro();
@@ -127,27 +128,24 @@
     if (labelFetch) labelFetch.textContent = pro ? '一鍵抓取（已內建網址，直接按）' : '一鍵抓取（免費版請自備抓取網址）';
     if (apiBaseEl) {
       if (pro) {
-        // 付費版：自動帶入一鍵抓取網址，鎖住欄位不可修改、不可選取複製
         apiBaseEl.value = DEFAULT_API_BASE;
         apiBaseEl.readOnly = true;
         apiBaseEl.classList.add('api-base-locked');
         apiBaseEl.setAttribute('readonly', 'readonly');
       } else {
-        // 免費版：該行保持空白，不顯示網址
         apiBaseEl.value = '';
         apiBaseEl.readOnly = false;
         apiBaseEl.classList.remove('api-base-locked');
         apiBaseEl.removeAttribute('readonly');
+        localStorage.removeItem(LS_API_BASE);
       }
     }
   }
-  // 若網址有 ?paid=1 表示從付款頁導回，啟用付費版
   const urlParams = new URLSearchParams(window.location.search);
   if (urlParams.get('paid') === '1') {
     localStorage.setItem(LS_IS_PRO, '1');
-    apiBaseEl.value = DEFAULT_API_BASE;
     localStorage.setItem(LS_API_BASE, DEFAULT_API_BASE);
-    history.replaceState({}, '', window.location.pathname);  // 移除 ?paid=1
+    history.replaceState({}, '', window.location.pathname);
   }
   refreshVersionUI();
 
@@ -179,7 +177,7 @@
         : '免費版請自行貼上開獎號碼到上方欄位，或貼上你自己部署的抓取服務網址（需自備）。';
       return;
     }
-    localStorage.setItem(LS_API_BASE, base);
+    if (isPro()) localStorage.setItem(LS_API_BASE, base);
     const n = Math.max(1, Math.min(parseInt(periodsEl.value, 10) || 20, 200));
     outEl.textContent = `正在抓取 ${mode === '539' ? '今彩539' : '大樂透'} 最近 ${n} 期…`;
     const url = `${base}/${mode}?periods=${encodeURIComponent(n)}`;
@@ -370,7 +368,7 @@
     return s;
   }
 
-  // ===== 新的「專業結構分析」：從 Python PremiumLotteryAnalyzer 移植 =====
+  // ===== 付費版結構分析：從 Python PremiumLotteryAnalyzer 移植 =====
 
   function zone3(nums) {
     let low = 0, mid = 0, high = 0;
@@ -519,7 +517,7 @@
     const internalType = type === '539' ? '539' : 'lotto';
     const r = premiumAnalyzeOne(nums, internalType, true);
     const base = r.analysis || {};
-    let text = `【專業結構分析】\n這一組號碼：${r.numbers.join(', ')}\n`;
+    let text = `【付費版結構分析】\n這一組號碼：${r.numbers.join(', ')}\n`;
     text += `綜合評分：${r.total_score} 分\n整體看法：${r.summary}\n\n`;
     text += `區間分佈感覺：${base.zone || ''}\n`;
     text += `單雙搭配感覺：${base.odd_even || ''}\n`;
@@ -554,7 +552,7 @@
 
   $('btnProStructure').onclick = () => {
     if (!isPro()) {
-      outEl.textContent = '「專業結構分析」為付費版功能，請先在上方點「升級付費版」完成後再使用。';
+      outEl.textContent = '「結構分析」為付費版功能，請先在上方點「升級付費版」完成後再使用。';
       return;
     }
     const draws = parseData(dataEl.value, mode);
