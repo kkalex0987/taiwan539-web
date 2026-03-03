@@ -313,13 +313,41 @@
   </style>
 </head>
 <body>
+  <script>
+  window.switchMode = function(mode) {
+    var d = document.getElementById('data'), h = document.getElementById('help');
+    var t539 = document.getElementById('tab539'), t649 = document.getElementById('tab649');
+    if (t539) t539.classList.toggle('active', mode === '539');
+    if (t649) t649.classList.toggle('active', mode === '649');
+    if (d) d.placeholder = mode === '539' ? '今彩539 每行 5 個號碼 (1-39)\n例：3,6,9,31,39' : '大樂透 每行 6 個號碼 (1-49)\n例：1,16,22,24,47,48';
+    if (h) h.textContent = mode === '539' ? '今彩539：每行 5 個號碼 (1-39)。你也可以先按「一鍵抓取」。' : '大樂透：每行 6 個號碼 (1-49)。你也可以先按「一鍵抓取」。';
+    window.__lottoMode = mode;
+  };
+  window.doFetch = function() {
+    var api = document.getElementById('apiBase'), out = document.getElementById('out'), per = document.getElementById('periods');
+    var mode = (window.__lottoMode === '649') ? '649' : '539';
+    var base = (api && api.value) ? String(api.value).trim().replace(/\/+$/, '') : '';
+    if (!base) { if (out) { out.textContent = '請在上方欄位貼上 Worker 網址後再按一鍵抓取。'; out.scrollIntoView({ block: 'nearest' }); } return; }
+    var n = 50;
+    if (per && per.value) n = Math.min(Math.max(1, parseInt(per.value, 10) || 50), 50);
+    if (out) { out.textContent = '正在抓取 ' + (mode === '539' ? '今彩539' : '大樂透') + ' 最近 ' + n + ' 期…'; out.scrollIntoView({ block: 'nearest' }); }
+    var url = base + '/' + mode + '?periods=' + n;
+    fetch(url).then(function(r) { return r.json(); }).then(function(j) {
+      var draws = j && j.draws;
+      if (!draws || !draws.length) { if (out) out.textContent = '沒有拿到期數資料'; return; }
+      var data = document.getElementById('data');
+      if (data) data.value = draws.map(function(row) { return row.join(', '); }).join('\n');
+      if (out) out.textContent = '✅ 已抓取 ' + draws.length + ' 期並填入。現在可以按「開始分析」。';
+    }).catch(function(e) { if (out) out.textContent = '抓取失敗：' + String(e); });
+  };
+  </script>
   <header class="header">
     <h1>539・大樂透分析</h1>
     <p class="tagline">數據驅動・智能統計</p>
   </header>
   <div class="tabs">
-    <button type="button" id="tab539" class="active">今彩539</button>
-    <button type="button" id="tab649">大樂透</button>
+    <button type="button" id="tab539" class="active" onclick="switchMode('539')">今彩539</button>
+    <button type="button" id="tab649" onclick="switchMode('649')">大樂透</button>
   </div>
   <div class="header-plans-bar">
     <span class="header-plans-label">方案：</span>
@@ -362,7 +390,7 @@
     <div class="card" id="fetchSection">
       <label id="labelFetch">一鍵抓取</label>
       <input type="text" id="apiBase" placeholder="付費版以上已內建">
-      <button type="button" class="btn btn-tertiary" id="btnFetch" style="min-height:48px;">一鍵抓取最新開獎</button>
+      <button type="button" class="btn btn-tertiary" id="btnFetch" style="min-height:48px;" onclick="doFetch()">一鍵抓取最新開獎</button>
     </div>
     <div class="card">
       <label>分析期數<span id="periodsHint"></span></label>
@@ -411,6 +439,7 @@
 
   function setMode(next) {
     mode = next;
+    window.__lottoMode = next;
     var t539 = $('tab539'), t649 = $('tab649');
     if (t539) t539.classList.toggle('active', mode === '539');
     if (t649) t649.classList.toggle('active', mode === '649');
@@ -422,14 +451,7 @@
     if (helpEl) helpEl.textContent = mode === '539' ? '今彩539：每行 5 個號碼 (1-39)。你也可以先按「一鍵抓取」。' : '大樂透：每行 6 個號碼 (1-49)。你也可以先按「一鍵抓取」。';
   }
 
-  function handleTap(e) {
-    var t = e.target;
-    if (t && (t.id === 'tab539' || (t.closest && t.closest('#tab539')))) { e.preventDefault(); e.stopPropagation(); setMode('539'); return; }
-    if (t && (t.id === 'tab649' || (t.closest && t.closest('#tab649')))) { e.preventDefault(); e.stopPropagation(); setMode('649'); return; }
-    if (t && (t.id === 'btnFetch' || (t.closest && t.closest('#btnFetch')))) { e.preventDefault(); e.stopPropagation(); if (typeof fetchDraws === 'function') fetchDraws(); return; }
-  }
-  document.body.addEventListener('click', handleTap, true);
-  document.body.addEventListener('touchend', handleTap, true);
+  if (window.__lottoMode) mode = window.__lottoMode;
   setMode('539');
 
   function getTier() { return localStorage.getItem(LS_TIER) || 'free'; }
@@ -790,6 +812,7 @@
   }
 
   $('btnAnalyze').onclick = () => {
+    if (window.__lottoMode) mode = window.__lottoMode;
     const draws = parseData(dataEl.value, mode);
     if (!draws.length) { outEl.textContent = '請貼上開獎號碼，每行一期。'; return; }
     const maxN = getTier() === 'free' ? 50 : (getTier() === 'pro' ? 500 : 200);
@@ -798,6 +821,7 @@
   };
 
   $('btnAI').onclick = () => {
+    if (window.__lottoMode) mode = window.__lottoMode;
     if (getTier() === 'free') { outEl.textContent = 'AI 快報為付費版功能，請升級。'; return; }
     const draws = parseData(dataEl.value, mode);
     if (!draws.length) { outEl.textContent = '請貼上開獎號碼。'; return; }
