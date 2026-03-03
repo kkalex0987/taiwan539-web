@@ -387,6 +387,11 @@
     out.textContent = runAnalyze(draws, n, mode, tier);
     out.scrollIntoView({ block: 'nearest' });
   };
+  window.doStructureScore = function() {
+    if (window.__doStructureScoreImpl) { window.__doStructureScoreImpl(); return; }
+    var out = document.getElementById('out');
+    if (out) { out.textContent = '結構評分為付費版功能，請升級。'; out.scrollIntoView({ block: 'nearest' }); }
+  };
   window.doAI = function() {
     var data = document.getElementById('data'), out = document.getElementById('out'), per = document.getElementById('periods');
     var tier = window.getTier();
@@ -483,11 +488,13 @@
       <div class="btn-grid">
         <button type="button" class="btn btn-primary" id="btnAnalyze" onclick="doAnalyze()">開始分析</button>
         <button type="button" class="btn btn-secondary" id="btnAI" onclick="doAI()">AI 快報</button>
+        <button type="button" class="btn btn-secondary" id="btnStructure" onclick="doStructureScore()">結構評分</button>
       </div>
       <details class="help" style="margin-top:12px;">
         <summary>功能說明</summary>
-        <p><strong>開始分析：</strong>依您貼上的開獎號碼，統計「熱門6、冷門6、建議號碼、奇偶比例、區間比例」。免費版可看基本統計；付費版另含結構分析、策略建議、撞號機率、總和落點、連號機率、包牌期望。</p>
-        <p><strong>AI 快報：</strong>付費版功能。依出現機率排序、熱門冷門、趨勢，給出「建議號碼」與機率說明；539 另有二合三合頻率。</p>
+        <p><strong>開始分析：</strong>依您貼上的開獎號碼，統計熱門冷門、建議號碼、奇偶與區間比例；付費版另含結構分析、撞號機率、總和落點等。</p>
+        <p><strong>AI 快報：</strong>付費版功能。依機率與趨勢給出建議號碼；539 另有二合三合頻率。</p>
+        <p><strong>結構評分：</strong>付費版功能。五維／六維評分（區間平衡、奇偶、總和、連號、撞號風險等），總分 100，並標示「結構優化型／均衡型／偏態型／高風險集中型」。本系統不預測中獎號碼，僅提供統計結構優化建議。</p>
       </details>
     </div>
     <div class="card" id="proSection" style="display:none;">
@@ -557,6 +564,7 @@
     const periodsHint = $('periodsHint');
     const proSection = $('proSection');
     const btnAI = $('btnAI');
+    const btnStructure = $('btnStructure');
     const linkUpgrade = $('linkUpgrade');
     if (badge) {
       badge.textContent = t === 'pro' ? '專業版' : t === 'paid' ? '付費版' : '免費版';
@@ -576,6 +584,7 @@
       if (periodsEl) periodsEl.max = 50;
       if (periodsEl && parseInt(periodsEl.value, 10) > 50) periodsEl.value = 50;
       if (btnAI) btnAI.style.display = 'none';
+      if (btnStructure) btnStructure.style.display = 'none';
       if (proSection) proSection.style.display = 'none';
     } else {
       if (fetchSection) fetchSection.style.display = 'block';
@@ -583,6 +592,7 @@
       if (periodsHint) periodsHint.textContent = t === 'pro' ? '（專業版無上限）' : '（付費版最多200期）';
       if (periodsEl) periodsEl.max = t === 'pro' ? 500 : 200;
       if (btnAI) btnAI.style.display = 'block';
+      if (btnStructure) btnStructure.style.display = 'block';
       if (apiBaseEl && !apiBaseEl.value.trim()) apiBaseEl.value = DEFAULT_API_BASE;
       if (proSection) proSection.style.display = t === 'pro' ? 'block' : 'none';
     }
@@ -922,6 +932,103 @@
   var btnAnalyze = $('btnAnalyze'), btnAI = $('btnAI');
   if (btnAnalyze) btnAnalyze.onclick = window.__doAnalyzeImpl;
   if (btnAI) btnAI.onclick = window.__doAIImpl;
+
+  function score539Structure(nums) {
+    if (!nums || nums.length !== 5) return null;
+    var arr = nums.slice().sort(function(a,b){ return a-b; });
+    var low = 0, mid = 0, high = 0, i, part, sum = 0, odd = 0;
+    for (i = 0; i < arr.length; i++) {
+      if (arr[i] <= 13) low++; else if (arr[i] <= 26) mid++; else high++;
+      sum += arr[i];
+      if (arr[i] % 2) odd++;
+    }
+    var zoneKey = low + '-' + mid + '-' + high;
+    var zoneScore = (zoneKey === '2-2-1' || zoneKey === '2-1-2' || zoneKey === '1-2-2') ? 20 : (zoneKey === '3-1-1' || zoneKey === '1-3-1' || zoneKey === '1-1-3') ? 15 : (zoneKey === '4-1-0' || zoneKey === '4-0-1' || zoneKey === '1-4-0' || zoneKey === '0-4-1' || zoneKey === '1-0-4' || zoneKey === '0-1-4') ? 8 : 0;
+    var oddEvenScore = (odd === 2 || odd === 3) ? 15 : (odd === 1 || odd === 4) ? 8 : 0;
+    var sumScore = (sum >= 85 && sum <= 115) ? 20 : (sum >= 70 && sum <= 130) ? 12 : 5;
+    var consec = 0;
+    for (i = 1; i < arr.length; i++) if (arr[i] - arr[i-1] === 1) consec++;
+    var consecScore = consec <= 1 ? 15 : consec === 2 ? 8 : 0;
+    var birth = 0, lucky = 0, sym = 0;
+    for (i = 0; i < arr.length; i++) {
+      if (arr[i] <= 31) birth++;
+      if ([8,6,9].indexOf(arr[i]) >= 0) lucky++;
+      if ([1,11,21,31].indexOf(arr[i]) >= 0) sym++;
+    }
+    var crashScore = (birth >= 4 || lucky >= 3 || sym >= 2) ? 5 : (birth >= 3 || lucky >= 2) ? 15 : 30;
+    var total = zoneScore + oddEvenScore + sumScore + consecScore + crashScore;
+    var type = total >= 85 ? '結構優化型' : total >= 70 ? '均衡型' : total >= 50 ? '偏態型' : '高風險集中型';
+    var zoneDesc = '區間分布 ' + low + '-' + mid + '-' + high + '（低-中-高）' + (zoneScore === 20 ? '，理想' : '');
+    var oddDesc = '奇偶 ' + odd + ':' + (5-odd) + (oddEvenScore === 15 ? '，平衡' : '');
+    var sumDesc = '總和 ' + sum + (sum >= 85 && sum <= 115 ? '，落在高機率區' : '');
+    var consecDesc = (consec <= 1 ? '連號' + consec + '組，常見' : '連號' + consec + '組');
+    var crashDesc = crashScore >= 25 ? '撞號風險低' : '部分號碼偏熱門';
+    return { total: total, zoneScore: zoneScore, oddEvenScore: oddEvenScore, sumScore: sumScore, consecScore: consecScore, crashScore: crashScore, type: type, zoneDesc: zoneDesc, oddDesc: oddDesc, sumDesc: sumDesc, consecDesc: consecDesc, crashDesc: crashDesc, sum: sum };
+  }
+
+  function score649Structure(nums) {
+    if (!nums || nums.length !== 6) return null;
+    var arr = nums.slice().sort(function(a,b){ return a-b; });
+    var z1 = 0, z2 = 0, z3 = 0, z4 = 0, i, sum = 0, odd = 0;
+    for (i = 0; i < arr.length; i++) {
+      if (arr[i] <= 12) z1++; else if (arr[i] <= 24) z2++; else if (arr[i] <= 36) z3++; else z4++;
+      sum += arr[i];
+      if (arr[i] % 2) odd++;
+    }
+    var zoneBal = Math.max(z1,z2,z3,z4) <= 2 && [z1,z2,z3,z4].every(function(c){ return c >= 0; });
+    var zoneScore = zoneBal ? 25 : (Math.max(z1,z2,z3,z4) >= 4 ? 5 : 15);
+    var oddEvenScore = (odd === 3 || odd === 4 || odd === 2) ? 15 : (odd <= 1 || odd >= 5) ? 5 : 10;
+    var sumScore = (sum >= 130 && sum <= 170) ? 20 : (sum >= 115 && sum <= 185) ? 12 : 5;
+    var consec = 0;
+    for (i = 1; i < arr.length; i++) if (arr[i] - arr[i-1] === 1) consec++;
+    var consecScore = consec <= 2 ? 15 : consec >= 3 ? 5 : 10;
+    var span = arr[5] - arr[0];
+    var spanScore = (span >= 30 && span <= 45) ? 10 : (span >= 25 && span <= 48) ? 6 : 2;
+    var birth = 0;
+    for (i = 0; i < arr.length; i++) if (arr[i] <= 31) birth++;
+    var crashScore = birth >= 5 ? 5 : birth >= 4 ? 10 : 15;
+    var total = zoneScore + oddEvenScore + sumScore + consecScore + spanScore + crashScore;
+    var type = total >= 85 ? '結構優化型' : total >= 70 ? '均衡型' : total >= 50 ? '偏態型' : '高風險集中型';
+    return { total: total, zoneScore: zoneScore, oddEvenScore: oddEvenScore, sumScore: sumScore, consecScore: consecScore, spanScore: spanScore, crashScore: crashScore, type: type, sum: sum, odd: odd, consec: consec, span: span };
+  }
+
+  window.__doStructureScoreImpl = function() {
+    var dataEl = $('data'), outEl = $('out');
+    if (!outEl || !dataEl) return;
+    var tier = getTier();
+    if (tier === 'free') { outEl.textContent = '結構評分為付費版功能，請升級。'; outEl.scrollIntoView({ block: 'nearest' }); return; }
+    var mode = (window.__lottoMode === '649') ? '649' : '539';
+    var line = (dataEl.value || '').trim().split(/\n/)[0];
+    if (!line) { outEl.textContent = '請在開獎號碼區貼上至少一行號碼（欲評分的那組）。'; outEl.scrollIntoView({ block: 'nearest' }); return; }
+    var nums = line.replace(/,/g, ' ').split(/\s+/).map(function(s){ return parseInt(s,10); }).filter(function(n){ return !isNaN(n) && n >= 1 && (mode === '539' ? n <= 39 : n <= 49); });
+    var need = mode === '539' ? 5 : 6;
+    var uniq = []; for (var i = 0; i < nums.length; i++) if (uniq.indexOf(nums[i]) === -1) uniq.push(nums[i]);
+    if (uniq.length !== need) { outEl.textContent = '請貼上正確格式：今彩539 為 5 個號碼(1-39)，大樂透 為 6 個號碼(1-49)。'; outEl.scrollIntoView({ block: 'nearest' }); return; }
+    var result = mode === '539' ? score539Structure(uniq) : score649Structure(uniq);
+    if (!result) { outEl.textContent = '評分失敗。'; return; }
+    var s = '【' + (mode === '539' ? '今彩539' : '大樂透') + ' 結構評分】\n\n';
+    s += '本組號碼：' + uniq.sort(function(a,b){ return a-b; }).join(', ') + '\n\n';
+    if (mode === '539') {
+      s += '① 區間平衡 ' + result.zoneScore + '/20分  ' + result.zoneDesc + '\n';
+      s += '② 奇偶平衡 ' + result.oddEvenScore + '/15分  ' + result.oddDesc + '\n';
+      s += '③ 總和區間 ' + result.sumScore + '/20分  ' + result.sumDesc + '\n';
+      s += '④ 連號風險 ' + result.consecScore + '/15分  ' + result.consecDesc + '\n';
+      s += '⑤ 撞號風險 ' + result.crashScore + '/30分  ' + result.crashDesc + '\n\n';
+    } else {
+      s += '① 四區間平衡 ' + result.zoneScore + '/25分\n';
+      s += '② 奇偶比例 ' + result.oddEvenScore + '/15分（奇' + result.odd + ':偶' + (6-result.odd) + '）\n';
+      s += '③ 總和值 ' + result.sumScore + '/20分（總和' + result.sum + '）\n';
+      s += '④ 連號與群聚 ' + result.consecScore + '/15分（' + result.consec + '組連號）\n';
+      s += '⑤ 跨距 ' + result.spanScore + '/10分（跨距' + result.span + '）\n';
+      s += '⑥ 撞號與生日密集度 ' + result.crashScore + '/15分\n\n';
+    }
+    s += '總分 ' + result.total + ' / 100  →  ' + result.type + '\n\n';
+    if (mode === '539') s += '▶ 本組號碼 ' + result.zoneDesc + '；' + result.oddDesc + '；' + result.sumDesc + '；' + result.consecDesc + '；' + result.crashDesc + '。\n\n';
+    s += '────────────────────\n';
+    s += '※ 本系統不預測中獎號碼，僅提供統計結構優化建議。結果僅供娛樂參考。';
+    outEl.textContent = s;
+    outEl.scrollIntoView({ block: 'nearest' });
+  };
 
   function runStrategySimulate(draws, n, type) {
     const use = draws.slice(0, n);
