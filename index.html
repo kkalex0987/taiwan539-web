@@ -75,8 +75,8 @@
       gap: 8px;
     }
     .header-plans-label { color: var(--text-muted); }
-    .header-plans-sep { color: var(--text-muted); opacity: 0.6; }
-    .header-plans-link {
+    .header-plans-bar .header-plans-sep { color: var(--text-muted); opacity: 0.6; }
+    .header-plans-bar .header-plans-link {
       color: var(--accent);
       font-weight: 600;
       text-decoration: none;
@@ -86,7 +86,7 @@
       transition: background 0.2s;
       display: inline-block;
     }
-    .header-plans-link:hover { background: rgba(245,158,11,0.3); }
+    .header-plans-bar .header-plans-link:hover { background: rgba(245,158,11,0.3); }
     .tabs {
       display: flex;
       gap: 0;
@@ -248,6 +248,7 @@
       border-radius: var(--radius);
       padding: 20px;
       margin-top: 20px;
+      min-height: 60px;
       white-space: pre-wrap;
       word-break: break-all;
       font-size: 0.9rem;
@@ -312,18 +313,18 @@
   <header class="header">
     <h1>539・大樂透分析</h1>
     <p class="tagline">數據驅動・智能統計</p>
-    <div class="header-plans">
-      <span class="header-plans-label">方案：</span>
-      <span>免費版</span>
-      <span class="header-plans-sep">|</span>
-      <a href="https://kkalex0987.github.io/taiwan539-web/pay.html?plan=1" class="header-plans-link">付費版 $99</a>
-      <span class="header-plans-sep">|</span>
-      <a href="https://kkalex0987.github.io/taiwan539-web/pay.html?plan=2" class="header-plans-link">專業版 $199</a>
-    </div>
   </header>
   <div class="tabs">
     <button type="button" id="tab539" class="active">今彩539</button>
     <button type="button" id="tab649">大樂透</button>
+  </div>
+  <div class="header-plans-bar">
+    <span class="header-plans-label">方案：</span>
+    <span>免費版</span>
+    <span class="header-plans-sep">|</span>
+    <a href="https://kkalex0987.github.io/taiwan539-web/pay.html?plan=1" class="header-plans-link">付費版 $99</a>
+    <span class="header-plans-sep">|</span>
+    <a href="https://kkalex0987.github.io/taiwan539-web/pay.html?plan=2" class="header-plans-link">專業版 $199</a>
   </div>
   <div class="container">
     <div class="card" id="plansPreviewCard">
@@ -358,7 +359,7 @@
     <div class="card" id="fetchSection">
       <label id="labelFetch">一鍵抓取</label>
       <input type="text" id="apiBase" placeholder="付費版以上已內建">
-      <button type="button" class="btn btn-tertiary" id="btnFetch">一鍵抓取最新開獎</button>
+      <button type="button" class="btn btn-tertiary" id="btnFetch" style="min-height:48px;">一鍵抓取最新開獎</button>
     </div>
     <div class="card">
       <label>分析期數<span id="periodsHint"></span></label>
@@ -497,49 +498,60 @@
   }
 
   async function fetchDraws() {
+    function show(msg) {
+      outEl.textContent = msg;
+      outEl.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }
     const base = (apiBaseEl.value || '').trim().replace(/\/+$/, '');
     if (!base) {
-      outEl.textContent = isPaidOrPro()
+      show(isPaidOrPro()
         ? '應已內建抓取網址，若仍為空請重新整理頁面。'
-        : '請在上方欄位貼上 Worker 網址後再按一鍵抓取。';
+        : '請在上方欄位貼上 Worker 網址後再按一鍵抓取。');
       return;
     }
-    localStorage.setItem(LS_API_BASE, base);
-    const maxP = getTier() === 'pro' ? 500 : (getTier() === 'paid' ? 200 : 50);
-    const n = Math.max(1, Math.min(parseInt(periodsEl.value, 10) || 20, maxP));
-    outEl.textContent = `正在抓取 ${mode === '539' ? '今彩539' : '大樂透'} 最近 ${n} 期…`;
-    const url = `${base}/${mode}?periods=${encodeURIComponent(n)}`;
-    let resp;
     try {
-      resp = await fetch(url, { method: 'GET' });
-    } catch (e) {
-      outEl.textContent = `抓取失敗：連線不到抓取服務。\n請確認網址正確、手機有網路。\n\n${String(e)}`;
-      return;
+      localStorage.setItem(LS_API_BASE, base);
+      const maxP = getTier() === 'pro' ? 500 : (getTier() === 'paid' ? 200 : 50);
+      const n = Math.max(1, Math.min(parseInt(periodsEl.value, 10) || 20, maxP));
+      show(`正在抓取 ${mode === '539' ? '今彩539' : '大樂透'} 最近 ${n} 期…`);
+      const url = `${base}/${mode}?periods=${encodeURIComponent(n)}`;
+      let resp;
+      try {
+        resp = await fetch(url, { method: 'GET' });
+      } catch (e) {
+        show('抓取失敗：無法連線（可能是 CORS 或網址錯誤）。\n\n' + String(e));
+        return;
+      }
+      if (!resp.ok) {
+        const t = await resp.text().catch(() => '');
+        show('抓取失敗：HTTP ' + resp.status + '\n' + (t || ''));
+        return;
+      }
+      let json;
+      try {
+        json = await resp.json();
+      } catch (e) {
+        show('抓取失敗：回傳不是 JSON。\n' + String(e));
+        return;
+      }
+      const draws = Array.isArray(json.draws) ? json.draws : [];
+      if (!draws.length) {
+        show('抓取成功，但沒有拿到期數資料（draws 為空）。');
+        return;
+      }
+      dataEl.value = fmtDrawLines(draws);
+      if (mode === '539') localStorage.setItem(LS_LAST_539, dataEl.value);
+      else localStorage.setItem(LS_LAST_649, dataEl.value);
+      show('✅ 已抓取 ' + draws.length + ' 期並填入。現在可以按「開始分析」。');
+    } catch (err) {
+      show('發生錯誤：' + String(err));
     }
-    if (!resp.ok) {
-      const t = await resp.text().catch(() => '');
-      outEl.textContent = `抓取失敗：HTTP ${resp.status}\n${t || ''}`;
-      return;
-    }
-    let json;
-    try {
-      json = await resp.json();
-    } catch (e) {
-      outEl.textContent = `抓取失敗：回傳不是 JSON。\n${String(e)}`;
-      return;
-    }
-    const draws = Array.isArray(json.draws) ? json.draws : [];
-    if (!draws.length) {
-      outEl.textContent = '抓取成功，但沒有拿到期數資料（draws 為空）。';
-      return;
-    }
-    dataEl.value = fmtDrawLines(draws);
-    if (mode === '539') localStorage.setItem(LS_LAST_539, dataEl.value);
-    else localStorage.setItem(LS_LAST_649, dataEl.value);
-    outEl.textContent = `✅ 已抓取 ${draws.length} 期並填入。現在可以按「分析」或「AI 快報」。`;
   }
 
-  $('btnFetch').onclick = () => { fetchDraws(); };
+  const btnFetch = $('btnFetch');
+  if (btnFetch) {
+    btnFetch.onclick = function() { fetchDraws(); };
+  }
 
   function parseData(text, type) {
     const maxNum = type === '539' ? 39 : 49;
