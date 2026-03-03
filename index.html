@@ -40,9 +40,9 @@
     <label>貼上開獎號碼（每行一期，號碼用逗號或空格分隔）</label>
     <textarea id="data" placeholder="今彩539 每行 5 個號碼 (1-39)&#10;例：3,6,9,31,39&#10;5,22,28,35,36"></textarea>
     <p class="help" id="help">今彩539：每行 5 個號碼。大樂透：每行 6 個號碼。</p>
-    <p class="help" style="margin-bottom:8px;"><span id="versionBadge">免費版</span> <span id="versionDesc">請自行貼上開獎號碼，或自備抓取網址</span> <a href="#" id="linkUpgrade" style="color:#e94560;margin-left:6px;">升級付費版</a></p>
-    <label id="labelFetch">一鍵抓取（付費版已內建網址，免費版請自備網址）</label>
-    <input type="text" id="apiBase" placeholder="免費版請貼上你的抓取網址；付費版已預填">
+    <p class="help" style="margin-bottom:8px;"><span id="versionBadge">免費版</span> <span id="versionDesc">請自行貼上開獎號碼，或自備抓取網址</span> <a href="pay.html" id="linkUpgrade" style="color:#e94560;margin-left:6px;">升級付費版</a></p>
+    <label id="labelFetch">一鍵抓取（付費版已內建網址，免費版請自備抓取網址）</label>
+    <input type="text" id="apiBase" placeholder="免費版請自行貼上開獎號碼或留空；付費版由系統帶入" value="">
     <button type="button" class="btn btn-tertiary" id="btnFetch">一鍵抓取最新開獎</button>
     <label>分析期數（取最近幾期）</label>
     <input type="number" id="periods" value="20" min="5" max="200">
@@ -77,6 +77,24 @@
   // 付費頁面網址（同一專案底下的 pay.html）
   const PAYMENT_URL = 'pay.html';
   const savedBase = localStorage.getItem(LS_API_BASE);
+
+  // 一載入就依是否付費決定「一鍵抓取」欄位：免費版空白、付費版帶入網址並鎖住
+  function applyApiBaseByPro() {
+    const pro = localStorage.getItem(LS_IS_PRO) === '1';
+    if (!apiBaseEl) return;
+    if (pro) {
+      apiBaseEl.value = DEFAULT_API_BASE;
+      apiBaseEl.readOnly = true;
+      apiBaseEl.classList.add('api-base-locked');
+      apiBaseEl.setAttribute('readonly', 'readonly');
+    } else {
+      apiBaseEl.value = '';
+      apiBaseEl.readOnly = false;
+      apiBaseEl.classList.remove('api-base-locked');
+      apiBaseEl.removeAttribute('readonly');
+    }
+  }
+  applyApiBaseByPro();
 
   function setMode(next) {
     mode = next;
@@ -132,12 +150,18 @@
     history.replaceState({}, '', window.location.pathname);  // 移除 ?paid=1
   }
   refreshVersionUI();
-  $('linkUpgrade').onclick = function(e) {
-    e.preventDefault();
-    if (isPro()) return;
-    const returnUrl = encodeURIComponent(window.location.origin + window.location.pathname + '?paid=1');
-    window.location.href = PAYMENT_URL + (PAYMENT_URL.includes('?') ? '&' : '?') + 'return=' + returnUrl;
-  };
+
+  (function setupUpgradeLink() {
+    const link = $('linkUpgrade');
+    if (!link) return;
+    link.href = PAYMENT_URL;
+    link.onclick = function(e) {
+      if (isPro()) return;
+      e.preventDefault();
+      const returnUrl = window.location.origin + window.location.pathname + '?paid=1';
+      window.location.href = PAYMENT_URL + '?return=' + encodeURIComponent(returnUrl);
+    };
+  })();
 
   function fmtDrawLines(draws) {
     return draws.map(d => d.join(', ')).join('\n');
@@ -284,7 +308,7 @@
     for (const d of use) for (const num of d) counts[num]++;
     const rateList = Object.entries(counts).map(([num, c]) => [+num, 100 * c / total]).sort((a,b) => b[1] - a[1]);
     const hot = rateList.slice(0, 5).map(([n]) => n);
-    const cold = rateList.sort((a,b) => a[1] - b[1]).slice(0, 5).map(([n]) => n);
+    const cold = [...rateList].sort((a,b) => a[1] - b[1]).slice(0, 5).map(([n]) => n);
     const half = Math.max(1, Math.floor(use.length / 2));
     let cr = {}, co = {};
     for (let i = 1; i <= max; i++) cr[i] = co[i] = 0;
@@ -306,10 +330,11 @@
     }
     const topPairs = Object.entries(pairs).sort((a,b) => b[1] - a[1]).slice(0, 6).map(([k]) => k);
     const topTriples = Object.entries(triples).sort((a,b) => b[1] - a[1]).slice(0, 4).map(([k]) => k);
-    let keyNums = new Set([...hot, ...rateList.slice(0, 5).map(([n]) => n)]);
+    const top5ByRate = rateList.slice(0, 5);
+    let keyNums = new Set([...hot, ...top5ByRate.map(([n]) => n)]);
     const recommend = [...keyNums].sort((a,b)=>a-b).slice(0, 5);
     let s = `【今彩539 AI 快報】最近 ${use.length} 期\n\n`;
-    s += `出現機率前5: ${rateList.slice(0,5).map(([n,r]) => `${n}(${r.toFixed(1)}%)`).join(' ')}\n`;
+    s += `出現機率前5（由高到低）: ${top5ByRate.map(([n,r]) => `${n}(${r.toFixed(1)}%)`).join(' ')}\n`;
     s += `熱門: ${hot.join(',')}  冷門: ${cold.join(',')}\n`;
     s += `趨勢上升: ${trendUp.slice(0,8).join(',')}\n`;
     s += `二合頻率高: ${topPairs.join(' ')}\n三合: ${topTriples.join(' ')}\n`;
@@ -327,17 +352,18 @@
     for (const d of use) for (const num of d) counts[num]++;
     const rateList = Object.entries(counts).map(([num, c]) => [+num, 100 * c / total]).sort((a,b) => b[1] - a[1]);
     const hot = rateList.slice(0, 6).map(([n]) => n);
-    const cold = rateList.sort((a,b) => a[1] - b[1]).slice(0, 6).map(([n]) => n);
+    const cold = [...rateList].sort((a,b) => a[1] - b[1]).slice(0, 6).map(([n]) => n);
     const half = Math.max(1, Math.floor(use.length / 2));
     let cr = {}, co = {};
     for (let i = 1; i <= max; i++) cr[i] = co[i] = 0;
     for (const d of use.slice(0, half)) for (const num of d) cr[num]++;
     for (const d of use.slice(half)) for (const num of d) co[num]++;
     const trendUp = Object.keys(cr).filter(n => cr[+n] > co[+n]).map(n => +n);
-    let keyNums = new Set([...hot, ...rateList.slice(0, 6).map(([n]) => n)]);
+    const top6ByRate = rateList.slice(0, 6);
+    let keyNums = new Set([...hot, ...top6ByRate.map(([n]) => n)]);
     const recommend = [...keyNums].sort((a,b)=>a-b).slice(0, 6);
     let s = `【大樂透 AI 快報】最近 ${use.length} 期（不含二合三合）\n\n`;
-    s += `出現機率前6: ${rateList.slice(0,6).map(([n,r]) => `${n}(${r.toFixed(1)}%)`).join(' ')}\n`;
+    s += `出現機率前6（由高到低）: ${top6ByRate.map(([n,r]) => `${n}(${r.toFixed(1)}%)`).join(' ')}\n`;
     s += `熱門: ${hot.join(',')}  冷門: ${cold.join(',')}\n`;
     s += `趨勢上升: ${trendUp.slice(0,10).join(',')}\n`;
     s += `建議6碼: ${recommend.join(',')}\n※僅供娛樂。`;
