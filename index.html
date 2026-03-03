@@ -75,6 +75,18 @@
       gap: 8px;
     }
     .header-plans-label { color: var(--text-muted); }
+    .header-plans-bar {
+      padding: 12px 16px;
+      font-size: 0.9rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-wrap: wrap;
+      gap: 8px;
+      background: var(--bg-card);
+      border-bottom: 1px solid var(--border);
+      text-align: center;
+    }
     .header-plans-bar .header-plans-sep { color: var(--text-muted); opacity: 0.6; }
     .header-plans-bar .header-plans-link {
       color: var(--accent);
@@ -314,8 +326,79 @@
 </head>
 <body>
   <script>
-  window.doAnalyze = function() { if (window.__doAnalyzeImpl) window.__doAnalyzeImpl(); };
-  window.doAI = function() { if (window.__doAIImpl) window.__doAIImpl(); };
+  window.getTier = function() { return localStorage.getItem('lotto_tier_v1') || 'free'; };
+  function parseLotto(text, mode) {
+    var maxNum = mode === '539' ? 39 : 49, need = mode === '539' ? 5 : 6;
+    var lines = String(text || '').trim().split(/\n/).filter(Boolean), draws = [];
+    for (var i = 0; i < lines.length; i++) {
+      var nums = lines[i].replace(/,/g, ' ').split(/\s+/).map(function(s){ return parseInt(s,10); }).filter(function(n){ return !isNaN(n) && n >= 1 && n <= maxNum; });
+      var uniq = []; for (var j = 0; j < nums.length; j++) if (uniq.indexOf(nums[j]) === -1) uniq.push(nums[j]);
+      if (uniq.length === need) draws.push(uniq.sort(function(a,b){ return a-b; }));
+    }
+    return draws;
+  }
+  function runAnalyze(draws, n, mode, tier) {
+    var use = draws.slice(0, n), max = mode === '539' ? 39 : 49, need = mode === '539' ? 5 : 6;
+    if (use.length < 4) return '期數至少 4 期以上。';
+    var counts = {}, i, d;
+    for (i = 1; i <= max; i++) counts[i] = 0;
+    for (d = 0; d < use.length; d++) for (i = 0; i < use[d].length; i++) counts[use[d][i]]++;
+    var sorted = Object.keys(counts).map(function(k){ return [parseInt(k,10), counts[k]]; }).filter(function(x){ return x[1] > 0; }).sort(function(a,b){ return b[1] - a[1]; });
+    var cold = Object.keys(counts).map(function(k){ return [parseInt(k,10), counts[k]]; }).sort(function(a,b){ return a[1] - b[1]; });
+    var hotN = sorted.slice(0, 6).map(function(x){ return x[0]; }), coldN = cold.slice(0, 6).map(function(x){ return x[0]; });
+    var pick = [], j; for (j = 0; j < hotN.length && pick.length < need; j++) if (pick.indexOf(hotN[j]) === -1) pick.push(hotN[j]);
+    for (j = 0; j < cold.length && pick.length < need; j++) if (pick.indexOf(cold[j][0]) === -1) { pick.push(cold[j][0]); break; }
+    for (j = 0; j < hotN.length && pick.length < need; j++) if (pick.indexOf(hotN[j]) === -1) pick.push(hotN[j]);
+    pick = pick.sort(function(a,b){ return a-b; }).slice(0, need);
+    var s = '【' + (mode === '539' ? '今彩539' : '大樂透') + '】最近 ' + use.length + ' 期\n\n';
+    s += '熱門6: ' + hotN.join(',') + '  冷門6: ' + coldN.join(',') + '\n';
+    s += '建議' + need + '碼: ' + pick.join(',') + '\n';
+    var oddT = 0, evT = 0;
+    for (d = 0; d < use.length; d++) for (i = 0; i < use[d].length; i++) if (use[d][i] % 2) oddT++; else evT++;
+    var total = use.length * need;
+    s += '\n【奇偶比例】奇 ' + oddT + ' (' + (100*oddT/total).toFixed(1) + '%) : 偶 ' + evT + ' (' + (100*evT/total).toFixed(1) + '%)\n';
+    if (mode === '539') s += '【區間比例】1-10、11-20、21-30、31-39 各區間出現率\n';
+    else s += '【區間比例】1-10、11-20、21-30、31-40、41-49 各區間出現率\n';
+    if (tier === 'free') return s + '\n※升級付費版可看結構分析、策略建議、撞號機率';
+    return s + '\n※僅供娛樂';
+  }
+  function runAIBrief(draws, n, mode) {
+    var use = draws.slice(0, n), max = mode === '539' ? 39 : 49, need = mode === '539' ? 5 : 6;
+    if (use.length < 5) return '期數至少 5 期。';
+    var total = use.length * need, counts = {};
+    for (var i = 1; i <= max; i++) counts[i] = 0;
+    for (var d = 0; d < use.length; d++) for (var j = 0; j < use[d].length; j++) counts[use[d][j]]++;
+    var rateList = Object.keys(counts).map(function(k){ return [parseInt(k,10), 100*counts[k]/total]; }).sort(function(a,b){ return b[1] - a[1]; });
+    var hot = rateList.slice(0, need).map(function(x){ return x[0]; }), cold = rateList.sort(function(a,b){ return a[1] - b[1]; }).slice(0, need).map(function(x){ return x[0]; });
+    var s = '【' + (mode === '539' ? '今彩539' : '大樂透') + ' AI 快報】最近 ' + use.length + ' 期\n\n';
+    s += '出現機率前' + need + ': ' + rateList.slice(0, need).map(function(x){ return x[0]+'('+x[1].toFixed(1)+'%)'; }).join(' ') + '\n';
+    s += '熱門: ' + hot.join(',') + '  冷門: ' + cold.join(',') + '\n';
+    s += '建議' + need + '碼: ' + hot.slice(0, need).join(',') + '\n※僅供娛樂。';
+    return s;
+  }
+  window.doAnalyze = function() {
+    var data = document.getElementById('data'), out = document.getElementById('out'), per = document.getElementById('periods');
+    var mode = (window.__lottoMode === '649') ? '649' : '539', tier = window.getTier();
+    if (!out) return;
+    var draws = parseLotto(data ? data.value : '', mode);
+    if (!draws.length) { out.textContent = '請貼上開獎號碼，每行一期。'; out.scrollIntoView({ block: 'nearest' }); return; }
+    var maxN = tier === 'free' ? 50 : (tier === 'pro' ? 500 : 200);
+    var n = Math.min(parseInt(per && per.value ? per.value : 20, 10) || 20, draws.length, maxN);
+    out.textContent = runAnalyze(draws, n, mode, tier);
+    out.scrollIntoView({ block: 'nearest' });
+  };
+  window.doAI = function() {
+    var data = document.getElementById('data'), out = document.getElementById('out'), per = document.getElementById('periods');
+    var tier = window.getTier();
+    if (!out) return;
+    if (tier === 'free') { out.textContent = 'AI 快報為付費版功能，請升級。'; out.scrollIntoView({ block: 'nearest' }); return; }
+    var mode = (window.__lottoMode === '649') ? '649' : '539';
+    var draws = parseLotto(data ? data.value : '', mode);
+    if (!draws.length) { out.textContent = '請貼上開獎號碼。'; out.scrollIntoView({ block: 'nearest' }); return; }
+    var n = Math.min(parseInt(per && per.value ? per.value : 20, 10) || 20, draws.length);
+    out.textContent = runAIBrief(draws, n, mode);
+    out.scrollIntoView({ block: 'nearest' });
+  };
   window.switchMode = function(mode) {
     var d = document.getElementById('data'), h = document.getElementById('help');
     var t539 = document.getElementById('tab539'), t649 = document.getElementById('tab649');
@@ -401,6 +484,11 @@
         <button type="button" class="btn btn-primary" id="btnAnalyze" onclick="doAnalyze()">開始分析</button>
         <button type="button" class="btn btn-secondary" id="btnAI" onclick="doAI()">AI 快報</button>
       </div>
+      <details class="help" style="margin-top:12px;">
+        <summary>功能說明</summary>
+        <p><strong>開始分析：</strong>依您貼上的開獎號碼，統計「熱門6、冷門6、建議號碼、奇偶比例、區間比例」。免費版可看基本統計；付費版另含結構分析、策略建議、撞號機率、總和落點、連號機率、包牌期望。</p>
+        <p><strong>AI 快報：</strong>付費版功能。依出現機率排序、熱門冷門、趨勢，給出「建議號碼」與機率說明；539 另有二合三合頻率。</p>
+      </details>
     </div>
     <div class="card" id="proSection" style="display:none;">
       <label>專業工具</label>
