@@ -61,6 +61,29 @@
       color: var(--text-muted);
       font-weight: 500;
     }
+    .header-plans {
+      margin-top: 14px;
+      padding-top: 12px;
+      border-top: 1px solid rgba(255,255,255,0.1);
+      font-size: 0.9rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+    .header-plans-label { color: var(--text-muted); }
+    .header-plans-sep { color: var(--text-muted); opacity: 0.6; }
+    .header-plans-link {
+      color: var(--accent);
+      font-weight: 600;
+      text-decoration: none;
+      padding: 4px 10px;
+      border-radius: 6px;
+      background: rgba(245,158,11,0.15);
+      transition: background 0.2s;
+    }
+    .header-plans-link:hover { background: rgba(245,158,11,0.3); }
     .tabs {
       display: flex;
       gap: 0;
@@ -280,12 +303,38 @@
   <header class="header">
     <h1>539・大樂透分析</h1>
     <p class="tagline">數據驅動・智能統計</p>
+    <div class="header-plans">
+      <span class="header-plans-label">方案：</span>
+      <span>免費版</span>
+      <span class="header-plans-sep">|</span>
+      <a href="https://kkalex0987.github.io/taiwan539-web/pay.html?plan=1" class="header-plans-link">付費版 $99</a>
+      <span class="header-plans-sep">|</span>
+      <a href="https://kkalex0987.github.io/taiwan539-web/pay.html?plan=2" class="header-plans-link">專業版 $199</a>
+    </div>
   </header>
   <div class="tabs">
     <button type="button" id="tab539" class="active">今彩539</button>
     <button type="button" id="tab649">大樂透</button>
   </div>
   <div class="container">
+    <div class="card" id="plansPreviewCard">
+      <label>升級方案</label>
+      <p class="help" style="margin-top:0;">付費版 $99 與專業版 $199 解鎖更多分析功能</p>
+      <div class="plans-preview">
+        <div class="plan-mini">
+          <div class="price">$99</div>
+          <div class="name">付費版</div>
+          <div class="feat">任意期數・一鍵抓取<br>奇偶建議・總和落點<br>連號機率・包牌期望<br>結構分析・AI 快報</div>
+          <a href="https://kkalex0987.github.io/taiwan539-web/pay.html?plan=1" class="btn-upgrade">選擇付費版</a>
+        </div>
+        <div class="plan-mini">
+          <div class="price">$199</div>
+          <div class="name">專業版</div>
+          <div class="feat">付費版全部<br>+ 策略模擬<br>+ 回測系統<br>+ 報酬模擬<br>+ 群眾行為</div>
+          <a href="https://kkalex0987.github.io/taiwan539-web/pay.html?plan=2" class="btn-upgrade">選擇專業版</a>
+        </div>
+      </div>
+    </div>
     <div class="card">
       <label>開獎號碼</label>
       <p class="help" style="margin-top:0;">每行一期，號碼用逗號或空格分隔</p>
@@ -295,7 +344,7 @@
     <div class="version-bar">
       <span class="badge free" id="versionBadge">免費版</span>
       <span class="desc" id="versionDesc"></span>
-      <a href="#" class="link-upgrade" id="linkUpgrade"></a>
+      <a href="https://kkalex0987.github.io/taiwan539-web/pay.html" class="link-upgrade" id="linkUpgrade"></a>
     </div>
     <div class="card" id="fetchSection">
       <label id="labelFetch">一鍵抓取</label>
@@ -391,9 +440,8 @@
     if (linkUpgrade) {
       linkUpgrade.textContent = t === 'pro' ? '已為專業版' : t === 'paid' ? '升級專業版' : '升級';
       linkUpgrade.style.display = t === 'pro' ? 'none' : 'inline';
+      linkUpgrade.href = 'https://kkalex0987.github.io/taiwan539-web/pay.html' + (t === 'paid' ? '?plan=2' : '');
     }
-    const plansPreview = document.getElementById('plansPreviewCard');
-    if (plansPreview) plansPreview.style.display = (t === 'paid' || t === 'pro') ? 'none' : 'block';
     if (t === 'free') {
       if (fetchSection) fetchSection.style.display = 'none';
       if (periodsHint) periodsHint.textContent = '（免費版最多50期）';
