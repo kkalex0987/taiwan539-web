@@ -94,7 +94,8 @@
       background: var(--bg-card);
       border-bottom: 1px solid var(--border);
       position: relative;
-      z-index: 10;
+      z-index: 999;
+      pointer-events: auto;
     }
     .tabs button {
       flex: 1;
@@ -109,9 +110,11 @@
       border-bottom: 3px solid transparent;
       font-family: inherit;
       position: relative;
-      z-index: 1;
+      z-index: 2;
       touch-action: manipulation;
       -webkit-tap-highlight-color: transparent;
+      pointer-events: auto;
+      user-select: none;
     }
     .tabs button:hover { color: var(--text); }
     .tabs button.active {
@@ -388,7 +391,7 @@
   </div>
   <script>
 (function() {
-  const $ = id => document.getElementById(id);
+  const $ = function(id) { return document.getElementById(id); };
   const dataEl = $('data');
   const periodsEl = $('periods');
   const apiBaseEl = $('apiBase');
@@ -399,33 +402,34 @@
   const LS_API_BASE = 'lotto_api_base_v1';
   const LS_LAST_539 = 'lotto_last_539_v1';
   const LS_LAST_649 = 'lotto_last_649_v1';
-  const LS_TIER = 'lotto_tier_v1';  // 'free' | 'paid' | 'pro'
-
+  const LS_TIER = 'lotto_tier_v1';
   const DEFAULT_API_BASE = 'https://workers-playground-spring-fog-589c.kkalex0987.workers.dev';
   const PAYMENT_URL = 'https://kkalex0987.github.io/taiwan539-web/pay.html';
   const savedBase = localStorage.getItem(LS_API_BASE);
   const tier = localStorage.getItem(LS_TIER) || 'free';
-  apiBaseEl.value = (tier === 'paid' || tier === 'pro') ? (savedBase || DEFAULT_API_BASE) : (savedBase || '');
+  if (apiBaseEl) apiBaseEl.value = (tier === 'paid' || tier === 'pro') ? (savedBase || DEFAULT_API_BASE) : (savedBase || '');
 
   function setMode(next) {
     mode = next;
-    if (mode === '539') {
-      $('tab539').classList.add('active'); $('tab649').classList.remove('active');
-      dataEl.placeholder = '今彩539 每行 5 個號碼 (1-39)\n例：3,6,9,31,39';
-      helpEl.textContent = '今彩539：每行 5 個號碼 (1-39)。你也可以先按「一鍵抓取」。';
-      const cached = localStorage.getItem(LS_LAST_539);
-      if (cached && !dataEl.value.trim()) dataEl.value = cached;
-    } else {
-      $('tab649').classList.add('active'); $('tab539').classList.remove('active');
-      dataEl.placeholder = '大樂透 每行 6 個號碼 (1-49)\n例：1,16,22,24,47,48';
-      helpEl.textContent = '大樂透：每行 6 個號碼 (1-49)。你也可以先按「一鍵抓取」。';
-      const cached = localStorage.getItem(LS_LAST_649);
-      if (cached && !dataEl.value.trim()) dataEl.value = cached;
+    var t539 = $('tab539'), t649 = $('tab649');
+    if (t539) t539.classList.toggle('active', mode === '539');
+    if (t649) t649.classList.toggle('active', mode === '649');
+    if (dataEl) {
+      dataEl.placeholder = mode === '539' ? '今彩539 每行 5 個號碼 (1-39)\n例：3,6,9,31,39' : '大樂透 每行 6 個號碼 (1-49)\n例：1,16,22,24,47,48';
+      if (mode === '539') { var c = localStorage.getItem(LS_LAST_539); if (c && !dataEl.value.trim()) dataEl.value = c; }
+      else { var c2 = localStorage.getItem(LS_LAST_649); if (c2 && !dataEl.value.trim()) dataEl.value = c2; }
     }
+    if (helpEl) helpEl.textContent = mode === '539' ? '今彩539：每行 5 個號碼 (1-39)。你也可以先按「一鍵抓取」。' : '大樂透：每行 6 個號碼 (1-49)。你也可以先按「一鍵抓取」。';
   }
 
-  $('tab539').onclick = () => setMode('539');
-  $('tab649').onclick = () => setMode('649');
+  function handleTap(e) {
+    var t = e.target;
+    if (t && (t.id === 'tab539' || (t.closest && t.closest('#tab539')))) { e.preventDefault(); e.stopPropagation(); setMode('539'); return; }
+    if (t && (t.id === 'tab649' || (t.closest && t.closest('#tab649')))) { e.preventDefault(); e.stopPropagation(); setMode('649'); return; }
+    if (t && (t.id === 'btnFetch' || (t.closest && t.closest('#btnFetch')))) { e.preventDefault(); e.stopPropagation(); if (typeof fetchDraws === 'function') fetchDraws(); return; }
+  }
+  document.body.addEventListener('click', handleTap, true);
+  document.body.addEventListener('touchend', handleTap, true);
   setMode('539');
 
   function getTier() { return localStorage.getItem(LS_TIER) || 'free'; }
@@ -484,12 +488,13 @@
     history.replaceState({}, '', window.location.pathname);
   }
   refreshVersionUI();
-  $('linkUpgrade').onclick = function(e) {
+  var linkUpgrade = $('linkUpgrade');
+  if (linkUpgrade) linkUpgrade.onclick = function(e) {
     e.preventDefault();
-    const t = getTier();
-    const returnUrl = encodeURIComponent(window.location.origin + window.location.pathname);
-    let url = PAYMENT_URL + (PAYMENT_URL.includes('?') ? '&' : '?') + 'return=' + returnUrl;
-    if (t === 'paid') url += '&plan=2';  // 付費版用戶點升級 → 預選專業版
+    var t = getTier();
+    var returnUrl = encodeURIComponent(window.location.origin + window.location.pathname);
+    var url = PAYMENT_URL + (PAYMENT_URL.indexOf('?') >= 0 ? '&' : '?') + 'return=' + returnUrl;
+    if (t === 'paid') url += '&plan=2';
     window.location.href = url;
   };
 
@@ -499,8 +504,7 @@
 
   async function fetchDraws() {
     function show(msg) {
-      outEl.textContent = msg;
-      outEl.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      if (outEl) { outEl.textContent = msg; outEl.scrollIntoView({ behavior: 'smooth', block: 'nearest' }); }
     }
     const base = (apiBaseEl.value || '').trim().replace(/\/+$/, '');
     if (!base) {
@@ -548,10 +552,7 @@
     }
   }
 
-  const btnFetch = $('btnFetch');
-  if (btnFetch) {
-    btnFetch.onclick = function() { fetchDraws(); };
-  }
+  window.fetchDraws = fetchDraws;
 
   function parseData(text, type) {
     const maxNum = type === '539' ? 39 : 49;
