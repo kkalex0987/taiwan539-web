@@ -74,12 +74,40 @@
   const LS_LAST_539 = 'lotto_last_539_v1';
   const LS_LAST_649 = 'lotto_last_649_v1';
   const LS_IS_PRO = 'lotto_is_pro_v1';
+  const LS_PAID_UNTIL = 'lotto_paid_until_v1';  // 訂月制：付費有效至 YYYYMMDD
 
-  // 付費版專用：內建一鍵抓取網址（免費版不預填，需自行貼資料或自備網址）
   const DEFAULT_API_BASE = 'https://workers-playground-spring-fog-589c.kkalex0987.workers.dev';
-  // 付費頁面網址（同一專案底下的 pay.html）
   const PAYMENT_URL = 'pay.html';
   const savedBase = localStorage.getItem(LS_API_BASE);
+
+  function getPaidUntil() {
+    const until = localStorage.getItem(LS_PAID_UNTIL);
+    if (!until || until.length !== 8) return null;
+    return until;
+  }
+
+  function isPaidExpired() {
+    const until = getPaidUntil();
+    if (!until) return false;
+    const y = parseInt(until.slice(0, 4), 10);
+    const m = parseInt(until.slice(4, 6), 10);
+    const d = parseInt(until.slice(6, 8), 10);
+    const expiry = new Date(y, m - 1, d);
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    expiry.setHours(23, 59, 59, 999);
+    return today > expiry;
+  }
+
+  function clearPaidIfExpired() {
+    if (isPaidExpired()) {
+      localStorage.removeItem(LS_IS_PRO);
+      localStorage.removeItem(LS_PAID_UNTIL);
+      localStorage.removeItem(LS_API_BASE);
+      return true;
+    }
+    return false;
+  }
 
   // 免費版：不顯示網址欄位，只顯示提示；付費版：顯示網址並鎖住
   function applyApiBaseByPro() {
@@ -131,7 +159,18 @@
     const badge = $('versionBadge');
     const desc = $('versionDesc');
     const labelFetch = $('labelFetch');
-    if (badge) badge.textContent = pro ? '付費版' : '免費版';
+    if (badge) {
+      if (pro) {
+        const untilStr = getPaidUntil();
+        if (untilStr) {
+          badge.textContent = '付費版（至 ' + untilStr.slice(0,4) + '/' + untilStr.slice(4,6) + '/' + untilStr.slice(6,8) + '）';
+        } else {
+          badge.textContent = '付費版';
+        }
+      } else {
+        badge.textContent = '免費版';
+      }
+    }
     if (desc) desc.textContent = pro ? '已內建一鍵抓取，直接按即可' : '請自行貼上開獎號碼，或自備抓取網址';
     if (labelFetch) labelFetch.textContent = pro ? '一鍵抓取（已內建網址，直接按）' : '一鍵抓取（付費版功能，升級後即可使用）';
     const freeMsg = $('apiBaseFreeMsg');
@@ -157,12 +196,21 @@
     }
   }
   const urlParams = new URLSearchParams(window.location.search);
-  if (urlParams.get('paid') === '1') {
+  const paid = urlParams.get('paid');
+  const until = urlParams.get('until');
+  if (paid === '1') {
     localStorage.setItem(LS_IS_PRO, '1');
     localStorage.setItem(LS_API_BASE, DEFAULT_API_BASE);
-    history.replaceState({}, '', window.location.pathname);
+    if (until && /^\d{8}$/.test(until)) {
+      localStorage.setItem(LS_PAID_UNTIL, until);
+    }
+    history.replaceState({}, '', window.location.pathname + window.location.hash);
   }
+  var justExpired = clearPaidIfExpired();
   refreshVersionUI();
+  if (justExpired && outEl) {
+    outEl.textContent = '您的付費版已到期，感謝您的支持。如需繼續使用一鍵抓取與結構分析，請再次訂閱。';
+  }
 
   (function setupUpgradeLink() {
     const link = $('linkUpgrade');
@@ -181,6 +229,7 @@
   }
 
   function isPro() {
+    clearPaidIfExpired();
     return localStorage.getItem(LS_IS_PRO) === '1';
   }
 

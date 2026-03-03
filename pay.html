@@ -24,18 +24,20 @@
 <body>
   <div class="container">
     <a href="index.html" class="back">← 返回</a>
-    <h1>付費版方案</h1>
-    <p style="text-align:center;color:#888;margin-bottom:24px;">僅此一種付費方案，開通後即可使用一鍵抓取與結構分析</p>
+    <h1>付費版方案（月訂制）</h1>
+    <p style="text-align:center;color:#888;margin-bottom:24px;">僅此一種付費方案，開通後即可使用一鍵抓取與結構分析。採月訂制，到期後需續訂。</p>
 
     <div class="card">
       <h2>① 銀行轉帳</h2>
-      <p>轉帳完成後請加入 LINE 告知，我們會立即為您開通。</p>
+      <p>轉帳完成後請用 LINE 聯絡我們，並告知您已完成轉帳。我們會寄送「付費版開通連結」給您，點開連結即開通一個月。</p>
+      <!-- 下面四行請改成你的銀行資料 -->
       <div class="bank-info" id="bankInfo">銀行代碼：012
 銀行名稱：台灣銀行
 戶名：王小明
 帳號：12345678901234</div>
+      <!-- 下面 href 的網址請改成你的 LINE 加好友連結 -->
       <a href="https://line.me/ti/p/你的LINE_ID" class="btn btn-line" target="_blank" id="btnLine">我已轉帳，聯絡開通</a>
-      <p class="note">轉帳後請截圖並透過 LINE 告知，我們會盡快處理。</p>
+      <p class="note">轉帳後請截圖並透過 LINE 告知，我們會盡快寄送開通連結（一個月有效）。</p>
     </div>
 
     <div class="card">
@@ -58,9 +60,10 @@
   const urlParams = new URLSearchParams(window.location.search);
   const returnUrl = urlParams.get('return') || 'https://kkalex0987.github.io/taiwan539-web/?paid=1';
 
-  const ECPAY_URL = 'https://payment.ecpay.com.tw/...';
-  const LINEPAY_URL = 'https://pay.line.me/...';
-  const LINE_LINK = 'https://line.me/ti/p/你的LINE_ID';
+  // ========== 請在這裡填入你的資料 ==========
+  const ECPAY_URL = 'https://payment.ecpay.com.tw/...';   // 綠界金流付款頁網址（不用可留 ...）
+  const LINEPAY_URL = 'https://pay.line.me/...';          // Line Pay 付款頁網址（不用可留 ...）
+  const LINE_LINK = 'https://line.me/ti/p/你的LINE_ID';   // 你的 LINE 加好友/聯絡連結，必填
 
   document.getElementById('btnLine').href = LINE_LINK;
   document.getElementById('btnEcpay').href = ECPAY_URL.includes('...') ? '#' : ECPAY_URL;
