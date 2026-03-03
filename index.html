@@ -44,6 +44,8 @@
       padding: 20px 20px 18px;
       text-align: center;
       border-bottom: 1px solid var(--border);
+      position: relative;
+      z-index: 1;
     }
     .header h1 {
       margin: 0;
@@ -82,6 +84,7 @@
       border-radius: 6px;
       background: rgba(245,158,11,0.15);
       transition: background 0.2s;
+      display: inline-block;
     }
     .header-plans-link:hover { background: rgba(245,158,11,0.3); }
     .tabs {
@@ -90,6 +93,8 @@
       padding: 0 16px;
       background: var(--bg-card);
       border-bottom: 1px solid var(--border);
+      position: relative;
+      z-index: 10;
     }
     .tabs button {
       flex: 1;
@@ -103,6 +108,10 @@
       transition: all 0.2s ease;
       border-bottom: 3px solid transparent;
       font-family: inherit;
+      position: relative;
+      z-index: 1;
+      touch-action: manipulation;
+      -webkit-tap-highlight-color: transparent;
     }
     .tabs button:hover { color: var(--text); }
     .tabs button.active {
@@ -443,7 +452,9 @@
       linkUpgrade.href = 'https://kkalex0987.github.io/taiwan539-web/pay.html' + (t === 'paid' ? '?plan=2' : '');
     }
     if (t === 'free') {
-      if (fetchSection) fetchSection.style.display = 'none';
+      if (fetchSection) fetchSection.style.display = 'block';
+      if (labelFetch) labelFetch.textContent = '一鍵抓取（免費版請貼上 Worker 網址）';
+      if (apiBaseEl && !apiBaseEl.value.trim()) apiBaseEl.placeholder = '貼上 https://xxx.workers.dev';
       if (periodsHint) periodsHint.textContent = '（免費版最多50期）';
       if (periodsEl) periodsEl.max = 50;
       if (periodsEl && parseInt(periodsEl.value, 10) > 50) periodsEl.value = 50;
@@ -490,11 +501,11 @@
     if (!base) {
       outEl.textContent = isPaidOrPro()
         ? '應已內建抓取網址，若仍為空請重新整理頁面。'
-        : '免費版僅能手動輸入，升級付費版可一鍵抓取。';
+        : '請在上方欄位貼上 Worker 網址後再按一鍵抓取。';
       return;
     }
     localStorage.setItem(LS_API_BASE, base);
-    const maxP = getTier() === 'pro' ? 500 : 200;
+    const maxP = getTier() === 'pro' ? 500 : (getTier() === 'paid' ? 200 : 50);
     const n = Math.max(1, Math.min(parseInt(periodsEl.value, 10) || 20, maxP));
     outEl.textContent = `正在抓取 ${mode === '539' ? '今彩539' : '大樂透'} 最近 ${n} 期…`;
     const url = `${base}/${mode}?periods=${encodeURIComponent(n)}`;
