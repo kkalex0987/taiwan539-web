@@ -60,6 +60,7 @@
       <p><strong>Android：</strong> Chrome 打開此頁 → 選單(⋮) → 「加入主畫面」或「安裝應用程式」。</p>
       <p>之後從主畫面點圖示即可像 App 一樣開啟。</p>
     </details>
+    <p style="margin-top:20px;text-align:center;"><a href="#" id="linkResetFree" style="font-size:0.8rem;color:#666;">測試用：還原為免費版</a></p>
   </div>
   <script>
 (function() {
@@ -232,6 +233,18 @@
       e.preventDefault();
       const returnUrl = window.location.origin + window.location.pathname + '?paid=1';
       window.location.href = PAYMENT_URL + '?return=' + encodeURIComponent(returnUrl);
+    };
+  })();
+
+  (function setupResetFreeLink() {
+    const link = $('linkResetFree');
+    if (!link) return;
+    link.onclick = function(e) {
+      e.preventDefault();
+      localStorage.removeItem(LS_IS_PRO);
+      localStorage.removeItem(LS_PAID_UNTIL);
+      localStorage.removeItem(LS_API_BASE);
+      window.location.reload();
     };
   })();
 
