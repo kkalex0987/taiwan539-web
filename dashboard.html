@@ -47,10 +47,15 @@
   </style>
 </head>
 <body>
-  <div class="container">
+  <div id="paywall" style="display:none;max-width:480px;margin:40px auto;text-align:center;padding:24px;">
+    <h2 style="color:#e94560;margin-bottom:16px;">全網共識儀表板為付費版功能</h2>
+    <p style="color:#aaa;margin-bottom:20px;">請先升級付費版後即可使用。</p>
+    <a href="pay.html" class="btn" style="display:inline-block;padding:12px 24px;background:#e94560;color:#fff;text-decoration:none;border-radius:8px;margin-right:12px;">升級付費版</a>
+    <a href="index.html" style="color:#888;">返回首頁</a>
+  </div>
+  <div id="dashboardContent" class="container">
     <p style="margin-bottom:12px;"><a href="index.html" style="color:#888;text-decoration:none;font-size:0.9rem;">← 返回首頁</a></p>
     <h1>全網共識儀表板</h1>
-    <p class="subtitle">樂透雲 × FB 社團 × YouTube 報牌 — 一鍵監控「誰在被點名」</p>
     <div id="loadErr" class="load-err" style="display:none;"></div>
 
     <div class="card">
@@ -95,6 +100,16 @@
     <p id="updated" class="updated"></p>
   </div>
 
+  <script>
+(function checkPaywall() {
+  var LS_IS_PRO = 'lotto_is_pro_v1';
+  if (localStorage.getItem(LS_IS_PRO) !== '1') {
+    document.getElementById('paywall').style.display = 'block';
+    document.getElementById('dashboardContent').style.display = 'none';
+    return;
+  }
+})();
+  </script>
   <script>
 (function() {
   var DATA_URL = '539_consensus_latest.json';
