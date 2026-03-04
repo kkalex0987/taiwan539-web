@@ -210,7 +210,7 @@
     el.style.display = 'block';
   }
 
-  fetch(DATA_URL).then(function (res) {
+  fetch(DATA_URL + '?t=' + Date.now()).then(function (res) {
     if (res.ok) return res.json();
     throw new Error('無法載入 ' + DATA_URL);
   }).then(function (data) {
