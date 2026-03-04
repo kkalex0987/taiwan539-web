@@ -52,7 +52,7 @@
     <button type="button" class="btn btn-primary" id="btnAnalyze">分析（統計＋趨勢＋推薦）</button>
     <button type="button" class="btn btn-secondary" id="btnAI">AI 快報</button>
     <button type="button" class="btn btn-secondary" id="btnProStructure">結構分析（付費版）</button>
-    <a href="dashboard.html" class="btn btn-secondary" id="linkDashboard" style="text-align:center;text-decoration:none;margin-top:8px;display:none;">📡 全網共識儀表板</a>
+    <a href="dashboard.html" class="btn btn-secondary" id="linkDashboard" style="text-align:center;text-decoration:none;margin-top:8px;display:block;">📡 全網共識儀表板（付費版）</a>
     <div id="out"></div>
     <details class="how-add">
       <summary>如何「加到主畫面」當 App 使用？</summary>
@@ -181,8 +181,6 @@
     const freeMsg = $('apiBaseFreeMsg');
     const btnFetch = $('btnFetch');
     if (btnFetch) btnFetch.style.display = pro ? '' : 'none';
-    const linkDashboard = $('linkDashboard');
-    if (linkDashboard) linkDashboard.style.display = pro ? 'block' : 'none';
     if (apiBaseEl) {
       if (pro) {
         if (freeMsg) freeMsg.style.display = 'none';
