@@ -1,0 +1,32 @@
+   # 每 3 小時自動跑一次「全網共識」並更新儀表板（00:00–23:59 共 8 次/天）
+   name: 更新儀表板共識數據
+
+   on:
+     schedule:
+       # 每 3 小時整點跑（UTC：0, 3, 6, 9, 12, 15, 18, 21 時 = 台灣 8, 11, 14, 17, 20, 23, 2, 5 時）
+       - cron: '0 */3 * * *'
+     workflow_dispatch:
+       # 手動觸發：GitHub  repo 頁面 Actions → 選此 workflow → Run workflow
+
+   jobs:
+     refresh:
+       runs-on: ubuntu-latest
+       steps:
+         - name: 取出專案
+           uses: actions/checkout@v4
+
+         - name: 設定 Python
+           uses: actions/setup-python@v5
+           with:
+             python-version: '3.10'
+
+         - name: 執行共識引擎
+           run: python3 consensus_engine.py
+           working-directory: .
+
+         - name: 上傳並提交 539_consensus_latest.json
+           run: |
+             git config user.name "github-actions[bot]"
+             git config user.email "github-actions[bot]@users.noreply.github.com"
+             git add 539_consensus_latest.json
+             git diff --staged --quiet || (git commit -m "自動更新儀表板共識數據" && git push)
