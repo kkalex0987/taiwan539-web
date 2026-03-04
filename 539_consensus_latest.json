@@ -1,0 +1,209 @@
+{
+  "generated_at": "2026-03-04T00:38:35.691215",
+  "description": "539 全網數據聚合 — 當日共識得分與過度對齊號碼",
+  "sources": [
+    {
+      "name": "樂透雲_熱門與預測榜",
+      "sample_size": 16
+    },
+    {
+      "name": "FB539社團_留言熱門",
+      "sample_size": 12
+    },
+    {
+      "name": "YouTube報牌_標題數字",
+      "sample_size": 11
+    }
+  ],
+  "frequency_count": {
+    "3": 1,
+    "7": 2,
+    "11": 5,
+    "18": 5,
+    "22": 7,
+    "29": 3,
+    "33": 3,
+    "35": 6,
+    "5": 1,
+    "27": 2,
+    "31": 2,
+    "39": 2
+  },
+  "consensus_scores": {
+    "1": 0.0,
+    "2": 0.0,
+    "3": 14.3,
+    "4": 0.0,
+    "5": 14.3,
+    "6": 0.0,
+    "7": 28.6,
+    "8": 0.0,
+    "9": 0.0,
+    "10": 0.0,
+    "11": 71.4,
+    "12": 0.0,
+    "13": 0.0,
+    "14": 0.0,
+    "15": 0.0,
+    "16": 0.0,
+    "17": 0.0,
+    "18": 71.4,
+    "19": 0.0,
+    "20": 0.0,
+    "21": 0.0,
+    "22": 100.0,
+    "23": 0.0,
+    "24": 0.0,
+    "25": 0.0,
+    "26": 0.0,
+    "27": 28.6,
+    "28": 0.0,
+    "29": 42.9,
+    "30": 0.0,
+    "31": 28.6,
+    "32": 0.0,
+    "33": 42.9,
+    "34": 0.0,
+    "35": 85.7,
+    "36": 0.0,
+    "37": 0.0,
+    "38": 0.0,
+    "39": 28.6
+  },
+  "over_aligned_numbers": [
+    {
+      "number": 22,
+      "consensus_score": 100.0
+    },
+    {
+      "number": 35,
+      "consensus_score": 85.7
+    },
+    {
+      "number": 11,
+      "consensus_score": 71.4
+    },
+    {
+      "number": 18,
+      "consensus_score": 71.4
+    }
+  ],
+  "over_aligned_threshold": 60,
+  "cold_calm_numbers": [
+    {
+      "number": 19,
+      "consensus_score": 0.0,
+      "omission_days": 14
+    },
+    {
+      "number": 37,
+      "consensus_score": 0.0,
+      "omission_days": 14
+    },
+    {
+      "number": 9,
+      "consensus_score": 0.0,
+      "omission_days": 13
+    },
+    {
+      "number": 17,
+      "consensus_score": 0.0,
+      "omission_days": 13
+    },
+    {
+      "number": 23,
+      "consensus_score": 0.0,
+      "omission_days": 13
+    },
+    {
+      "number": 31,
+      "consensus_score": 28.6,
+      "omission_days": 12
+    },
+    {
+      "number": 39,
+      "consensus_score": 28.6,
+      "omission_days": 12
+    },
+    {
+      "number": 34,
+      "consensus_score": 0.0,
+      "omission_days": 11
+    },
+    {
+      "number": 24,
+      "consensus_score": 0.0,
+      "omission_days": 10
+    },
+    {
+      "number": 28,
+      "consensus_score": 0.0,
+      "omission_days": 10
+    },
+    {
+      "number": 3,
+      "consensus_score": 14.3,
+      "omission_days": 8
+    },
+    {
+      "number": 20,
+      "consensus_score": 0.0,
+      "omission_days": 8
+    },
+    {
+      "number": 25,
+      "consensus_score": 0.0,
+      "omission_days": 8
+    },
+    {
+      "number": 4,
+      "consensus_score": 0.0,
+      "omission_days": 7
+    },
+    {
+      "number": 5,
+      "consensus_score": 14.3,
+      "omission_days": 7
+    },
+    {
+      "number": 14,
+      "consensus_score": 0.0,
+      "omission_days": 7
+    },
+    {
+      "number": 13,
+      "consensus_score": 0.0,
+      "omission_days": 6
+    },
+    {
+      "number": 16,
+      "consensus_score": 0.0,
+      "omission_days": 6
+    },
+    {
+      "number": 27,
+      "consensus_score": 28.6,
+      "omission_days": 6
+    }
+  ],
+  "master_backtest": [
+    {
+      "name": "九爺",
+      "hit_rate_pct": 18.2,
+      "sample_size": 7,
+      "trend": "down"
+    },
+    {
+      "name": "阿圖",
+      "hit_rate_pct": 22.1,
+      "sample_size": 7,
+      "trend": "up"
+    },
+    {
+      "name": "其他指標頻道",
+      "hit_rate_pct": 15.0,
+      "sample_size": 7,
+      "trend": "flat"
+    }
+  ]
+}

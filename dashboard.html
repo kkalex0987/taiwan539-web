@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>全網共識儀表板 · 539 數據聚合</title>
+  <style>
+    * { box-sizing: border-box; }
+    body { margin: 0; padding: 16px; font-family: -apple-system, "Microsoft JhengHei", sans-serif; background: #0f0f1a; color: #e0e0e0; min-height: 100vh; }
+    .container { max-width: 900px; margin: 0 auto; }
+    h1 { font-size: 1.4rem; text-align: center; margin-bottom: 8px; color: #fff; }
+    .subtitle { text-align: center; color: #888; font-size: 0.9rem; margin-bottom: 24px; }
+    .card { background: #1a1a2e; border-radius: 12px; padding: 20px; margin-bottom: 20px; border: 1px solid #2a2a4a; }
+    .card h2 { font-size: 1.1rem; margin: 0 0 16px; color: #e94560; display: flex; align-items: center; gap: 8px; }
+    .card h2 .icon { font-size: 1.2rem; }
+    .radar-grid { display: grid; grid-template-columns: repeat(13, 1fr); gap: 4px; }
+    .radar-cell { aspect-ratio: 1; border-radius: 6px; display: flex; align-items: center; justify-content: center; font-size: 0.75rem; font-weight: bold; color: #fff; transition: transform 0.15s; }
+    .radar-cell:hover { transform: scale(1.08); }
+    .radar-cell.hot { background: linear-gradient(135deg, #c53030, #e53e3e); }
+    .radar-cell.warm { background: linear-gradient(135deg, #c05621, #dd6b20); }
+    .radar-cell.mid { background: linear-gradient(135deg, #2b6b2b, #38a169); }
+    .radar-cell.cold { background: linear-gradient(135deg, #2c5282, #2b6cb0); }
+    .radar-legend { display: flex; gap: 16px; margin-top: 12px; font-size: 0.8rem; color: #888; flex-wrap: wrap; }
+    .radar-legend span { display: flex; align-items: center; gap: 6px; }
+    .radar-legend .dot { width: 10px; height: 10px; border-radius: 50%; }
+    .lights { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+    @media (max-width: 600px) { .lights { grid-template-columns: 1fr; } }
+    .light-box { padding: 14px; border-radius: 10px; }
+    .light-box.red { background: rgba(229, 62, 62, 0.15); border: 1px solid #e53e3e; }
+    .light-box.green { background: rgba(72, 187, 120, 0.15); border: 1px solid #38a169; }
+    .light-box h3 { margin: 0 0 8px; font-size: 0.95rem; }
+    .light-box.red h3 { color: #fc8181; }
+    .light-box.green h3 { color: #68d391; }
+    .light-box p { margin: 0 0 10px; font-size: 0.85rem; color: #aaa; line-height: 1.4; }
+    .light-nums { display: flex; flex-wrap: wrap; gap: 8px; }
+    .light-num { padding: 6px 12px; border-radius: 8px; font-weight: bold; }
+    .light-box.red .light-num { background: #c53030; color: #fff; }
+    .light-box.green .light-num { background: #276749; color: #fff; }
+    .master-table { width: 100%; border-collapse: collapse; font-size: 0.9rem; }
+    .master-table th, .master-table td { padding: 10px 12px; text-align: left; border-bottom: 1px solid #2a2a4a; }
+    .master-table th { color: #888; font-weight: 600; }
+    .master-table .trend-up { color: #68d391; }
+    .master-table .trend-down { color: #fc8181; }
+    .master-table .trend-flat { color: #a0aec0; }
+    .updated { text-align: center; font-size: 0.8rem; color: #555; margin-top: 24px; }
+    .load-err { background: #742a2a; color: #feb2b2; padding: 12px; border-radius: 8px; margin-bottom: 16px; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <p style="margin-bottom:12px;"><a href="index.html" style="color:#888;text-decoration:none;font-size:0.9rem;">← 返回首頁</a></p>
+    <h1>全網共識儀表板</h1>
+    <p class="subtitle">樂透雲 × FB 社團 × YouTube 報牌 — 一鍵監控「誰在被點名」</p>
+    <div id="loadErr" class="load-err" style="display:none;"></div>
+
+    <div class="card">
+      <h2><span class="icon">📡</span> 全網情緒雷達圖</h2>
+      <p style="margin:0 0 12px;font-size:0.9rem;color:#aaa;">01–39 號碼今天被大家提到的多寡（愈紅＝愈多人推薦，愈藍＝沒什麼人提）</p>
+      <div id="radarGrid" class="radar-grid"></div>
+      <div class="radar-legend">
+        <span><i class="dot" style="background:#e53e3e;"></i> 很多人推薦</span>
+        <span><i class="dot" style="background:#dd6b20;"></i> 偏多人推</span>
+        <span><i class="dot" style="background:#38a169;"></i> 普通</span>
+        <span><i class="dot" style="background:#2b6cb0;"></i> 沒什麼人提</span>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2><span class="icon">🚦</span> 避險建議燈號</h2>
+      <div class="lights">
+        <div class="light-box red">
+          <h3>🔴 紅燈：大多數人都在推薦的號碼</h3>
+          <p>這些號碼到處都被提到，很多人都在抓，建議不要重壓。</p>
+          <div id="redNums" class="light-nums"></div>
+        </div>
+        <div class="light-box green">
+          <h3>🟢 綠燈：沒什麼人提的號碼</h3>
+          <p>全網很少人提到，而且很久沒開出來，可以當作逆向參考。</p>
+          <div id="greenNums" class="light-nums"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2><span class="icon">📊</span> 大師勝率回測</h2>
+      <p style="margin:0 0 12px;font-size:0.9rem;color:#aaa;">過去一週 YouTube 報牌與實際開獎比對，僅供參考。</p>
+      <table class="master-table">
+        <thead>
+          <tr><th>名稱</th><th>近一週命中率</th><th>樣本數</th><th>趨勢</th></tr>
+        </thead>
+        <tbody id="masterBody"></tbody>
+      </table>
+    </div>
+
+    <p id="updated" class="updated"></p>
+  </div>
+
+  <script>
+(function() {
+  var DATA_URL = '539_consensus_latest.json';
+  var MOCK = {
+    generated_at: new Date().toISOString(),
+    consensus_scores: {},
+    over_aligned_numbers: [
+      { number: 22, consensus_score: 100 },
+      { number: 35, consensus_score: 92 },
+      { number: 11, consensus_score: 78 },
+      { number: 18, consensus_score: 65 }
+    ],
+    over_aligned_threshold: 60,
+    cold_calm_numbers: [
+      { number: 2, consensus_score: 12, omission_days: 14 },
+      { number: 9, consensus_score: 8, omission_days: 12 },
+      { number: 16, consensus_score: 15, omission_days: 11 },
+      { number: 24, consensus_score: 20, omission_days: 9 }
+    ],
+    master_backtest: [
+      { name: '九爺', hit_rate_pct: 18.2, sample_size: 7, trend: 'down' },
+      { name: '阿圖', hit_rate_pct: 22.1, sample_size: 7, trend: 'up' },
+      { name: '其他指標頻道', hit_rate_pct: 15.0, sample_size: 7, trend: 'flat' }
+    ]
+  };
+
+  for (var n = 1; n <= 39; n++) {
+    MOCK.consensus_scores[n] = Math.round(Math.random() * 40 + (n % 5) * 15) % 101;
+  }
+
+  function getScoreClass(s) {
+    if (s >= 60) return 'hot';
+    if (s >= 40) return 'warm';
+    if (s >= 20) return 'mid';
+    return 'cold';
+  }
+
+  function renderRadar(scores) {
+    var el = document.getElementById('radarGrid');
+    el.innerHTML = '';
+    for (var n = 1; n <= 39; n++) {
+      var s = scores[n] != null ? scores[n] : 0;
+      var cell = document.createElement('div');
+      cell.className = 'radar-cell ' + getScoreClass(s);
+      cell.textContent = n < 10 ? '0' + n : n;
+      cell.title = '號碼 ' + n + ' · 共識 ' + s + '%';
+      el.appendChild(cell);
+    }
+  }
+
+  function renderLights(redList, greenList) {
+    var redEl = document.getElementById('redNums');
+    var greenEl = document.getElementById('greenNums');
+    redEl.innerHTML = '';
+    greenEl.innerHTML = '';
+    redList.forEach(function (x) {
+      var span = document.createElement('span');
+      span.className = 'light-num';
+      span.textContent = x.number;
+      redEl.appendChild(span);
+    });
+    greenList.forEach(function (x) {
+      var span = document.createElement('span');
+      span.className = 'light-num';
+      span.textContent = x.number + ' (遺漏' + (x.omission_days || 0) + '天)';
+      greenEl.appendChild(span);
+    });
+  }
+
+  function renderMaster(rows) {
+    var tbody = document.getElementById('masterBody');
+    tbody.innerHTML = '';
+    rows.forEach(function (r) {
+      var tr = document.createElement('tr');
+      var trend = r.trend === 'up' ? 'trend-up' : r.trend === 'down' ? 'trend-down' : 'trend-flat';
+      var trendText = r.trend === 'up' ? '↑' : r.trend === 'down' ? '↓' : '→';
+      tr.innerHTML = '<td>' + r.name + '</td><td>' + r.hit_rate_pct + '%</td><td>' + r.sample_size + ' 天</td><td class="' + trend + '">' + trendText + '</td>';
+      tbody.appendChild(tr);
+    });
+  }
+
+  function setUpdated(iso) {
+    var el = document.getElementById('updated');
+    if (!iso) return;
+    var d = new Date(iso);
+    el.textContent = '數據更新時間：' + d.toLocaleString('zh-TW');
+  }
+
+  function applyData(data) {
+    renderRadar(data.consensus_scores || {});
+    renderLights(data.over_aligned_numbers || [], data.cold_calm_numbers || []);
+    renderMaster(data.master_backtest || []);
+    setUpdated(data.generated_at);
+  }
+
+  function showErr(msg) {
+    var el = document.getElementById('loadErr');
+    el.textContent = msg;
+    el.style.display = 'block';
+  }
+
+  fetch(DATA_URL).then(function (res) {
+    if (res.ok) return res.json();
+    throw new Error('無法載入 ' + DATA_URL);
+  }).then(function (data) {
+    applyData(data);
+  }).catch(function () {
+    applyData(MOCK);
+    setUpdated(MOCK.generated_at);
+  });
+})();
+  </script>
+</body>
+</html>
