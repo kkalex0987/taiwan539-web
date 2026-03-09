@@ -67,13 +67,18 @@ class ConsensusEngine:
         return SourceResult(name="開獎API_近期開獎號碼", numbers=numbers, raw_count=len(numbers))
 
     def _parse_lottery_api_html(self, html: str) -> List[int]:
-        """解析開獎 API 的 HTML，提取 5 碼一組的開獎號（10 位連續數字）"""
+        """解析開獎 API 的 HTML，提取 5 碼一組的開獎號（10 位連續數字）。
+        最新一期開獎號碼權重 x2，讓每天開獎後數據明顯變化。"""
         numbers: List[int] = []
-        # 格式：1517183436 = 15,17,18,34,36
+        rows: List[List[int]] = []
         for m in re.finditer(r"\b(\d{2})(\d{2})(\d{2})(\d{2})(\d{2})\b", html):
             row = [int(m.group(i)) for i in range(1, 6) if self.MIN_NUM <= int(m.group(i)) <= self.MAX_NUM]
             if len(row) == 5:
-                numbers.extend(row)
+                rows.append(row)
+        for i, row in enumerate(rows):
+            numbers.extend(row)
+            if i == 0:
+                numbers.extend(row)  # 最新一期權重 x2
         return numbers
 
     def _simulate_lottery_api_fallback(self) -> List[int]:
@@ -238,14 +243,11 @@ class ConsensusEngine:
         self._all_sources.append(result)
 
     def run_sources(self) -> None:
-        """依序執行多個來源（真實抓取 + 模擬備援）"""
+        """只使用真實抓取來源，移除模擬來源以避免紅燈綠燈永遠不變"""
         self._all_sources.clear()
-        self.add_source(self.fetch_lottery_api())      # 真實：api.lottery.com.tw 近期開獎
-        self.add_source(self.fetch_lotto_cloud())    # 真實：happylottery.tw 冷熱門
-        self.add_source(self.fetch_fb_539_group())   # 模擬：FB（無 API）
-        self.add_source(self.fetch_youtube_titles())  # 模擬：YouTube（需 API key）
-        self.add_source(self.fetch_ptt_lotto())       # 真實：pttweb.cc 樂透板
-        self.add_source(self.fetch_other_sites())     # 模擬：其他站
+        self.add_source(self.fetch_lottery_api())    # 真實：近期開獎（每天變）
+        self.add_source(self.fetch_lotto_cloud())   # 真實：冷熱門統計
+        self.add_source(self.fetch_ptt_lotto())     # 真實：PTT 報牌討論
 
     def frequency_count(self) -> Counter:
         """統計每個號碼 (1–39) 的出現頻率"""
