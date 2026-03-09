@@ -8,7 +8,7 @@ import json
 import re
 from collections import Counter
 from dataclasses import dataclass, field
-from datetime import datetime
+from datetime import datetime, timezone
 from pathlib import Path
 from typing import List, Dict, Tuple, Optional
 
@@ -89,6 +89,32 @@ class ConsensusEngine:
             "今日 熱門 07 22 35",
         ]
 
+    # ========== 來源四：PTT 樂透板（模擬）— 散戶討論 ==========
+    def fetch_ptt_lotto(self) -> SourceResult:
+        """
+        模擬從 PTT 樂透板 / 批踢踢 539 討論串抓推薦號。
+        實作時可改為 PTT 網頁或 API 抓取。
+        """
+        numbers = self._simulate_ptt_mentions()
+        return SourceResult(name="PTT樂透板_討論熱門", numbers=numbers, raw_count=len(numbers))
+
+    def _simulate_ptt_mentions(self) -> List[int]:
+        """模擬 PTT 推文/貼文中的號碼（可替換成真實抓取）"""
+        return [2, 8, 11, 19, 22, 28, 33, 35, 39]
+
+    # ========== 來源五：其他開獎/統計站（模擬）— 冷熱統計 ==========
+    def fetch_other_sites(self) -> SourceResult:
+        """
+        模擬從其他開獎站、民間統計站抓「熱門號／冷門號」。
+        實作時可改為真實網址（例如各縣市彩券行統計、開獎歷史站）。
+        """
+        numbers = self._simulate_other_sites()
+        return SourceResult(name="其他開獎站_熱門統計", numbers=numbers, raw_count=len(numbers))
+
+    def _simulate_other_sites(self) -> List[int]:
+        """模擬其他站的熱門號（可替換成真實抓取）"""
+        return [5, 7, 12, 18, 22, 27, 31, 35]
+
     def _extract_numbers_from_text(self, texts: List[str]) -> List[int]:
         """用正則從多段文字中提取 1–39 的數字"""
         pattern = re.compile(r"\b([1-9]|[1-3][0-9])\b")
@@ -106,11 +132,13 @@ class ConsensusEngine:
         self._all_sources.append(result)
 
     def run_sources(self) -> None:
-        """依序執行三個來源（模擬抓取）並加入引擎"""
+        """依序執行多個來源（模擬抓取）並加入引擎"""
         self._all_sources.clear()
         self.add_source(self.fetch_lotto_cloud())
         self.add_source(self.fetch_fb_539_group())
         self.add_source(self.fetch_youtube_titles())
+        self.add_source(self.fetch_ptt_lotto())
+        self.add_source(self.fetch_other_sites())
 
     def frequency_count(self) -> Counter:
         """統計每個號碼 (1–39) 的出現頻率"""
@@ -207,7 +235,7 @@ class ConsensusEngine:
         if master_backtest is None:
             master_backtest = self.get_master_backtest()
         return {
-            "generated_at": datetime.now().isoformat(),
+            "generated_at": datetime.now(timezone.utc).isoformat(),
             "description": "539 全網數據聚合 — 當日共識得分與過度對齊號碼",
             "sources": [{"name": s.name, "sample_size": len(s.numbers)} for s in self._all_sources],
             "frequency_count": dict(counter),
