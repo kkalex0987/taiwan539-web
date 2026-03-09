@@ -213,7 +213,52 @@ class ConsensusEngine:
     def _simulate_ptt_mentions(self) -> List[int]:
         return [2, 8, 11, 19, 22, 28, 33, 35, 39]
 
-    # ========== 來源五：其他開獎/統計站（模擬）— 冷熱統計 ==========
+    # ========== 來源五：樂透堂報號統計（真實抓取）==========
+    def fetch_9800_bbs_statistics(self) -> SourceResult:
+        """
+        從樂透堂 9800.com.tw 抓取「今彩539討論區報號統計」。
+        該頁彙整討論區當期被推薦的號碼次數，是很好的報牌共識來源。
+        """
+        numbers: List[int] = []
+        if HAS_REQUESTS:
+            try:
+                numbers = self._fetch_9800_statistics()
+            except Exception:
+                pass
+        if not numbers:
+            numbers = self._extract_numbers_from_text(["樂透堂報號統計抓取失敗，使用備援"])
+        return SourceResult(name="樂透堂_報號統計", numbers=numbers, raw_count=len(numbers))
+
+    def _fetch_9800_statistics(self) -> List[int]:
+        """解析樂透堂報號統計頁。提取 1-39 號碼，熱門號依排序權重加成"""
+        url = "http://www.9800.com.tw/lotto539/bbs_statistics.html"
+        headers = {"User-Agent": "Mozilla/5.0 (compatible; 539Consensus/1.0)"}
+        r = requests.get(url, timeout=15, headers=headers)
+        r.encoding = "big5"
+        r.raise_for_status()
+        numbers: List[int] = []
+        soup = BeautifulSoup(r.text, "html.parser")
+        for tr in soup.find_all("tr"):
+            cells = tr.find_all("td")
+            if len(cells) < 20:
+                continue
+            row_nums: List[int] = []
+            for td in cells:
+                t = (td.get_text() or "").strip()
+                if re.match(r"^(0?[1-9]|[12][0-9]|3[0-9])$", t):
+                    n = int(t)
+                    if self.MIN_NUM <= n <= self.MAX_NUM:
+                        row_nums.append(n)
+            if len(row_nums) >= 30:
+                for i, n in enumerate(row_nums[:39]):
+                    weight = max(1, 20 - i // 2)
+                    numbers.extend([n] * min(weight, 8))
+                break
+        if not numbers:
+            numbers = self._extract_numbers_from_text([r.text])
+        return numbers
+
+    # ========== 來源六：其他開獎/統計站（模擬，備援）==========
     def fetch_other_sites(self) -> SourceResult:
         """
         模擬從其他開獎站、民間統計站抓「熱門號／冷門號」。
@@ -245,9 +290,10 @@ class ConsensusEngine:
     def run_sources(self) -> None:
         """只使用真實抓取來源，移除模擬來源以避免紅燈綠燈永遠不變"""
         self._all_sources.clear()
-        self.add_source(self.fetch_lottery_api())    # 真實：近期開獎（每天變）
-        self.add_source(self.fetch_lotto_cloud())   # 真實：冷熱門統計
-        self.add_source(self.fetch_ptt_lotto())     # 真實：PTT 報牌討論
+        self.add_source(self.fetch_lottery_api())       # 近期開獎（每天變）
+        self.add_source(self.fetch_lotto_cloud())      # 冷熱門統計
+        self.add_source(self.fetch_ptt_lotto())        # PTT 報牌討論
+        self.add_source(self.fetch_9800_bbs_statistics())  # 樂透堂報號統計
 
     def frequency_count(self) -> Counter:
         """統計每個號碼 (1–39) 的出現頻率"""
