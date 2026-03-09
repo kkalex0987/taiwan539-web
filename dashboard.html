@@ -194,7 +194,7 @@
     var el = document.getElementById('updated');
     if (!iso) return;
     var d = new Date(iso);
-    el.textContent = '數據更新時間：' + d.toLocaleString('zh-TW');
+    el.textContent = '數據更新時間（台灣）：' + d.toLocaleString('zh-TW', { timeZone: 'Asia/Taipei' });
   }
 
   function applyData(data) {
