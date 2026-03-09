@@ -20,6 +20,9 @@ jobs:
         with:
           python-version: '3.10'
 
+      - name: 安裝依賴
+        run: pip install requests beautifulsoup4
+
       - name: 執行共識引擎
         run: python3 consensus_engine.py
         working-directory: .
