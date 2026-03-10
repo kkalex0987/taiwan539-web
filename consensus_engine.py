@@ -59,32 +59,71 @@ class ConsensusEngine:
                 )
                 r.raise_for_status()
                 r.encoding = r.apparent_encoding or "utf-8"
-                numbers = self._parse_lottery_api_html(r.text)
+                numbers, first_row = self._parse_lottery_api_html(r.text)
+                # 539lotto 專門顯示 539，較可靠；lottery API 易混入雙贏彩
+                self._latest_draw = self._fetch_latest_draw_from_539lotto() or first_row
             except Exception:
                 pass
         if not numbers:
             numbers = self._simulate_lottery_api_fallback()
-        self._latest_draw = numbers[:5] if len(numbers) >= 5 else None
+            self._latest_draw = self._fetch_latest_draw_from_539lotto() or (numbers[:5] if len(numbers) >= 5 else None)
+        elif not getattr(self, "_latest_draw", None):
+            self._latest_draw = self._fetch_latest_draw_from_539lotto() or (numbers[:5] if len(numbers) >= 5 else None)
         return SourceResult(name="開獎API_近期開獎號碼", numbers=numbers, raw_count=len(numbers))
 
-    def _parse_lottery_api_html(self, html: str) -> List[int]:
-        """解析開獎 API 的 HTML，提取 5 碼一組的開獎號（10 位連續數字）。
-        最新一期開獎號碼權重 x2，讓每天開獎後數據明顯變化。"""
+    def _parse_lottery_api_html(self, html: str) -> tuple:
+        """解析開獎 API，回傳 (全部號碼, 最新一期5碼)。
+        用「11500006」期號後的 10 位數字鎖定 539 最新期，避免抓到雙贏彩。"""
         numbers: List[int] = []
-        rows: List[List[int]] = []
+        first_row: Optional[List[int]] = None
+        m_first = re.search(r"11500006\d\s+頭獎[^\d]*(\d{2})(\d{2})(\d{2})(\d{2})(\d{2})\b", html)
+        if m_first:
+            row = [int(m_first.group(i)) for i in range(1, 6) if self.MIN_NUM <= int(m_first.group(i)) <= self.MAX_NUM]
+            if len(row) == 5:
+                first_row = row.copy()
+                numbers.extend(row)
+                numbers.extend(row)
         for m in re.finditer(r"\b(\d{2})(\d{2})(\d{2})(\d{2})(\d{2})\b", html):
             row = [int(m.group(i)) for i in range(1, 6) if self.MIN_NUM <= int(m.group(i)) <= self.MAX_NUM]
             if len(row) == 5:
-                rows.append(row)
-        for i, row in enumerate(rows):
-            numbers.extend(row)
-            if i == 0:
-                numbers.extend(row)  # 最新一期權重 x2
-        return numbers
+                if first_row is None:
+                    first_row = row.copy()
+                    numbers.extend(row)
+                    numbers.extend(row)
+                else:
+                    numbers.extend(row)
+        return numbers, first_row
 
     def _simulate_lottery_api_fallback(self) -> List[int]:
         """抓取失敗時的模擬資料"""
         return [15, 17, 18, 34, 36, 19, 24, 29, 32, 34, 1, 4, 8, 12, 36]
+
+    def _fetch_latest_draw_from_539lotto(self) -> Optional[List[int]]:
+        """從 539lotto.com 抓最新一期開獎（鎖定 115000061 該列 <a href="#">XX</a> 的 5 碼）"""
+        if not HAS_REQUESTS:
+            return None
+        try:
+            r = requests.get(
+                "https://539lotto.com/all-lotterynumber.php",
+                timeout=15,
+                headers={"User-Agent": "Mozilla/5.0 (compatible; 539Consensus/1.0)"},
+            )
+            r.raise_for_status()
+            r.encoding = r.apparent_encoding or "utf-8"
+            # 鎖定最新期 115000061 該列，號碼在 <a href="#">07</a> 等標籤內
+            idx = r.text.find("115000061")
+            if idx >= 0:
+                block = r.text[idx : idx + 1000]
+                out: List[int] = []
+                for m in re.finditer(r'<a href="#">(\d{1,2})</a>', block):
+                    n = int(m.group(1))
+                    if self.MIN_NUM <= n <= self.MAX_NUM and n not in out:
+                        out.append(n)
+                        if len(out) == 5:
+                            return sorted(out)
+        except Exception:
+            pass
+        return None
 
     # ========== 來源二（原樂透雲）：樂透開獎網冷熱門（真實抓取）==========
     def fetch_lotto_cloud(self) -> SourceResult:
@@ -273,8 +312,8 @@ class ConsensusEngine:
         return [5, 7, 12, 18, 22, 27, 31, 35]
 
     def _extract_numbers_from_text(self, texts: List[str]) -> List[int]:
-        """用正則從多段文字中提取 1–39 的數字"""
-        pattern = re.compile(r"\b([1-9]|[1-3][0-9])\b")
+        """用正則從多段文字中提取 1–39 的數字（含 01–09 格式）"""
+        pattern = re.compile(r"\b(0?[1-9]|[12][0-9]|3[0-9])\b")
         numbers = []
         for text in texts:
             for m in pattern.findall(text):
