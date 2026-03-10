@@ -35,5 +35,6 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
+          git remote set-url origin "https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git"
           git add 539_consensus_latest.json
-          git diff --staged --quiet || (git commit -m "自動更新儀表板共識數據" && git push)
+          git diff --staged --quiet || (git commit -m "自動更新儀表板共識數據" && git push origin HEAD)
