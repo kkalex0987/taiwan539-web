@@ -36,6 +36,7 @@
     .light-num { padding: 6px 12px; border-radius: 8px; font-weight: bold; }
     .light-box.red .light-num { background: #c53030; color: #fff; }
     .light-box.green .light-num { background: #276749; color: #fff; }
+    .omission-num { padding: 6px 12px; border-radius: 8px; font-weight: bold; background: #2c5282; color: #fff; display: inline-flex; align-items: center; gap: 4px; }
     .master-table { width: 100%; border-collapse: collapse; font-size: 0.9rem; }
     .master-table th, .master-table td { padding: 10px 12px; text-align: left; border-bottom: 1px solid #2a2a4a; }
     .master-table th { color: #888; font-weight: 600; }
@@ -85,6 +86,12 @@
           <div id="greenNums" class="light-nums"></div>
         </div>
       </div>
+    </div>
+
+    <div class="card" id="cardTop5Omission">
+      <h2><span class="icon">📋</span> 累計遺漏前五名</h2>
+      <p style="margin:0 0 12px;font-size:0.9rem;color:#aaa;">依近期開獎紀錄，最久沒開出的 5 個號碼（期數愈多＝愈久沒開）</p>
+      <div id="top5OmissionNums" class="light-nums" style="flex-wrap:wrap;gap:8px;"></div>
     </div>
 
     <div class="card" id="cardDrawCompare">
@@ -140,7 +147,14 @@
       { name: '阿圖', hit_rate_pct: 22.1, sample_size: 7, trend: 'up' },
       { name: '其他指標頻道', hit_rate_pct: 15.0, sample_size: 7, trend: 'flat' }
     ],
-    latest_draw: [15, 17, 18, 34, 36]
+    latest_draw: [15, 17, 18, 34, 36],
+    top5_omission: [
+      { number: 2, omission_periods: 8 },
+      { number: 9, omission_periods: 7 },
+      { number: 16, omission_periods: 6 },
+      { number: 24, omission_periods: 5 },
+      { number: 31, omission_periods: 4 }
+    ]
   };
 
   for (var n = 1; n <= 39; n++) {
@@ -205,6 +219,18 @@
     el.textContent = '數據更新時間（台灣）：' + d.toLocaleString('zh-TW', { timeZone: 'Asia/Taipei' });
   }
 
+  function renderTop5Omission(list) {
+    var el = document.getElementById('top5OmissionNums');
+    if (!el) return;
+    el.innerHTML = '';
+    (list || []).forEach(function (x) {
+      var span = document.createElement('span');
+      span.className = 'omission-num';
+      span.textContent = (x.number < 10 ? '0' + x.number : x.number) + ' (' + (x.omission_periods || 0) + '期)';
+      el.appendChild(span);
+    });
+  }
+
   function renderDrawCompare(latestDraw, redList, greenList) {
     var summaryEl = document.getElementById('drawCompareSummary');
     var detailEl = document.getElementById('drawCompareDetail');
@@ -223,15 +249,17 @@
     var drawStr = latestDraw.map(function(n) { return n < 10 ? '0' + n : '' + n; }).join('、');
     summaryEl.textContent = '最新一期開獎：' + drawStr + '。';
     var parts = [];
+    parts.push('本期開出的 5 碼中：');
     if (inRed.length > 0) {
-      parts.push('其中 ' + inRed.map(function(n) { return n < 10 ? '0' + n : '' + n; }).join('、') + ' 在紅燈（多數人推薦）');
+      parts.push(inRed.map(function(n) { return n < 10 ? '0' + n : '' + n; }).join('、') + ' 在紅燈（多數人推薦）');
     } else {
-      parts.push('本期 0 碼在紅燈');
+      parts.push('0 碼在紅燈（多數人推薦）');
     }
+    parts.push('；');
     if (inGreen.length > 0) {
-      parts.push('；' + inGreen.map(function(n) { return n < 10 ? '0' + n : '' + n; }).join('、') + ' 在綠燈');
+      parts.push(inGreen.map(function(n) { return n < 10 ? '0' + n : '' + n; }).join('、') + ' 在綠燈（沒什麼人提）');
     } else {
-      parts.push('；0 碼在綠燈');
+      parts.push('0 碼在綠燈（沒什麼人提）');
     }
     detailEl.textContent = parts.join('') + '。';
   }
@@ -239,6 +267,7 @@
   function applyData(data) {
     renderRadar(data.consensus_scores || {});
     renderLights(data.over_aligned_numbers || [], data.cold_calm_numbers || []);
+    renderTop5Omission(data.top5_omission || []);
     renderDrawCompare(data.latest_draw, data.over_aligned_numbers, data.cold_calm_numbers);
     renderMaster(data.master_backtest || []);
     setUpdated(data.generated_at);

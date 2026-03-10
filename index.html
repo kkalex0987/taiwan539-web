@@ -315,6 +315,21 @@
     return draws;
   }
 
+  /** 累計遺漏前五名：依「距上次開出期數」排序，取最久沒開的 5 個號碼 */
+  function getTop5Omission(draws, maxNum) {
+    const omission = {};
+    for (let n = 1; n <= maxNum; n++) omission[n] = draws.length;
+    for (let i = 0; i < draws.length; i++) {
+      for (const n of draws[i]) {
+        if (n >= 1 && n <= maxNum && omission[n] === draws.length) omission[n] = i;
+      }
+    }
+    return Object.entries(omission)
+      .sort((a, b) => b[1] - a[1])
+      .slice(0, 5)
+      .map(([n, periods]) => ({ num: +n, periods }));
+  }
+
   function run539(draws, n) {
     const use = draws.slice(0, n);
     if (use.length < 4) return '期數至少 4 期以上。';
@@ -342,9 +357,11 @@
     for (const [num] of cold) { if (pick.size >= 5) break; if (!pick.has(+num)) { pick.add(+num); break; } }
     for (const num of sorted.map(([n]) => +n)) { if (pick.size >= 5) break; pick.add(num); }
     const recommend = [...pick].sort((a,b)=>a-b).slice(0, 5);
+    const top5Omit = getTop5Omission(use, 39);
     let s = `【今彩539】最近 ${use.length} 期\n\n`;
     s += `熱門6: ${hot6.join(',')}  冷門6: ${cold6.join(',')}\n`;
     s += `建議5碼(連莊+熱冷): ${recommend.join(',')}\n\n`;
+    s += `累計遺漏前5名（最久沒開）: ${top5Omit.map(x => x.num + '(' + x.periods + '期)').join('、')}\n`;
     s += `升溫: ${heating.slice(0,12).join(',')}\n降溫: ${cooling.slice(0,12).join(',')}\n`;
     s += `未開號碼: ${unused.length ? unused.join(',') : '無'}\n`;
     return s;
@@ -377,9 +394,11 @@
     for (const [num] of cold) { if (pick.size >= 6) break; if (!pick.has(+num)) { pick.add(+num); break; } }
     for (const num of sorted.map(([n]) => +n)) { if (pick.size >= 6) break; pick.add(num); }
     const recommend = [...pick].sort((a,b)=>a-b).slice(0, 6);
+    const top5Omit = getTop5Omission(use, 49);
     let s = `【大樂透】最近 ${use.length} 期（不含二合三合）\n\n`;
     s += `熱門6: ${hot6.join(',')}  冷門6: ${cold6.join(',')}\n`;
     s += `建議6碼: ${recommend.join(',')}\n\n`;
+    s += `累計遺漏前5名（最久沒開）: ${top5Omit.map(x => x.num + '(' + x.periods + '期)').join('、')}\n`;
     s += `升溫: ${heating.slice(0,12).join(',')}\n降溫: ${cooling.slice(0,12).join(',')}\n`;
     s += `未開號碼: ${unused.length ? unused.join(',') : '無'}\n`;
     return s;
@@ -420,8 +439,10 @@
     const top5ByRate = rateList.slice(0, 5);
     let keyNums = new Set([...hot, ...top5ByRate.map(([n]) => n)]);
     const recommend = [...keyNums].sort((a,b)=>a-b).slice(0, 5);
+    const top5Omit = getTop5Omission(use, 39);
     let s = `【今彩539 AI 快報】最近 ${use.length} 期\n\n`;
     s += `出現機率前5（由高到低）: ${top5ByRate.map(([n,r]) => `${n}(${r.toFixed(1)}%)`).join(' ')}\n`;
+    s += `累計遺漏前5名: ${top5Omit.map(x => x.num + '(' + x.periods + '期)').join('、')}\n`;
     s += `熱門: ${hot.join(',')}  冷門: ${cold.join(',')}\n`;
     s += `趨勢上升: ${trendUp.slice(0,8).join(',')}\n`;
     s += `二合頻率高: ${topPairs.join(' ')}\n三合: ${topTriples.join(' ')}\n`;
@@ -449,8 +470,10 @@
     const top6ByRate = rateList.slice(0, 6);
     let keyNums = new Set([...hot, ...top6ByRate.map(([n]) => n)]);
     const recommend = [...keyNums].sort((a,b)=>a-b).slice(0, 6);
+    const top5Omit = getTop5Omission(use, 49);
     let s = `【大樂透 AI 快報】最近 ${use.length} 期（不含二合三合）\n\n`;
     s += `出現機率前6（由高到低）: ${top6ByRate.map(([n,r]) => `${n}(${r.toFixed(1)}%)`).join(' ')}\n`;
+    s += `累計遺漏前5名: ${top5Omit.map(x => x.num + '(' + x.periods + '期)').join('、')}\n`;
     s += `熱門: ${hot.join(',')}  冷門: ${cold.join(',')}\n`;
     s += `趨勢上升: ${trendUp.slice(0,10).join(',')}\n`;
     s += `建議6碼: ${recommend.join(',')}\n※僅供娛樂。`;

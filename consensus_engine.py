@@ -60,15 +60,20 @@ class ConsensusEngine:
                 r.raise_for_status()
                 r.encoding = r.apparent_encoding or "utf-8"
                 numbers, first_row = self._parse_lottery_api_html(r.text)
+                self._recent_draws = self._numbers_to_draws(numbers)
                 # 539lotto 專門顯示 539，較可靠；lottery API 易混入雙贏彩
                 self._latest_draw = self._fetch_latest_draw_from_539lotto() or first_row
             except Exception:
                 pass
         if not numbers:
             numbers = self._simulate_lottery_api_fallback()
+            self._recent_draws = self._numbers_to_draws(numbers)
             self._latest_draw = self._fetch_latest_draw_from_539lotto() or (numbers[:5] if len(numbers) >= 5 else None)
-        elif not getattr(self, "_latest_draw", None):
-            self._latest_draw = self._fetch_latest_draw_from_539lotto() or (numbers[:5] if len(numbers) >= 5 else None)
+        else:
+            if not getattr(self, "_recent_draws", None):
+                self._recent_draws = self._numbers_to_draws(numbers)
+            if not getattr(self, "_latest_draw", None):
+                self._latest_draw = self._fetch_latest_draw_from_539lotto() or (numbers[:5] if len(numbers) >= 5 else None)
         return SourceResult(name="開獎API_近期開獎號碼", numbers=numbers, raw_count=len(numbers))
 
     def _parse_lottery_api_html(self, html: str) -> tuple:
@@ -398,6 +403,30 @@ class ConsensusEngine:
             if scores[n] <= score_threshold and omission_days.get(n, 0) >= omission_min_days
         ]
 
+    def _numbers_to_draws(self, numbers: List[int]) -> List[List[int]]:
+        """將扁平號碼列表轉為期別列表（每期 5 碼，去重相鄰重複）"""
+        draws: List[List[int]] = []
+        for i in range(0, len(numbers), 5):
+            chunk = numbers[i : i + 5]
+            if len(chunk) == 5 and all(self.MIN_NUM <= n <= self.MAX_NUM for n in chunk):
+                if not draws or chunk != draws[-1]:
+                    draws.append(chunk)
+        return draws
+
+    def get_top5_omission(self) -> List[Dict]:
+        """累計遺漏前五名：依「距上次開出期數」排序，取最久沒開的 5 個號碼"""
+        draws = getattr(self, "_recent_draws", None) or []
+        omission: Dict[int, int] = {n: len(draws) for n in range(self.MIN_NUM, self.MAX_NUM + 1)}
+        for i, d in enumerate(draws):
+            for n in d:
+                if self.MIN_NUM <= n <= self.MAX_NUM and omission[n] == len(draws):
+                    omission[n] = i
+        sorted_nums = sorted(
+            [(n, omission[n]) for n in range(self.MIN_NUM, self.MAX_NUM + 1)],
+            key=lambda x: -x[1],
+        )
+        return [{"number": n, "omission_periods": p} for n, p in sorted_nums[:5]]
+
     def _mock_omission_days(self) -> Dict[int, int]:
         """模擬歷史遺漏天數（實作時改為真實開獎紀錄計算）"""
         import random
@@ -430,6 +459,7 @@ class ConsensusEngine:
         if master_backtest is None:
             master_backtest = self.get_master_backtest()
         latest = getattr(self, "_latest_draw", None)
+        top5_omission = self.get_top5_omission()
         return {
             "generated_at": datetime.now(timezone.utc).isoformat(),
             "description": "539 全網數據聚合 — 當日共識得分與過度對齊號碼",
@@ -439,6 +469,7 @@ class ConsensusEngine:
             "over_aligned_numbers": sorted(over_aligned, key=lambda x: -x["consensus_score"]),
             "over_aligned_threshold": self.over_align_threshold,
             "cold_calm_numbers": sorted(cold_calm, key=lambda x: -x.get("omission_days", 0)),
+            "top5_omission": top5_omission,
             "master_backtest": master_backtest,
             "latest_draw": latest,
         }
