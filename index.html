@@ -40,7 +40,7 @@
     <label>貼上開獎號碼（每行一期，號碼用逗號或空格分隔）</label>
     <textarea id="data" placeholder="今彩539 每行 5 個號碼 (1-39)&#10;例：3,6,9,31,39&#10;5,22,28,35,36"></textarea>
     <p class="help" id="help">今彩539：每行 5 個號碼。大樂透：每行 6 個號碼。</p>
-    <p class="help" style="margin-bottom:8px;"><span id="versionBadge">免費版</span> <span id="versionDesc">請自行貼上開獎號碼，或自備抓取網址</span> <a href="pay.html" id="linkUpgrade" style="color:#e94560;margin-left:6px;">升級付費版</a></p>
+    <p class="help" style="margin-bottom:8px;"><span id="versionBadge">免費版</span> <span id="versionDesc">請自行貼上開獎號碼，或自備抓取網址</span> <a href="pay.html" id="linkUpgrade" style="color:#e94560;margin-left:6px;">抖內支持</a></p>
     <label id="labelFetch">一鍵抓取（免費可用，直接按）</label>
     <div id="apiBaseWrap">
       <span id="apiBaseFreeMsg" class="help" style="display:none;"></span>
@@ -51,8 +51,8 @@
     <input type="number" id="periods" value="20" min="5" max="200">
     <button type="button" class="btn btn-primary" id="btnAnalyze">分析（統計＋趨勢＋推薦）</button>
     <button type="button" class="btn btn-secondary" id="btnAI">AI 快報</button>
-    <button type="button" class="btn btn-secondary" id="btnProStructure">結構分析（付費版）</button>
-    <a href="dashboard.html" class="btn btn-secondary" id="linkDashboard" style="text-align:center;text-decoration:none;margin-top:8px;display:block;">📡 全網共識儀表板（付費版）</a>
+    <button type="button" class="btn btn-secondary" id="btnProStructure">結構分析（抖內解鎖）</button>
+    <a href="dashboard.html" class="btn btn-secondary" id="linkDashboard" style="text-align:center;text-decoration:none;margin-top:8px;display:block;">📡 全網共識儀表板（抖內解鎖）</a>
     <a href="chat.html" class="btn btn-secondary" style="text-align:center;text-decoration:none;margin-top:8px;display:block;">💬 討論區</a>
     <div id="out"></div>
     <details class="how-add">
@@ -170,9 +170,9 @@
       if (pro) {
         const untilStr = getPaidUntil();
         if (untilStr) {
-          badge.textContent = '付費版（至 ' + untilStr.slice(0,4) + '/' + untilStr.slice(4,6) + '/' + untilStr.slice(6,8) + '）';
+          badge.textContent = '已抖內（至 ' + untilStr.slice(0,4) + '/' + untilStr.slice(4,6) + '/' + untilStr.slice(6,8) + '）';
         } else {
-          badge.textContent = '付費版';
+          badge.textContent = '已抖內';
         }
       } else {
         badge.textContent = '免費版';
@@ -222,7 +222,7 @@
   var justExpired = clearPaidIfExpired();
   refreshVersionUI();
   if (justExpired && outEl) {
-    outEl.textContent = '您的付費版已到期，感謝您的支持。如需繼續使用一鍵抓取與結構分析，請再次訂閱。';
+    outEl.textContent = '您的抖內已到期，感謝您的支持。如需繼續使用儀表板與結構分析，請再次抖內。';
   }
 
   (function setupUpgradeLink() {
@@ -262,7 +262,7 @@
     const base = (apiBaseEl.value || '').trim().replace(/\/+$/, '');
     if (!base) {
       outEl.textContent = isPro()
-        ? '付費版應已內建抓取網址，若仍為空請重新整理頁面或聯絡客服。'
+        ? '已抖內用戶應可正常使用，若仍為空請重新整理頁面或聯絡客服。'
         : '免費版請自行貼上開獎號碼到上方欄位，或貼上你自己部署的抓取服務網址（需自備）。';
       return;
     }
@@ -629,7 +629,7 @@
     const internalType = type === '539' ? '539' : 'lotto';
     const r = premiumAnalyzeOne(nums, internalType, true);
     const base = r.analysis || {};
-    let text = `【付費版結構分析】\n這一組號碼：${r.numbers.join(', ')}\n`;
+    let text = `【結構分析】\n這一組號碼：${r.numbers.join(', ')}\n`;
     text += `綜合評分：${r.total_score} 分\n整體看法：${r.summary}\n\n`;
     text += `區間分佈感覺：${base.zone || ''}\n`;
     text += `單雙搭配感覺：${base.odd_even || ''}\n`;
@@ -664,7 +664,7 @@
 
   $('btnProStructure').onclick = () => {
     if (!isPro()) {
-      outEl.textContent = '「結構分析」為付費版功能，請先在上方點「升級付費版」完成後再使用。';
+      outEl.textContent = '「結構分析」為抖內解鎖功能，請先在上方點「抖內支持」完成後再使用。';
       return;
     }
     const draws = parseData(dataEl.value, mode);
