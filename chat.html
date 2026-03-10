@@ -54,7 +54,7 @@
   var firebaseConfig = {
     apiKey: "AIzaSyBGaHE5bFaIzZRLfOMpidYSI5AHLZOdu3M",
     authDomain: "lotto539-chat.firebaseapp.com",
-    databaseURL: "https://lotto539-chat-default-rtdb.firebaseio.com",
+    databaseURL: "https://lotto539-chat-default-rtdb.asia-southeast1.firebasedatabase.app",
     projectId: "lotto539-chat",
     storageBucket: "lotto539-chat.firebasestorage.app",
     messagingSenderId: "703618298132",
@@ -135,8 +135,18 @@
       inputEl.value = '';
       inputEl.style.height = 'auto';
       sendBtn.disabled = false;
+      showStatus('已連線');
     }).catch(function(err) {
-      showStatus('送出失敗：' + (err.message || '請檢查 Firebase 設定與規則'));
+      console.error('討論區送出失敗', err);
+      var code = err.code || '';
+      var msg = err.message || '';
+      var hint = '';
+      if (code === 'PERMISSION_DENIED' || msg.indexOf('permission') !== -1) {
+        hint = '→ 見 Firebase聊天室設定教學.md「仍無法發送」章節';
+      } else if (msg.indexOf('network') !== -1 || msg.indexOf('fetch') !== -1) {
+        hint = '→ 請檢查網路或改用 HTTPS 開啟';
+      }
+      showStatus('送出失敗：' + (msg || code) + (hint ? ' ' + hint : ''));
       sendBtn.disabled = false;
     });
   }
