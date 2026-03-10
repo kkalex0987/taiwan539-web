@@ -6,15 +6,22 @@
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
-  <title>升級付費版 - 539・大樂透分析</title>
+  <title>抖內支持 · 539・大樂透分析</title>
   <style>
     * { box-sizing: border-box; }
     body { margin: 0; padding: 20px; font-family: -apple-system, "Microsoft JhengHei", sans-serif; background: #1a1a2e; color: #eee; min-height: 100vh; }
     .container { max-width: 480px; margin: 0 auto; }
-    h1 { font-size: 1.3rem; text-align: center; margin-bottom: 24px; }
+    h1 { font-size: 1.3rem; text-align: center; margin-bottom: 8px; }
+    .subtitle { text-align: center; color: #888; font-size: 0.9rem; margin-bottom: 24px; }
     .card { background: #16213e; border-radius: 12px; padding: 20px; margin-bottom: 16px; border: 1px solid #333; }
     .card h2 { font-size: 1rem; margin: 0 0 12px; color: #e94560; }
     .card p { margin: 0 0 12px; font-size: 0.95rem; line-height: 1.6; color: #ccc; }
+    .tiers { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 16px; }
+    .tier { background: #0f3460; border-radius: 10px; padding: 14px; text-align: center; border: 2px solid transparent; }
+    .tier:hover { border-color: #e94560; }
+    .tier .price { font-size: 1.4rem; font-weight: bold; color: #e94560; }
+    .tier .period { font-size: 0.85rem; color: #94a3b8; margin-top: 4px; }
+    .tier.recommend { border-color: #e94560; background: rgba(233, 69, 96, 0.1); }
     .bank-info { background: #0f3460; padding: 14px; border-radius: 8px; font-family: monospace; font-size: 0.9rem; white-space: pre-wrap; margin: 12px 0; }
     .btn { display: block; width: 100%; padding: 14px; margin: 10px 0; font-size: 1rem; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; text-align: center; text-decoration: none; }
     .btn-line { background: #06c755; color: #fff; }
@@ -27,20 +34,41 @@
 <body>
   <div class="container">
     <a href="index.html" class="back">← 返回</a>
-    <h1>付費版方案（月訂制）</h1>
-    <p style="text-align:center;color:#888;margin-bottom:24px;">僅此一種付費方案，開通後即可使用一鍵抓取與結構分析。採月訂制，到期後需續訂。</p>
+    <h1>抖內支持</h1>
+    <p class="subtitle">贊助任意金額即可解鎖全網共識儀表板與結構分析，感謝你的支持！</p>
+
+    <div class="card">
+      <h2>選擇方案</h2>
+      <div class="tiers">
+        <div class="tier">
+          <div class="price">30 元</div>
+          <div class="period">試用 3 天</div>
+        </div>
+        <div class="tier">
+          <div class="price">90 元</div>
+          <div class="period">1 個月</div>
+        </div>
+        <div class="tier recommend">
+          <div class="price">450 元</div>
+          <div class="period">半年（約 8 折）</div>
+        </div>
+        <div class="tier recommend">
+          <div class="price">750 元</div>
+          <div class="period">1 年（約 7 折）</div>
+        </div>
+      </div>
+      <p style="margin:0;font-size:0.9rem;">抖內後請用 LINE 聯絡我們，告知金額與轉帳末五碼，我們會寄送解鎖連結給你。</p>
+    </div>
 
     <div class="card">
       <h2>① 銀行轉帳</h2>
-      <p>轉帳完成後請用 LINE 聯絡我們，並告知您已完成轉帳。我們會寄送「付費版開通連結」給您，點開連結即開通一個月。</p>
-      <!-- 下面四行請改成你的銀行資料 -->
+      <p>轉帳完成後請用 LINE 聯絡我們，並告知您抖內的金額與轉帳末五碼。我們會寄送「解鎖連結」給您，點開即開通。</p>
       <div class="bank-info" id="bankInfo">銀行代碼：822
 銀行名稱：中國信託商業銀行
 戶名：蘇暐竣
 帳號：059531778690</div>
-      <!-- 下面 href 的網址請改成你的 LINE 加好友連結 -->
       <a href="https://line.me/ti/p/DxN-vmmHSc" class="btn btn-line" target="_blank" id="btnLine">我已轉帳，聯絡開通</a>
-      <p class="note">轉帳後請截圖並透過 LINE 告知，我們會盡快寄送開通連結（一個月有效）。</p>
+      <p class="note">轉帳後請截圖並透過 LINE 告知金額，我們會盡快寄送解鎖連結。</p>
     </div>
 
     <div class="card">
@@ -56,18 +84,15 @@
       <a href="#" class="btn btn-line" id="btnLinePay">前往 Line Pay 付款</a>
       <p class="note">請先在 pay.html 填入 Line Pay 付款連結。</p>
     </div>
-    <p style="text-align:center;font-size:0.7rem;color:#333;margin-top:20px;">2025.03</p>
+    <!-- 管理員寄送解鎖連結：30元→+3天、90元→+1月、450元→+6月、750元→+1年。例：https://xxx.github.io/?paid=1&until=20260315 -->
+    <p style="text-align:center;font-size:0.7rem;color:#333;margin-top:20px;">2026.03</p>
   </div>
 
   <script>
 (function() {
-  const urlParams = new URLSearchParams(window.location.search);
-  const returnUrl = urlParams.get('return') || 'https://kkalex0987.github.io/taiwan539-web/?paid=1';
-
-  // ========== 請在這裡填入你的資料 ==========
-  const ECPAY_URL = 'https://payment.ecpay.com.tw/...';   // 綠界金流付款頁網址（不用可留 ...）
-  const LINEPAY_URL = 'https://pay.line.me/...';          // Line Pay 付款頁網址（不用可留 ...）
-  const LINE_LINK = 'https://line.me/ti/p/你的LINE_ID';   // 你的 LINE 加好友/聯絡連結，必填
+  const ECPAY_URL = 'https://payment.ecpay.com.tw/...';
+  const LINEPAY_URL = 'https://pay.line.me/...';
+  const LINE_LINK = 'https://line.me/ti/p/DxN-vmmHSc';
 
   document.getElementById('btnLine').href = LINE_LINK;
   document.getElementById('btnEcpay').href = ECPAY_URL.includes('...') ? '#' : ECPAY_URL;
