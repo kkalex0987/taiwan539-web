@@ -87,6 +87,13 @@
       </div>
     </div>
 
+    <div class="card" id="cardDrawCompare">
+      <h2><span class="icon">🎯</span> 開獎對照</h2>
+      <p style="margin:0 0 12px;font-size:0.9rem;color:#aaa;">最新一期開獎號碼與紅燈／綠燈對照，僅供參考。</p>
+      <p id="drawCompareSummary" style="margin:0;font-size:0.95rem;line-height:1.6;"></p>
+      <div id="drawCompareDetail" style="margin-top:10px;font-size:0.85rem;color:#aaa;"></div>
+    </div>
+
     <div class="card">
       <h2><span class="icon">📊</span> 大師勝率回測</h2>
       <p style="margin:0 0 12px;font-size:0.9rem;color:#aaa;">過去一週 YouTube 報牌與實際開獎比對，僅供參考。</p>
@@ -132,7 +139,8 @@
       { name: '九爺', hit_rate_pct: 18.2, sample_size: 7, trend: 'down' },
       { name: '阿圖', hit_rate_pct: 22.1, sample_size: 7, trend: 'up' },
       { name: '其他指標頻道', hit_rate_pct: 15.0, sample_size: 7, trend: 'flat' }
-    ]
+    ],
+    latest_draw: [15, 17, 18, 34, 36]
   };
 
   for (var n = 1; n <= 39; n++) {
@@ -197,9 +205,41 @@
     el.textContent = '數據更新時間（台灣）：' + d.toLocaleString('zh-TW', { timeZone: 'Asia/Taipei' });
   }
 
+  function renderDrawCompare(latestDraw, redList, greenList) {
+    var summaryEl = document.getElementById('drawCompareSummary');
+    var detailEl = document.getElementById('drawCompareDetail');
+    var card = document.getElementById('cardDrawCompare');
+    if (!latestDraw || !Array.isArray(latestDraw) || latestDraw.length < 5) {
+      if (summaryEl) summaryEl.textContent = '尚無最新開獎資料，請稍後再來看。';
+      if (detailEl) detailEl.textContent = '';
+      return;
+    }
+    var drawSet = {};
+    latestDraw.forEach(function(n) { drawSet[n] = true; });
+    var redNums = (redList || []).map(function(x) { return x.number; });
+    var greenNums = (greenList || []).map(function(x) { return x.number; });
+    var inRed = latestDraw.filter(function(n) { return redNums.indexOf(n) >= 0; });
+    var inGreen = latestDraw.filter(function(n) { return greenNums.indexOf(n) >= 0; });
+    var drawStr = latestDraw.map(function(n) { return n < 10 ? '0' + n : '' + n; }).join('、');
+    summaryEl.textContent = '最新一期開獎：' + drawStr + '。';
+    var parts = [];
+    if (inRed.length > 0) {
+      parts.push('其中 ' + inRed.map(function(n) { return n < 10 ? '0' + n : '' + n; }).join('、') + ' 在紅燈（多數人推薦）');
+    } else {
+      parts.push('本期 0 碼在紅燈');
+    }
+    if (inGreen.length > 0) {
+      parts.push('；' + inGreen.map(function(n) { return n < 10 ? '0' + n : '' + n; }).join('、') + ' 在綠燈');
+    } else {
+      parts.push('；0 碼在綠燈');
+    }
+    detailEl.textContent = parts.join('') + '。';
+  }
+
   function applyData(data) {
     renderRadar(data.consensus_scores || {});
     renderLights(data.over_aligned_numbers || [], data.cold_calm_numbers || []);
+    renderDrawCompare(data.latest_draw, data.over_aligned_numbers, data.cold_calm_numbers);
     renderMaster(data.master_backtest || []);
     setUpdated(data.generated_at);
   }

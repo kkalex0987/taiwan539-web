@@ -41,9 +41,9 @@
     <textarea id="data" placeholder="今彩539 每行 5 個號碼 (1-39)&#10;例：3,6,9,31,39&#10;5,22,28,35,36"></textarea>
     <p class="help" id="help">今彩539：每行 5 個號碼。大樂透：每行 6 個號碼。</p>
     <p class="help" style="margin-bottom:8px;"><span id="versionBadge">免費版</span> <span id="versionDesc">請自行貼上開獎號碼，或自備抓取網址</span> <a href="pay.html" id="linkUpgrade" style="color:#e94560;margin-left:6px;">升級付費版</a></p>
-    <label id="labelFetch">一鍵抓取（付費版已內建網址，免費版請自備抓取網址）</label>
+    <label id="labelFetch">一鍵抓取（免費可用，直接按）</label>
     <div id="apiBaseWrap">
-      <span id="apiBaseFreeMsg" class="help" style="display:none;">升級付費版後即可使用一鍵抓取，無需自填網址。</span>
+      <span id="apiBaseFreeMsg" class="help" style="display:none;"></span>
       <input type="text" id="apiBase" placeholder="付費版由系統帶入" value="" autocomplete="off">
     </div>
     <button type="button" class="btn btn-tertiary" id="btnFetch">一鍵抓取最新開獎</button>
@@ -115,13 +115,13 @@
     return false;
   }
 
-  // 免費版：不顯示網址欄位，只顯示提示；付費版：顯示網址並鎖住
+  // 一鍵抓取改為免費也可用：免費用戶預填網址並顯示按鈕；付費版鎖住網址
   function applyApiBaseByPro() {
     const pro = localStorage.getItem(LS_IS_PRO) === '1';
     const freeMsg = $('apiBaseFreeMsg');
     if (!apiBaseEl) return;
-    localStorage.removeItem(LS_API_BASE);
     if (pro) {
+      localStorage.setItem(LS_API_BASE, DEFAULT_API_BASE);
       if (freeMsg) freeMsg.style.display = 'none';
       apiBaseEl.style.display = '';
       apiBaseEl.value = DEFAULT_API_BASE;
@@ -129,9 +129,10 @@
       apiBaseEl.classList.add('api-base-locked');
       apiBaseEl.setAttribute('readonly', 'readonly');
     } else {
-      if (freeMsg) freeMsg.style.display = 'block';
-      apiBaseEl.style.display = 'none';
-      apiBaseEl.value = '';
+      localStorage.removeItem(LS_API_BASE);
+      if (freeMsg) freeMsg.style.display = 'none';
+      apiBaseEl.style.display = '';
+      apiBaseEl.value = DEFAULT_API_BASE;
       apiBaseEl.readOnly = false;
       apiBaseEl.classList.remove('api-base-locked');
       apiBaseEl.removeAttribute('readonly');

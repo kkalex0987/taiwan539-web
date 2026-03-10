@@ -64,6 +64,7 @@ class ConsensusEngine:
                 pass
         if not numbers:
             numbers = self._simulate_lottery_api_fallback()
+        self._latest_draw = numbers[:5] if len(numbers) >= 5 else None
         return SourceResult(name="開獎API_近期開獎號碼", numbers=numbers, raw_count=len(numbers))
 
     def _parse_lottery_api_html(self, html: str) -> List[int]:
@@ -389,6 +390,7 @@ class ConsensusEngine:
             cold_calm = self.get_cold_calm_numbers(scores=scores)
         if master_backtest is None:
             master_backtest = self.get_master_backtest()
+        latest = getattr(self, "_latest_draw", None)
         return {
             "generated_at": datetime.now(timezone.utc).isoformat(),
             "description": "539 全網數據聚合 — 當日共識得分與過度對齊號碼",
@@ -399,6 +401,7 @@ class ConsensusEngine:
             "over_aligned_threshold": self.over_align_threshold,
             "cold_calm_numbers": sorted(cold_calm, key=lambda x: -x.get("omission_days", 0)),
             "master_backtest": master_backtest,
+            "latest_draw": latest,
         }
 
     def run(self) -> Dict:
