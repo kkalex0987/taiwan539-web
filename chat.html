@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+  <meta name="theme-color" content="#16213e">
+  <title>討論區 · 539 樂透分析</title>
+  <style>
+    * { box-sizing: border-box; }
+    body { margin: 0; padding: 0; font-family: -apple-system, "Microsoft JhengHei", sans-serif; background: #1a1a2e; color: #eee; min-height: 100vh; display: flex; flex-direction: column; }
+    .header { background: #16213e; padding: 12px 16px; display: flex; align-items: center; gap: 10px; }
+    .header a { color: #94a3b8; text-decoration: none; font-size: 0.9rem; }
+    .header h1 { margin: 0; font-size: 1.1rem; flex: 1; }
+    .ad-slot { background: #0f3460; min-height: 50px; margin: 8px 16px; border-radius: 8px; display: flex; align-items: center; justify-content: center; color: #64748b; font-size: 0.8rem; }
+    #msgList { flex: 1; overflow-y: auto; padding: 12px 16px; padding-bottom: 80px; }
+    .msg { margin-bottom: 14px; padding: 10px 12px; background: #16213e; border-radius: 10px; border-left: 3px solid #e94560; }
+    .msg .name { font-size: 0.8rem; color: #e94560; margin-bottom: 4px; }
+    .msg .text { font-size: 0.95rem; line-height: 1.5; word-break: break-word; }
+    .msg .time { font-size: 0.75rem; color: #64748b; margin-top: 4px; }
+    .input-area { position: fixed; bottom: 0; left: 0; right: 0; padding: 10px 16px 20px; padding-bottom: calc(10px + env(safe-area-inset-bottom)); background: #16213e; border-top: 1px solid #2a2a4a; display: flex; gap: 8px; align-items: flex-end; }
+    #msgInput { flex: 1; padding: 12px 14px; font-size: 1rem; border: 1px solid #334155; border-radius: 8px; background: #0f172a; color: #fff; resize: none; min-height: 44px; max-height: 100px; }
+    #btnSend { padding: 12px 20px; font-size: 1rem; border: none; border-radius: 8px; background: #e94560; color: #fff; font-weight: bold; cursor: pointer; white-space: nowrap; }
+    #btnSend:disabled { opacity: 0.5; cursor: not-allowed; }
+    .status { padding: 8px 16px; font-size: 0.85rem; color: #94a3b8; text-align: center; }
+    .ad-slot-bottom { min-height: 60px; margin: 12px 16px; background: #0f3460; border-radius: 8px; display: flex; align-items: center; justify-content: center; color: #64748b; font-size: 0.8rem; }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <a href="index.html">← 返回</a>
+    <h1>討論區</h1>
+    <a href="#" id="linkNick" style="font-size:0.8rem;">暱稱</a>
+  </div>
+  <!-- 廣告區塊（之後可替換成 AdSense 等程式碼） -->
+  <div class="ad-slot" id="adSlotTop">廣告投放區</div>
+
+  <div id="msgList"></div>
+  <p class="status" id="status">連線中…</p>
+
+  <div class="input-area">
+    <textarea id="msgInput" placeholder="輸入訊息…（請勿留個資、勿違規）" rows="1" maxlength="500"></textarea>
+    <button type="button" id="btnSend">送出</button>
+  </div>
+
+  <!-- 底部廣告區塊（可選） -->
+  <div class="ad-slot-bottom" id="adSlotBottom">廣告投放區</div>
+
+  <!-- Firebase：請替換成你自己的設定，見 Firebase聊天室設定教學.md -->
+  <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-database-compat.js"></script>
+  <script>
+(function() {
+  var firebaseConfig = {
+    apiKey: "AIzaSyBGaHE5bFaIzZRLfOMpidYSI5AHLZOdu3M",
+    authDomain: "lotto539-chat.firebaseapp.com",
+    databaseURL: "https://lotto539-chat-default-rtdb.firebaseio.com",
+    projectId: "lotto539-chat",
+    storageBucket: "lotto539-chat.firebasestorage.app",
+    messagingSenderId: "703618298132",
+    appId: "1:703618298132:web:e0f146a5231ab821259201",
+    measurementId: "G-447MEBCKRJ"
+  };
+
+  var app, auth, db, messagesRef;
+  var listEl = document.getElementById('msgList');
+  var inputEl = document.getElementById('msgInput');
+  var sendBtn = document.getElementById('btnSend');
+  var statusEl = document.getElementById('status');
+  var NICK_KEY = 'chat_nick_v1';
+  var MAX_MSG = 200;
+  var MAX_LEN = 500;
+
+  function getNick() {
+    try {
+      var n = localStorage.getItem(NICK_KEY);
+      if (n && n.length <= 20) return n.trim();
+    } catch (e) {}
+    return '';
+  }
+  function setNick(n) {
+    try { localStorage.setItem(NICK_KEY, (n || '').trim().slice(0, 20)); } catch (e) {}
+  }
+
+  function showStatus(t) {
+    if (statusEl) statusEl.textContent = t;
+  }
+
+  function renderTime(ts) {
+    if (!ts) return '';
+    var d = new Date(ts);
+    var now = new Date();
+    var same = d.getDate() === now.getDate() && d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear();
+    if (same) return d.getHours() + ':' + (d.getMinutes() < 10 ? '0' : '') + d.getMinutes();
+    return (d.getMonth() + 1) + '/' + d.getDate() + ' ' + d.getHours() + ':' + (d.getMinutes() < 10 ? '0' : '') + d.getMinutes();
+  }
+
+  function renderMessages(snap) {
+    if (!snap || !snap.val()) {
+      listEl.innerHTML = '<p style="text-align:center;color:#64748b;padding:20px;">尚無訊息，來留第一句吧～</p>';
+      return;
+    }
+    var val = snap.val();
+    var arr = [];
+    for (var k in val) {
+      var m = val[k];
+      if (m && m.text) arr.push({ id: k, uid: m.uid, name: m.name || '訪客', text: m.text, ts: m.ts });
+    }
+    arr.sort(function(a, b) { return (a.ts || 0) - (b.ts || 0); });
+    if (arr.length > MAX_MSG) arr = arr.slice(-MAX_MSG);
+    listEl.innerHTML = arr.map(function(m) {
+      var safeName = (m.name || '訪客').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+      var safeText = (m.text || '').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/\n/g, '<br>');
+      return '<div class="msg"><div class="name">' + safeName + '</div><div class="text">' + safeText + '</div><div class="time">' + renderTime(m.ts) + '</div></div>';
+    }).join('');
+    listEl.scrollTop = listEl.scrollHeight;
+  }
+
+  function sendMessage() {
+    var text = (inputEl.value || '').trim();
+    if (text.length === 0 || text.length > MAX_LEN) return;
+    if (!auth || !auth.currentUser || !db) {
+      showStatus('尚未連線，請稍候再試');
+      return;
+    }
+    sendBtn.disabled = true;
+    var nick = getNick() || ('訪客' + (auth.currentUser.uid || '').slice(-4));
+    var msg = {
+      uid: auth.currentUser.uid,
+      name: nick,
+      text: text,
+      ts: Date.now()
+    };
+    messagesRef.push(msg).then(function() {
+      inputEl.value = '';
+      inputEl.style.height = 'auto';
+      sendBtn.disabled = false;
+    }).catch(function(err) {
+      showStatus('送出失敗：' + (err.message || '請檢查 Firebase 設定與規則'));
+      sendBtn.disabled = false;
+    });
+  }
+
+  function init() {
+    if (!firebaseConfig.apiKey || firebaseConfig.apiKey === 'YOUR_API_KEY') {
+      showStatus('請先設定 Firebase：編輯 chat.html 並填入你的 firebaseConfig，或參考「Firebase聊天室設定教學.md」');
+      listEl.innerHTML = '<p style="padding:20px;color:#94a3b8;">尚未設定 Firebase，無法使用討論區。<br>請依照教學完成設定後重新整理。</p>';
+      sendBtn.disabled = true;
+      return;
+    }
+    try {
+      app = firebase.initializeApp(firebaseConfig);
+      auth = firebase.auth(app);
+      db = firebase.database(app);
+      messagesRef = db.ref('chat_messages');
+    } catch (e) {
+      showStatus('Firebase 初始化失敗：' + (e.message || ''));
+      sendBtn.disabled = true;
+      return;
+    }
+
+    auth.signInAnonymously().then(function() {
+      showStatus('已連線');
+      messagesRef.limitToLast(MAX_MSG).on('value', renderMessages);
+    }).catch(function(err) {
+      showStatus('登入失敗：請在 Firebase 控制台啟用「匿名登入」');
+      sendBtn.disabled = true;
+    });
+
+    sendBtn.onclick = sendMessage;
+    inputEl.addEventListener('keydown', function(e) {
+      if (e.key === 'Enter' && !e.shiftKey) {
+        e.preventDefault();
+        sendMessage();
+      }
+    });
+    var linkNick = document.getElementById('linkNick');
+    if (linkNick) {
+      linkNick.onclick = function(e) {
+        e.preventDefault();
+        var cur = getNick();
+        var n = window.prompt('設定顯示名稱（最多 20 字）', cur || '');
+        if (n != null) { setNick(n); linkNick.textContent = getNick() || '暱稱'; }
+      };
+      if (getNick()) linkNick.textContent = getNick();
+    }
+  }
+
+  init();
+})();
+  </script>
+</body>
+</html>
