@@ -8,6 +8,10 @@ on:
   workflow_dispatch:
     # 手動觸發：GitHub → Actions → 選此 workflow → Run workflow
 
+# 必須給寫入權限，否則 git push 會失敗（exit code 128）
+permissions:
+  contents: write
+
 jobs:
   refresh:
     runs-on: ubuntu-latest
