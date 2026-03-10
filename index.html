@@ -44,7 +44,7 @@
     <label id="labelFetch">一鍵抓取（免費可用，直接按）</label>
     <div id="apiBaseWrap">
       <span id="apiBaseFreeMsg" class="help" style="display:none;"></span>
-      <input type="text" id="apiBase" placeholder="付費版由系統帶入" value="" autocomplete="off">
+      <input type="text" id="apiBase" placeholder="抓取服務網址（已預填）" value="" autocomplete="off">
     </div>
     <button type="button" class="btn btn-tertiary" id="btnFetch">一鍵抓取最新開獎</button>
     <label>分析期數（取最近幾期）</label>
@@ -179,11 +179,11 @@
         badge.textContent = '免費版';
       }
     }
-    if (desc) desc.textContent = pro ? '已內建一鍵抓取，直接按即可' : '請自行貼上開獎號碼，或自備抓取網址';
-    if (labelFetch) labelFetch.textContent = pro ? '一鍵抓取（已內建網址，直接按）' : '一鍵抓取（付費版功能，升級後即可使用）';
+    if (desc) desc.textContent = pro ? '已內建一鍵抓取，直接按即可' : '請自行貼上開獎號碼，或先按一鍵抓取';
+    if (labelFetch) labelFetch.textContent = '一鍵抓取（免費可用，網址已預填）';
     const freeMsg = $('apiBaseFreeMsg');
     const btnFetch = $('btnFetch');
-    if (btnFetch) btnFetch.style.display = pro ? '' : 'none';
+    if (btnFetch) btnFetch.style.display = '';
     if (apiBaseEl) {
       if (pro) {
         if (freeMsg) freeMsg.style.display = 'none';
@@ -193,9 +193,9 @@
         apiBaseEl.classList.add('api-base-locked');
         apiBaseEl.setAttribute('readonly', 'readonly');
       } else {
-        if (freeMsg) freeMsg.style.display = 'block';
-        apiBaseEl.style.display = 'none';
-        apiBaseEl.value = '';
+        if (freeMsg) freeMsg.style.display = 'none';
+        apiBaseEl.style.display = '';
+        apiBaseEl.value = DEFAULT_API_BASE;
         apiBaseEl.readOnly = false;
         apiBaseEl.classList.remove('api-base-locked');
         apiBaseEl.removeAttribute('readonly');
