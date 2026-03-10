@@ -51,7 +51,7 @@
     <input type="number" id="periods" value="20" min="5" max="200">
     <button type="button" class="btn btn-primary" id="btnAnalyze">分析（統計＋趨勢＋推薦）</button>
     <button type="button" class="btn btn-secondary" id="btnAI">AI 快報</button>
-    <button type="button" class="btn btn-secondary" id="btnProStructure">結構分析（抖內解鎖）</button>
+    <button type="button" class="btn btn-secondary" id="btnProStructure">結構分析</button>
     <a href="dashboard.html" class="btn btn-secondary" id="linkDashboard" style="text-align:center;text-decoration:none;margin-top:8px;display:block;">📡 全網共識儀表板（抖內解鎖）</a>
     <a href="chat.html" class="btn btn-secondary" style="text-align:center;text-decoration:none;margin-top:8px;display:block;">💬 討論區</a>
     <div id="out"></div>
@@ -222,7 +222,7 @@
   var justExpired = clearPaidIfExpired();
   refreshVersionUI();
   if (justExpired && outEl) {
-    outEl.textContent = '您的抖內已到期，感謝您的支持。如需繼續使用儀表板與結構分析，請再次抖內。';
+    outEl.textContent = '您的抖內已到期，感謝您的支持。如需繼續使用全網共識儀表板，請再次抖內。';
   }
 
   (function setupUpgradeLink() {
@@ -663,10 +663,6 @@
   };
 
   $('btnProStructure').onclick = () => {
-    if (!isPro()) {
-      outEl.textContent = '「結構分析」為抖內解鎖功能，請先在上方點「抖內支持」完成後再使用。';
-      return;
-    }
     const draws = parseData(dataEl.value, mode);
     if (!draws.length) { outEl.textContent = '請先貼上開獎號碼，每行一期。'; return; }
     outEl.textContent = proStructureText(draws, mode);
