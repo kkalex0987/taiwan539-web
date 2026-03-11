@@ -34,10 +34,21 @@
   <!-- 廣告區塊（之後可替換成 AdSense 等程式碼） -->
   <div class="ad-slot" id="adSlotTop">廣告投放區</div>
 
+  <div class="filter-bar" style="padding:8px 16px;background:#0f3460;display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
+    <span style="font-size:0.85rem;color:#94a3b8;">顯示：</span>
+    <button type="button" class="filter-btn active" data-filter="all" style="padding:6px 12px;border-radius:6px;border:1px solid #334155;background:#16213e;color:#e0e0e0;font-size:0.85rem;cursor:pointer;">全部</button>
+    <button type="button" class="filter-btn" data-filter="general" style="padding:6px 12px;border-radius:6px;border:1px solid #334155;background:#16213e;color:#e0e0e0;font-size:0.85rem;cursor:pointer;">一般</button>
+    <button type="button" class="filter-btn" data-filter="draw" style="padding:6px 12px;border-radius:6px;border:1px solid #334155;background:#16213e;color:#e0e0e0;font-size:0.85rem;cursor:pointer;">本期開獎討論</button>
+  </div>
   <div id="msgList"></div>
   <p class="status" id="status">連線中…</p>
 
   <div class="input-area">
+    <div style="margin-bottom:6px;font-size:0.8rem;color:#94a3b8;">發文至：</div>
+    <span style="margin-right:10px;">
+      <button type="button" class="topic-btn active" data-topic="general" style="padding:6px 10px;border-radius:6px;border:1px solid #334155;background:#16213e;color:#e0e0e0;font-size:0.8rem;cursor:pointer;margin-right:4px;">一般</button>
+      <button type="button" class="topic-btn" data-topic="draw" style="padding:6px 10px;border-radius:6px;border:1px solid #334155;background:#16213e;color:#e0e0e0;font-size:0.8rem;cursor:pointer;">本期開獎討論</button>
+    </span>
     <textarea id="msgInput" placeholder="輸入訊息…（請勿留個資、勿違規）" rows="1" maxlength="500"></textarea>
     <button type="button" id="btnSend">送出</button>
   </div>
@@ -70,6 +81,9 @@
   var NICK_KEY = 'chat_nick_v1';
   var MAX_MSG = 200;
   var MAX_LEN = 500;
+  var currentTopic = 'general';
+  var currentFilter = 'all';
+  var lastSnapshot = null;
 
   function getNick() {
     try {
@@ -96,6 +110,7 @@
   }
 
   function renderMessages(snap) {
+    lastSnapshot = snap;
     if (!snap || !snap.val()) {
       listEl.innerHTML = '<p style="text-align:center;color:#64748b;padding:20px;">尚無訊息，來留第一句吧～</p>';
       return;
@@ -104,16 +119,25 @@
     var arr = [];
     for (var k in val) {
       var m = val[k];
-      if (m && m.text) arr.push({ id: k, uid: m.uid, name: m.name || '訪客', text: m.text, ts: m.ts });
+      if (m && m.text) {
+        var topic = (m.topic === 'draw' ? 'draw' : 'general');
+        arr.push({ id: k, uid: m.uid, name: m.name || '訪客', text: m.text, ts: m.ts, topic: topic });
+      }
     }
+    if (currentFilter !== 'all') arr = arr.filter(function(m) { return m.topic === currentFilter; });
     arr.sort(function(a, b) { return (a.ts || 0) - (b.ts || 0); });
     if (arr.length > MAX_MSG) arr = arr.slice(-MAX_MSG);
     listEl.innerHTML = arr.map(function(m) {
       var safeName = (m.name || '訪客').replace(/</g, '&lt;').replace(/>/g, '&gt;');
       var safeText = (m.text || '').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/\n/g, '<br>');
-      return '<div class="msg"><div class="name">' + safeName + '</div><div class="text">' + safeText + '</div><div class="time">' + renderTime(m.ts) + '</div></div>';
+      var tag = m.topic === 'draw' ? '<span style="font-size:0.7rem;color:#e94560;margin-left:6px;">[本期開獎]</span>' : '';
+      return '<div class="msg"><div class="name">' + safeName + tag + '</div><div class="text">' + safeText + '</div><div class="time">' + renderTime(m.ts) + '</div></div>';
     }).join('');
     listEl.scrollTop = listEl.scrollHeight;
+  }
+
+  function applyFilter() {
+    if (lastSnapshot) renderMessages(lastSnapshot);
   }
 
   function sendMessage() {
@@ -129,7 +153,8 @@
       uid: auth.currentUser.uid,
       name: nick,
       text: text,
-      ts: Date.now()
+      ts: Date.now(),
+      topic: currentTopic
     };
     messagesRef.push(msg).then(function() {
       inputEl.value = '';
@@ -178,6 +203,21 @@
     });
 
     sendBtn.onclick = sendMessage;
+    document.querySelectorAll('.filter-btn').forEach(function(btn) {
+      btn.onclick = function() {
+        document.querySelectorAll('.filter-btn').forEach(function(b) { b.classList.remove('active'); b.style.background = '#16213e'; });
+        btn.classList.add('active'); btn.style.background = '#0f3460';
+        currentFilter = btn.getAttribute('data-filter');
+        applyFilter();
+      };
+    });
+    document.querySelectorAll('.topic-btn').forEach(function(btn) {
+      btn.onclick = function() {
+        document.querySelectorAll('.topic-btn').forEach(function(b) { b.classList.remove('active'); b.style.background = '#16213e'; });
+        btn.classList.add('active'); btn.style.background = '#0f3460';
+        currentTopic = btn.getAttribute('data-topic');
+      };
+    });
     inputEl.addEventListener('keydown', function(e) {
       if (e.key === 'Enter' && !e.shiftKey) {
         e.preventDefault();
