@@ -295,34 +295,36 @@
   }
 
   async function fetchDraws() {
-    const base = (apiBaseEl.value || '').trim().replace(/\/+$/, '');
+    if (!(apiBaseEl.value || '').trim() && DEFAULT_API_BASE) apiBaseEl.value = DEFAULT_API_BASE;
+    var base = (apiBaseEl.value || '').trim().replace(/\/+$/, '');
+    if (!base) base = DEFAULT_API_BASE;
     if (!base) {
-      outEl.textContent = isPro()
-        ? '已抖內用戶應可正常使用，若仍為空請重新整理頁面或聯絡客服。'
-        : '免費版請自行貼上開獎號碼到上方欄位，或貼上你自己部署的抓取服務網址（需自備）。';
+      outEl.textContent = '請在上方輸入抓取服務網址，或重新整理頁面（會預填網址）。';
       return;
     }
     if (isPro()) localStorage.setItem(LS_API_BASE, base);
     const n = Math.max(1, Math.min(parseInt(periodsEl.value, 10) || 20, 200));
     outEl.textContent = `正在抓取 ${mode === '539' ? '今彩539' : '大樂透'} 最近 ${n} 期…`;
-    const url = `${base}/${mode}?periods=${encodeURIComponent(n)}`;
+    const url = base + '/' + mode + '?periods=' + encodeURIComponent(n);
     let resp;
     try {
-      resp = await fetch(url, { method: 'GET' });
+      resp = await fetch(url, { method: 'GET', mode: 'cors' });
     } catch (e) {
-      outEl.textContent = `抓取失敗：連線不到抓取服務。\n請確認網址正確、手機有網路。\n\n${String(e)}`;
+      outEl.textContent = '抓取失敗：無法連線（可能是 CORS 或網路問題）。\n\n' +
+        '若你的是「抓取服務」是自己架的，請在該服務加上回應標頭：\nAccess-Control-Allow-Origin: *\n\n' +
+        '或先改用手動貼上開獎號碼。\n\n' + String(e);
       return;
     }
     if (!resp.ok) {
-      const t = await resp.text().catch(() => '');
-      outEl.textContent = `抓取失敗：HTTP ${resp.status}\n${t || ''}`;
+      const t = await resp.text().catch(function() { return ''; });
+      outEl.textContent = '抓取失敗：HTTP ' + resp.status + '\n' + (t || '');
       return;
     }
     let json;
     try {
       json = await resp.json();
     } catch (e) {
-      outEl.textContent = `抓取失敗：回傳不是 JSON。\n${String(e)}`;
+      outEl.textContent = '抓取失敗：回傳不是 JSON。\n' + String(e);
       return;
     }
     const draws = Array.isArray(json.draws) ? json.draws : [];
@@ -333,7 +335,7 @@
     dataEl.value = fmtDrawLines(draws);
     if (mode === '539') localStorage.setItem(LS_LAST_539, dataEl.value);
     else localStorage.setItem(LS_LAST_649, dataEl.value);
-    outEl.textContent = `✅ 已抓取 ${draws.length} 期並填入。現在可以按「分析」或「AI 快報」。`;
+    outEl.textContent = '✅ 已抓取 ' + draws.length + ' 期並填入。現在可以按「分析」或「AI 快報」。';
   }
 
   $('btnFetch').onclick = () => { fetchDraws(); };
