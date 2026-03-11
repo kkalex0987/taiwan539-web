@@ -167,35 +167,41 @@
     } else {
       $('tab649').classList.add('active'); $('tab539').classList.remove('active');
       dataEl.placeholder = '大樂透 每行 6 個號碼 (1-49)\n例：1,16,22,24,47,48';
-      helpEl.textContent = '大樂透：每行 6 個號碼 (1-49)。你也可以先按「一鍵抓取」。';
+      helpEl.textContent = '大樂透：每行 6 個號碼 (1-49)。一鍵抓取若無資料請改用手動貼上。';
       const cached = localStorage.getItem(LS_LAST_649);
       if (cached && !dataEl.value.trim()) dataEl.value = cached;
     }
+    renderLucky(mode);
   }
 
   $('tab539').onclick = () => setMode('539');
   $('tab649').onclick = () => setMode('649');
   setMode('539');
 
-  /** 今日幸運號：用日期當 seed，同一天所有人看到相同 5 碼 */
-  function getTodayLuckyNumbers(maxNum) {
+  /** 今日幸運號：用日期當 seed，539 為 5 碼(1-39)、大樂透為 6 碼(1-49) */
+  function getTodayLuckyNumbers(maxNum, count) {
+    if (!count) count = maxNum === 39 ? 5 : 6;
     var d = new Date();
     var seed = d.getFullYear() * 10000 + (d.getMonth() + 1) * 100 + d.getDate();
     var s = seed % 2147483647;
     var out = [];
-    while (out.length < (maxNum === 39 ? 5 : 6)) {
+    while (out.length < count) {
       s = (s * 16807) % 2147483647;
       var n = (s % maxNum) + 1;
       if (out.indexOf(n) === -1) out.push(n);
     }
     return out.sort(function(a, b) { return a - b; });
   }
-  (function renderLucky() {
+  function renderLucky(m) {
     var el = document.getElementById('luckyNums');
+    var titleEl = document.querySelector('.lucky-card .title');
     if (!el) return;
-    var nums = getTodayLuckyNumbers(39);
+    var maxNum = m === '649' ? 49 : 39;
+    var count = m === '649' ? 6 : 5;
+    var nums = getTodayLuckyNumbers(maxNum, count);
     el.innerHTML = nums.map(function(n) { return '<span class="num">' + (n < 10 ? '0' + n : n) + '</span>'; }).join('');
-  })();
+    if (titleEl) titleEl.textContent = m === '649' ? '🍀 今日幸運號（大樂透 6 碼，僅供娛樂）' : '🍀 今日幸運號（今彩539 5 碼，僅供娛樂）';
+  }
 
   function refreshVersionUI() {
     const pro = isPro();
@@ -310,14 +316,18 @@
     try {
       resp = await fetch(url, { method: 'GET', mode: 'cors' });
     } catch (e) {
-      outEl.textContent = '抓取失敗：無法連線（可能是 CORS 或網路問題）。\n\n' +
+      var errMsg = '抓取失敗：無法連線（可能是 CORS 或網路問題）。\n\n' +
         '若你的是「抓取服務」是自己架的，請在該服務加上回應標頭：\nAccess-Control-Allow-Origin: *\n\n' +
         '或先改用手動貼上開獎號碼。\n\n' + String(e);
+      if (mode === '649') errMsg = '抓取失敗（大樂透可能需抓取服務支援 /649）。\n\n請改用手動貼上開獎號碼：每行 6 個號碼 (1-49)，逗號或空格分隔。\n\n' + String(e);
+      outEl.textContent = errMsg;
       return;
     }
     if (!resp.ok) {
       const t = await resp.text().catch(function() { return ''; });
-      outEl.textContent = '抓取失敗：HTTP ' + resp.status + '\n' + (t || '');
+      var failText = '抓取失敗：HTTP ' + resp.status + '\n' + (t || '');
+      if (mode === '649') failText += '\n\n大樂透若無 /649 端點，請改用手動貼上開獎號碼（每行 6 碼 1-49）。';
+      outEl.textContent = failText;
       return;
     }
     let json;
@@ -329,7 +339,9 @@
     }
     const draws = Array.isArray(json.draws) ? json.draws : [];
     if (!draws.length) {
-      outEl.textContent = '抓取成功，但沒有拿到期數資料（draws 為空）。';
+      var msg = '抓取成功，但沒有拿到期數資料（draws 為空）。';
+      if (mode === '649') msg += '\n\n大樂透若無一鍵抓取服務，請改用手動貼上開獎號碼（每行 6 碼 1-49）。';
+      outEl.textContent = msg;
       return;
     }
     dataEl.value = fmtDrawLines(draws);
@@ -353,8 +365,9 @@
     return draws;
   }
 
-  /** 累計遺漏前五名：依「距上次開出期數」排序，取最久沒開的 5 個號碼 */
-  function getTop5Omission(draws, maxNum) {
+  /** 累計遺漏前 K 名：539 取 5、大樂透取 6 */
+  function getTopOmission(draws, maxNum, topK) {
+    if (!topK) topK = maxNum === 39 ? 5 : 6;
     const omission = {};
     for (let n = 1; n <= maxNum; n++) omission[n] = draws.length;
     for (let i = 0; i < draws.length; i++) {
@@ -364,14 +377,16 @@
     }
     return Object.entries(omission)
       .sort((a, b) => b[1] - a[1])
-      .slice(0, 5)
+      .slice(0, topK)
       .map(([n, periods]) => ({ num: +n, periods }));
   }
+  function getTop5Omission(draws, maxNum) { return getTopOmission(draws, maxNum, maxNum === 39 ? 5 : 6); }
 
   /** 冷熱號一覽表：1~max 出現次數＋遺漏期數，依出現次數排序 */
   function runHotColdTable(draws, n, maxNum) {
     const use = draws.slice(0, n);
     if (use.length < 2) return '請至少貼上 2 期開獎資料。';
+    const gameLabel = maxNum === 39 ? '今彩539' : '大樂透';
     const counts = {};
     for (let i = 1; i <= maxNum; i++) counts[i] = 0;
     for (const d of use) for (const num of d) if (num >= 1 && num <= maxNum) counts[num]++;
@@ -384,7 +399,7 @@
     for (let num = 1; num <= maxNum; num++)
       rows.push({ num, count: counts[num], omit: omission[num], pct: maxCount ? Math.round(100 * counts[num] / maxCount) : 0 });
     rows.sort((a, b) => b.count - a.count);
-    let html = '<p style="margin:0 0 8px;"><strong>冷熱號一覽</strong>（最近 ' + use.length + ' 期）</p>';
+    let html = '<p style="margin:0 0 8px;"><strong>' + gameLabel + ' 冷熱號一覽</strong>（最近 ' + use.length + ' 期）</p>';
     html += '<table class="hotcold-table"><thead><tr><th>號碼</th><th>出現次數</th><th>遺漏期數</th><th>相對</th></tr></thead><tbody>';
     rows.forEach(function(r) {
       html += '<tr><td>' + (r.num < 10 ? '0' + r.num : r.num) + '</td><td>' + r.count + '</td><td>' + r.omit + '</td><td><div class="bar-wrap"><div class="bar" style="width:' + r.pct + '%"></div></div></td></tr>';
@@ -397,6 +412,7 @@
   function runTrendChart(draws, n, maxNum) {
     const use = draws.slice(0, n);
     if (use.length < 2) return '請至少貼上 2 期開獎資料。';
+    const gameLabel = maxNum === 39 ? '今彩539' : '大樂透';
     const total = use.length * (maxNum === 39 ? 5 : 6);
     const counts = {};
     for (let i = 1; i <= maxNum; i++) counts[i] = 0;
@@ -408,7 +424,7 @@
       rows.push({ num, count: counts[num], rate: rate, pct: Math.round(100 * rate), barPct: maxRate ? Math.round(100 * rate / maxRate) : 0 });
     }
     rows.sort((a, b) => b.rate - a.rate);
-    let html = '<p style="margin:0 0 8px;"><strong>歷史走勢</strong>（最近 ' + use.length + ' 期，出現率）</p>';
+    let html = '<p style="margin:0 0 8px;"><strong>' + gameLabel + ' 歷史走勢</strong>（最近 ' + use.length + ' 期，出現率）</p>';
     html += '<table class="hotcold-table"><thead><tr><th>號碼</th><th>出現次數</th><th>出現率</th><th>走勢</th></tr></thead><tbody>';
     rows.forEach(function(r) {
       html += '<tr><td>' + (r.num < 10 ? '0' + r.num : r.num) + '</td><td>' + r.count + '</td><td>' + r.pct + '%</td><td><div class="bar-wrap"><div class="bar" style="width:' + r.barPct + '%"></div></div></td></tr>';
@@ -444,11 +460,11 @@
     for (const [num] of cold) { if (pick.size >= 5) break; if (!pick.has(+num)) { pick.add(+num); break; } }
     for (const num of sorted.map(([n]) => +n)) { if (pick.size >= 5) break; pick.add(num); }
     const recommend = [...pick].sort((a,b)=>a-b).slice(0, 5);
-    const top5Omit = getTop5Omission(use, 39);
+    const topOmit = getTop5Omission(use, 39);
     let s = `【今彩539】最近 ${use.length} 期\n\n`;
     s += `熱門6: ${hot6.join(',')}  冷門6: ${cold6.join(',')}\n`;
     s += `建議5碼(連莊+熱冷): ${recommend.join(',')}\n\n`;
-    s += `累計遺漏前5名（最久沒開）: ${top5Omit.map(x => x.num + '(' + x.periods + '期)').join('、')}\n`;
+    s += `累計遺漏前5名（最久沒開）: ${topOmit.map(x => x.num + '(' + x.periods + '期)').join('、')}\n`;
     s += `升溫: ${heating.slice(0,12).join(',')}\n降溫: ${cooling.slice(0,12).join(',')}\n`;
     s += `未開號碼: ${unused.length ? unused.join(',') : '無'}\n`;
     return s;
@@ -481,11 +497,11 @@
     for (const [num] of cold) { if (pick.size >= 6) break; if (!pick.has(+num)) { pick.add(+num); break; } }
     for (const num of sorted.map(([n]) => +n)) { if (pick.size >= 6) break; pick.add(num); }
     const recommend = [...pick].sort((a,b)=>a-b).slice(0, 6);
-    const top5Omit = getTop5Omission(use, 49);
+    const topOmit = getTop5Omission(use, 49);
     let s = `【大樂透】最近 ${use.length} 期（不含二合三合）\n\n`;
     s += `熱門6: ${hot6.join(',')}  冷門6: ${cold6.join(',')}\n`;
     s += `建議6碼: ${recommend.join(',')}\n\n`;
-    s += `累計遺漏前5名（最久沒開）: ${top5Omit.map(x => x.num + '(' + x.periods + '期)').join('、')}\n`;
+    s += `累計遺漏前6名（最久沒開）: ${topOmit.map(x => x.num + '(' + x.periods + '期)').join('、')}\n`;
     s += `升溫: ${heating.slice(0,12).join(',')}\n降溫: ${cooling.slice(0,12).join(',')}\n`;
     s += `未開號碼: ${unused.length ? unused.join(',') : '無'}\n`;
     return s;
