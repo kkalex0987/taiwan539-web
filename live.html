@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#16213e">
+  <title>開獎直播 · 539・大樂透分析</title>
+  <style>
+    * { box-sizing: border-box; }
+    body { margin: 0; padding: 0; font-family: -apple-system, "Microsoft JhengHei", sans-serif; background: #1a1a2e; color: #eee; min-height: 100vh; }
+    .header { background: #16213e; padding: 14px 16px; display: flex; align-items: center; gap: 10px; }
+    .header a { color: #94a3b8; text-decoration: none; font-size: 0.9rem; }
+    .header h1 { margin: 0; font-size: 1.1rem; flex: 1; }
+    .container { max-width: 900px; margin: 0 auto; padding: 16px; }
+    .card { background: #16213e; border-radius: 12px; padding: 16px; margin-bottom: 16px; border: 1px solid #2a2a4a; }
+    .card h2 { margin: 0 0 12px; font-size: 1rem; color: #e94560; }
+    .card p { margin: 0 0 12px; font-size: 0.9rem; color: #94a3b8; line-height: 1.5; }
+    .embed-wrap { position: relative; width: 100%; padding-bottom: 56.25%; height: 0; overflow: hidden; border-radius: 10px; background: #0f172a; }
+    .embed-wrap iframe { position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: none; }
+    .fallback { margin-top: 12px; text-align: center; }
+    .fallback a { display: inline-block; padding: 12px 20px; background: #e94560; color: #fff; text-decoration: none; border-radius: 8px; font-weight: bold; }
+    .fallback a:hover { opacity: 0.9; }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <a href="index.html">← 返回</a>
+    <h1>開獎直播</h1>
+  </div>
+  <div class="container">
+    <div class="card">
+      <h2>📺 全民i彩券 · 台灣彩券開獎直播</h2>
+      <p>週一至週六 20:30～21:00 開獎（今彩539、大樂透、威力彩、三星彩、四星彩等）。有直播時會自動播放當日場次，非直播時段可能無法顯示。</p>
+      <div class="embed-wrap">
+        <!-- 使用 UC 頻道 ID，有直播時自動顯示當日場次，不需每天改 -->
+        <iframe
+          src="https://www.youtube.com/embed/live_stream?channel=UCX9q-HI41sFuh1Gs5X_ZZCw"
+          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+          allowfullscreen
+          title="全民i彩券開獎直播"
+        ></iframe>
+      </div>
+      <p class="fallback">若上方無法播放，請<a href="https://www.youtube.com/@48ilottery48/live" target="_blank" rel="noopener">至 YouTube 收看直播</a></p>
+    </div>
+  </div>
+</body>
+</html>
