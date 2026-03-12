@@ -36,7 +36,6 @@
     .light-num { padding: 6px 12px; border-radius: 8px; font-weight: bold; }
     .light-box.red .light-num { background: #c53030; color: #fff; }
     .light-box.green .light-num { background: #276749; color: #fff; }
-    .omission-num { padding: 6px 12px; border-radius: 8px; font-weight: bold; background: #2c5282; color: #fff; display: inline-flex; align-items: center; gap: 4px; }
     .updated { text-align: center; font-size: 0.8rem; color: #555; margin-top: 24px; }
     .load-err { background: #742a2a; color: #feb2b2; padding: 12px; border-radius: 8px; margin-bottom: 16px; }
   </style>
@@ -81,19 +80,6 @@
         </div>
       </div>
     </div>
-
-    <div class="card" id="cardTop5Omission">
-      <h2><span class="icon">📋</span> 累計遺漏前五名</h2>
-      <p style="margin:0 0 12px;font-size:0.9rem;color:#aaa;">依近期開獎紀錄，最久沒開出的 5 個號碼（期數愈多＝愈久沒開）</p>
-      <div id="top5OmissionNums" class="light-nums" style="flex-wrap:wrap;gap:8px;"></div>
-    </div>
-
-    <div class="card" id="cardDrawCompare">
-      <h2><span class="icon">🎯</span> 開獎對照</h2>
-      <p style="margin:0 0 12px;font-size:0.9rem;color:#aaa;">最新一期開獎號碼與紅燈／綠燈對照，僅供參考。</p>
-      <p id="drawCompareSummary" style="margin:0;font-size:0.95rem;line-height:1.6;"></p>
-      <div id="drawCompareDetail" style="margin-top:10px;font-size:0.85rem;color:#aaa;"></div>
-    </div>
   </div>
 
   <script>
@@ -125,14 +111,6 @@
       { number: 16, consensus_score: 15, omission_days: 11 },
       { number: 24, consensus_score: 20, omission_days: 9 }
     ],
-    latest_draw: [15, 17, 18, 34, 36],
-    top5_omission: [
-      { number: 2, omission_periods: 8 },
-      { number: 9, omission_periods: 7 },
-      { number: 16, omission_periods: 6 },
-      { number: 24, omission_periods: 5 },
-      { number: 31, omission_periods: 4 }
-    ]
   };
 
   for (var n = 1; n <= 39; n++) {
@@ -185,64 +163,9 @@
     el.textContent = '數據更新時間（台灣）：' + d.toLocaleString('zh-TW', { timeZone: 'Asia/Taipei' });
   }
 
-  function renderTop5Omission(list) {
-    var el = document.getElementById('top5OmissionNums');
-    if (!el) return;
-    el.innerHTML = '';
-    var arr = list && Array.isArray(list) ? list : [];
-    if (arr.length === 0) {
-      el.textContent = '資料更新中，請稍後再來。';
-      return;
-    }
-    arr.forEach(function (x) {
-      var num = x && (x.number != null) ? x.number : 0;
-      var periods = x && (x.omission_periods != null) ? x.omission_periods : 0;
-      var span = document.createElement('span');
-      span.className = 'omission-num';
-      span.textContent = (num < 10 ? '0' + num : num) + ' (' + periods + '期)';
-      el.appendChild(span);
-    });
-  }
-
-  function renderDrawCompare(latestDraw, redList, greenList) {
-    var summaryEl = document.getElementById('drawCompareSummary');
-    var detailEl = document.getElementById('drawCompareDetail');
-    var arr = latestDraw && Array.isArray(latestDraw) ? latestDraw : [];
-    if (arr.length < 5) {
-      if (summaryEl) summaryEl.textContent = '尚無最新開獎資料，請稍後再來看。';
-      if (detailEl) detailEl.textContent = '';
-      return;
-    }
-    latestDraw = arr;
-    var drawSet = {};
-    latestDraw.forEach(function(n) { drawSet[n] = true; });
-    var redNums = (redList || []).map(function(x) { return x.number; });
-    var greenNums = (greenList || []).map(function(x) { return x.number; });
-    var inRed = latestDraw.filter(function(n) { return redNums.indexOf(n) >= 0; });
-    var inGreen = latestDraw.filter(function(n) { return greenNums.indexOf(n) >= 0; });
-    var drawStr = latestDraw.map(function(n) { return n < 10 ? '0' + n : '' + n; }).join('、');
-    summaryEl.textContent = '最新一期開獎：' + drawStr + '。';
-    var parts = [];
-    parts.push('本期開出的 5 碼中：');
-    if (inRed.length > 0) {
-      parts.push(inRed.map(function(n) { return n < 10 ? '0' + n : '' + n; }).join('、') + ' 在紅燈（多數人推薦）');
-    } else {
-      parts.push('0 碼在紅燈（多數人推薦）');
-    }
-    parts.push('；');
-    if (inGreen.length > 0) {
-      parts.push(inGreen.map(function(n) { return n < 10 ? '0' + n : '' + n; }).join('、') + ' 在綠燈（沒什麼人提）');
-    } else {
-      parts.push('0 碼在綠燈（沒什麼人提）');
-    }
-    detailEl.textContent = parts.join('') + '。';
-  }
-
   function applyData(data) {
     renderRadar(data.consensus_scores || {});
     renderLights(data.over_aligned_numbers || [], data.cold_calm_numbers || []);
-    renderTop5Omission(data.top5_omission);
-    renderDrawCompare(data.latest_draw, data.over_aligned_numbers, data.cold_calm_numbers);
     setUpdated(data.generated_at);
   }
 
