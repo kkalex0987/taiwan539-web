@@ -44,10 +44,11 @@
 </head>
 <body>
   <div class="header">
-    <span class="header-title">539・大樂透分析</span>
+    <span class="header-title">539</span>
     <div class="header-mascot-wrap">
       <img src="images/landgod.png" alt="" id="landgodImg" onerror="this.parentElement.style.display='none'">
     </div>
+    <span class="header-title">大樂透分析</span>
   </div>
   <div class="tabs">
     <button type="button" id="tab539" class="active">今彩539</button>
@@ -62,14 +63,14 @@
       <div class="title">🍀 今日幸運號（僅供娛樂，同一天大家都一樣）</div>
       <div class="nums" id="luckyNums"></div>
     </div>
+    <label>分析期數（取最近幾期）</label>
+    <input type="number" id="periods" value="20" min="5" max="200">
     <label id="labelFetch">一鍵抓取（免費可用，直接按）</label>
     <div id="apiBaseWrap">
       <span id="apiBaseFreeMsg" class="help" style="display:none;"></span>
       <input type="text" id="apiBase" placeholder="抓取服務網址（已預填）" value="" autocomplete="off">
     </div>
     <button type="button" class="btn btn-tertiary" id="btnFetch">一鍵抓取最新開獎</button>
-    <label>分析期數（取最近幾期）</label>
-    <input type="number" id="periods" value="20" min="5" max="200">
     <button type="button" class="btn btn-primary" id="btnAnalyze">分析（統計＋趨勢＋推薦）</button>
     <button type="button" class="btn btn-secondary" id="btnAI">AI 快報</button>
     <button type="button" class="btn btn-secondary" id="btnProStructure">結構分析</button>
