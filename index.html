@@ -37,6 +37,8 @@
     .hotcold-table th { color: #94a3b8; }
     .hotcold-table .bar-wrap { width: 80px; height: 14px; background: #0f172a; border-radius: 4px; overflow: hidden; }
     .hotcold-table .bar { height: 100%; background: linear-gradient(90deg, #2b6cb0, #e94560); border-radius: 4px; }
+    .social-card { background: linear-gradient(135deg, #0f3460 0%, #16213e 100%); border-radius: 10px; padding: 14px; margin: 14px 0; border: 1px solid #2a2a4a; text-align: center; }
+    .social-card img { max-width: 100%; height: auto; border-radius: 8px; display: block; margin: 0 auto; }
   </style>
 </head>
 <body>
@@ -70,6 +72,10 @@
     <a href="dashboard.html" class="btn btn-secondary" id="linkDashboard" style="text-align:center;text-decoration:none;margin-top:8px;display:block;">📡 全網共識儀表板（抖內解鎖）</a>
     <a href="live.html" class="btn btn-secondary" style="text-align:center;text-decoration:none;margin-top:8px;display:block;">📺 開獎直播</a>
     <a href="chat.html" class="btn btn-secondary" style="text-align:center;text-decoration:none;margin-top:8px;display:block;">💬 討論區</a>
+    <!-- 平台吉祥物：把你的 Q 版土地公圖放在 images/ 資料夾，檔名設為 landgod.png -->
+    <div class="social-card">
+      <img src="images/landgod.png" alt="土地公" id="landgodImg" style="max-height:180px;">
+    </div>
     <div id="out"></div>
     <details class="how-add">
       <summary>如何「加到主畫面」當 App 使用？</summary>
