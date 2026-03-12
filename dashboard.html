@@ -37,12 +37,6 @@
     .light-box.red .light-num { background: #c53030; color: #fff; }
     .light-box.green .light-num { background: #276749; color: #fff; }
     .omission-num { padding: 6px 12px; border-radius: 8px; font-weight: bold; background: #2c5282; color: #fff; display: inline-flex; align-items: center; gap: 4px; }
-    .master-table { width: 100%; border-collapse: collapse; font-size: 0.9rem; }
-    .master-table th, .master-table td { padding: 10px 12px; text-align: left; border-bottom: 1px solid #2a2a4a; }
-    .master-table th { color: #888; font-weight: 600; }
-    .master-table .trend-up { color: #68d391; }
-    .master-table .trend-down { color: #fc8181; }
-    .master-table .trend-flat { color: #a0aec0; }
     .updated { text-align: center; font-size: 0.8rem; color: #555; margin-top: 24px; }
     .load-err { background: #742a2a; color: #feb2b2; padding: 12px; border-radius: 8px; margin-bottom: 16px; }
   </style>
@@ -100,17 +94,6 @@
       <p id="drawCompareSummary" style="margin:0;font-size:0.95rem;line-height:1.6;"></p>
       <div id="drawCompareDetail" style="margin-top:10px;font-size:0.85rem;color:#aaa;"></div>
     </div>
-
-    <div class="card">
-      <h2><span class="icon">📊</span> 大師勝率回測</h2>
-      <p style="margin:0 0 12px;font-size:0.9rem;color:#aaa;">過去一週 YouTube 報牌與實際開獎比對，僅供參考。<span style="color:#666;">（目前為參考範例，實際回測持續優化中）</span></p>
-      <table class="master-table">
-        <thead>
-          <tr><th>名稱</th><th>近一週命中率</th><th>樣本數</th><th>趨勢</th></tr>
-        </thead>
-        <tbody id="masterBody"></tbody>
-      </table>
-    </div>
   </div>
 
   <script>
@@ -141,11 +124,6 @@
       { number: 9, consensus_score: 8, omission_days: 12 },
       { number: 16, consensus_score: 15, omission_days: 11 },
       { number: 24, consensus_score: 20, omission_days: 9 }
-    ],
-    master_backtest: [
-      { name: '九爺', hit_rate_pct: 18.2, sample_size: 7, trend: 'down' },
-      { name: '阿圖', hit_rate_pct: 22.1, sample_size: 7, trend: 'up' },
-      { name: '其他指標頻道', hit_rate_pct: 15.0, sample_size: 7, trend: 'flat' }
     ],
     latest_draw: [15, 17, 18, 34, 36],
     top5_omission: [
@@ -200,18 +178,6 @@
     });
   }
 
-  function renderMaster(rows) {
-    var tbody = document.getElementById('masterBody');
-    tbody.innerHTML = '';
-    rows.forEach(function (r) {
-      var tr = document.createElement('tr');
-      var trend = r.trend === 'up' ? 'trend-up' : r.trend === 'down' ? 'trend-down' : 'trend-flat';
-      var trendText = r.trend === 'up' ? '↑' : r.trend === 'down' ? '↓' : '→';
-      tr.innerHTML = '<td>' + r.name + '</td><td>' + r.hit_rate_pct + '%</td><td>' + r.sample_size + ' 天</td><td class="' + trend + '">' + trendText + '</td>';
-      tbody.appendChild(tr);
-    });
-  }
-
   function setUpdated(iso) {
     var el = document.getElementById('updated');
     if (!iso) return;
@@ -223,10 +189,17 @@
     var el = document.getElementById('top5OmissionNums');
     if (!el) return;
     el.innerHTML = '';
-    (list || []).forEach(function (x) {
+    var arr = list && Array.isArray(list) ? list : [];
+    if (arr.length === 0) {
+      el.textContent = '資料更新中，請稍後再來。';
+      return;
+    }
+    arr.forEach(function (x) {
+      var num = x && (x.number != null) ? x.number : 0;
+      var periods = x && (x.omission_periods != null) ? x.omission_periods : 0;
       var span = document.createElement('span');
       span.className = 'omission-num';
-      span.textContent = (x.number < 10 ? '0' + x.number : x.number) + ' (' + (x.omission_periods || 0) + '期)';
+      span.textContent = (num < 10 ? '0' + num : num) + ' (' + periods + '期)';
       el.appendChild(span);
     });
   }
@@ -234,12 +207,13 @@
   function renderDrawCompare(latestDraw, redList, greenList) {
     var summaryEl = document.getElementById('drawCompareSummary');
     var detailEl = document.getElementById('drawCompareDetail');
-    var card = document.getElementById('cardDrawCompare');
-    if (!latestDraw || !Array.isArray(latestDraw) || latestDraw.length < 5) {
+    var arr = latestDraw && Array.isArray(latestDraw) ? latestDraw : [];
+    if (arr.length < 5) {
       if (summaryEl) summaryEl.textContent = '尚無最新開獎資料，請稍後再來看。';
       if (detailEl) detailEl.textContent = '';
       return;
     }
+    latestDraw = arr;
     var drawSet = {};
     latestDraw.forEach(function(n) { drawSet[n] = true; });
     var redNums = (redList || []).map(function(x) { return x.number; });
@@ -267,9 +241,8 @@
   function applyData(data) {
     renderRadar(data.consensus_scores || {});
     renderLights(data.over_aligned_numbers || [], data.cold_calm_numbers || []);
-    renderTop5Omission(data.top5_omission || []);
+    renderTop5Omission(data.top5_omission);
     renderDrawCompare(data.latest_draw, data.over_aligned_numbers, data.cold_calm_numbers);
-    renderMaster(data.master_backtest || []);
     setUpdated(data.generated_at);
   }
 
