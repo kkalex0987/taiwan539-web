@@ -143,13 +143,13 @@
     return false;
   }
 
-  // 全站免費：一鍵抓取預填網址，不鎖定
+  // 一鍵抓取網址預填並鎖住，不讓複製／修改
   function applyApiBaseByPro() {
     if (!apiBaseEl) return;
     if (!(apiBaseEl.value || '').trim()) apiBaseEl.value = DEFAULT_API_BASE;
-    apiBaseEl.readOnly = false;
-    apiBaseEl.classList.remove('api-base-locked');
-    apiBaseEl.removeAttribute('readonly');
+    apiBaseEl.readOnly = true;
+    apiBaseEl.classList.add('api-base-locked');
+    apiBaseEl.setAttribute('readonly', 'readonly');
   }
   applyApiBaseByPro();
 
