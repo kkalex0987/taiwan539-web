@@ -41,12 +41,6 @@
   </style>
 </head>
 <body>
-  <div id="paywall" style="display:none;max-width:480px;margin:40px auto;text-align:center;padding:24px;">
-    <h2 style="color:#e94560;margin-bottom:16px;">全網共識儀表板為抖內解鎖功能</h2>
-    <p style="color:#aaa;margin-bottom:20px;">抖內支持後即可使用，30 元試用 3 天、90 元 1 個月起。</p>
-    <a href="pay.html" class="btn" style="display:inline-block;padding:12px 24px;background:#e94560;color:#fff;text-decoration:none;border-radius:8px;margin-right:12px;">抖內支持</a>
-    <a href="index.html" style="color:#888;">返回首頁</a>
-  </div>
   <div id="dashboardContent" class="container">
     <p style="margin-bottom:12px;"><a href="index.html" style="color:#888;text-decoration:none;font-size:0.9rem;">← 返回首頁</a></p>
     <h1>全網共識儀表板</h1>
@@ -80,18 +74,16 @@
         </div>
       </div>
     </div>
+
+    <!-- 廣告區：可貼上 Google AdSense 或其他廣告代碼 -->
+    <div class="ad-slot" id="adDashboard"><!-- 在此貼上廣告代碼 --></div>
+
+    <p style="text-align:center;margin-top:20px;"><a href="pay.html" style="color:#94a3b8;font-size:0.85rem;">若覺得有幫助，歡迎隨喜抖內</a> · <a href="index.html" style="color:#94a3b8;font-size:0.85rem;">返回首頁</a></p>
   </div>
 
-  <script>
-(function checkPaywall() {
-  var LS_IS_PRO = 'lotto_is_pro_v1';
-  if (localStorage.getItem(LS_IS_PRO) !== '1') {
-    document.getElementById('paywall').style.display = 'block';
-    document.getElementById('dashboardContent').style.display = 'none';
-    return;
-  }
-})();
-  </script>
+  <style>
+  .ad-slot { min-height: 90px; margin: 20px 0; padding: 12px; background: rgba(15,52,96,0.3); border-radius: 8px; border: 1px dashed #2a2a4a; color: #666; font-size: 0.8rem; }
+  </style>
   <script>
 (function() {
   var DATA_URL = '539_consensus_latest.json';

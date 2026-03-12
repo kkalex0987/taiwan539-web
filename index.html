@@ -40,6 +40,7 @@
     .hotcold-table th { color: #94a3b8; }
     .hotcold-table .bar-wrap { width: 80px; height: 14px; background: #0f172a; border-radius: 4px; overflow: hidden; }
     .hotcold-table .bar { height: 100%; background: linear-gradient(90deg, #2b6cb0, #e94560); border-radius: 4px; }
+    .ad-slot { min-height: 90px; margin: 16px 0; padding: 12px; background: rgba(15,52,96,0.3); border-radius: 8px; border: 1px dashed #2a2a4a; color: #666; font-size: 0.8rem; }
   </style>
 </head>
 <body>
@@ -58,7 +59,7 @@
     <label>貼上開獎號碼（每行一期，號碼用逗號或空格分隔）</label>
     <textarea id="data" placeholder="今彩539 每行 5 個號碼 (1-39)&#10;例：3,6,9,31,39&#10;5,22,28,35,36"></textarea>
     <p class="help" id="help">今彩539：每行 5 個號碼。大樂透：每行 6 個號碼。</p>
-    <p class="help" style="margin-bottom:8px;"><span id="versionBadge">免費版</span> <span id="versionDesc">請自行貼上開獎號碼，或自備抓取網址</span> <a href="pay.html" id="linkUpgrade" style="color:#e94560;margin-left:6px;">抖內支持</a></p>
+    <p class="help" style="margin-bottom:8px;">全站免費使用 · 若覺得有幫助歡迎 <a href="pay.html" id="linkUpgrade" style="color:#e94560;">隨喜抖內</a></p>
     <div class="lucky-card" id="luckyCard">
       <div class="title">🍀 今日幸運號（僅供娛樂，同一天大家都一樣）</div>
       <div class="nums" id="luckyNums"></div>
@@ -76,9 +77,11 @@
     <button type="button" class="btn btn-secondary" id="btnProStructure">結構分析</button>
     <button type="button" class="btn btn-tertiary" id="btnHotCold">冷熱號一覽表</button>
     <button type="button" class="btn btn-tertiary" id="btnTrend">歷史走勢圖</button>
-    <a href="dashboard.html" class="btn btn-secondary" id="linkDashboard" style="text-align:center;text-decoration:none;margin-top:8px;display:block;">📡 全網共識儀表板（抖內解鎖）</a>
+    <a href="dashboard.html" class="btn btn-secondary" id="linkDashboard" style="text-align:center;text-decoration:none;margin-top:8px;display:block;">📡 全網共識儀表板</a>
     <a href="live.html" class="btn btn-secondary" style="text-align:center;text-decoration:none;margin-top:8px;display:block;">📺 開獎直播</a>
     <a href="chat.html" class="btn btn-secondary" style="text-align:center;text-decoration:none;margin-top:8px;display:block;">💬 討論區</a>
+    <!-- 廣告區：可貼上 Google AdSense 或其他廣告代碼 -->
+    <div class="ad-slot" id="adIndex"><!-- 在此貼上廣告代碼 --></div>
     <div id="out"></div>
     <details class="how-add">
       <summary>如何「加到主畫面」當 App 使用？</summary>
@@ -140,28 +143,13 @@
     return false;
   }
 
-  // 一鍵抓取改為免費也可用：免費用戶預填網址並顯示按鈕；付費版鎖住網址
+  // 全站免費：一鍵抓取預填網址，不鎖定
   function applyApiBaseByPro() {
-    const pro = localStorage.getItem(LS_IS_PRO) === '1';
-    const freeMsg = $('apiBaseFreeMsg');
     if (!apiBaseEl) return;
-    if (pro) {
-      localStorage.setItem(LS_API_BASE, DEFAULT_API_BASE);
-      if (freeMsg) freeMsg.style.display = 'none';
-      apiBaseEl.style.display = '';
-      apiBaseEl.value = DEFAULT_API_BASE;
-      apiBaseEl.readOnly = true;
-      apiBaseEl.classList.add('api-base-locked');
-      apiBaseEl.setAttribute('readonly', 'readonly');
-    } else {
-      localStorage.removeItem(LS_API_BASE);
-      if (freeMsg) freeMsg.style.display = 'none';
-      apiBaseEl.style.display = '';
-      apiBaseEl.value = DEFAULT_API_BASE;
-      apiBaseEl.readOnly = false;
-      apiBaseEl.classList.remove('api-base-locked');
-      apiBaseEl.removeAttribute('readonly');
-    }
+    if (!(apiBaseEl.value || '').trim()) apiBaseEl.value = DEFAULT_API_BASE;
+    apiBaseEl.readOnly = false;
+    apiBaseEl.classList.remove('api-base-locked');
+    apiBaseEl.removeAttribute('readonly');
   }
   applyApiBaseByPro();
 
@@ -213,45 +201,8 @@
   }
 
   function refreshVersionUI() {
-    const pro = isPro();
-    const badge = $('versionBadge');
-    const desc = $('versionDesc');
-    const labelFetch = $('labelFetch');
-    if (badge) {
-      if (pro) {
-        const untilStr = getPaidUntil();
-        if (untilStr) {
-          badge.textContent = '已抖內（至 ' + untilStr.slice(0,4) + '/' + untilStr.slice(4,6) + '/' + untilStr.slice(6,8) + '）';
-        } else {
-          badge.textContent = '已抖內';
-        }
-      } else {
-        badge.textContent = '免費版';
-      }
-    }
-    if (desc) desc.textContent = pro ? '已內建一鍵抓取，直接按即可' : '請自行貼上開獎號碼，或先按一鍵抓取';
-    if (labelFetch) labelFetch.textContent = '一鍵抓取（免費可用，網址已預填）';
-    const freeMsg = $('apiBaseFreeMsg');
-    const btnFetch = $('btnFetch');
-    if (btnFetch) btnFetch.style.display = '';
-    if (apiBaseEl) {
-      if (pro) {
-        if (freeMsg) freeMsg.style.display = 'none';
-        apiBaseEl.style.display = '';
-        apiBaseEl.value = DEFAULT_API_BASE;
-        apiBaseEl.readOnly = true;
-        apiBaseEl.classList.add('api-base-locked');
-        apiBaseEl.setAttribute('readonly', 'readonly');
-      } else {
-        if (freeMsg) freeMsg.style.display = 'none';
-        apiBaseEl.style.display = '';
-        apiBaseEl.value = DEFAULT_API_BASE;
-        apiBaseEl.readOnly = false;
-        apiBaseEl.classList.remove('api-base-locked');
-        apiBaseEl.removeAttribute('readonly');
-        localStorage.removeItem(LS_API_BASE);
-      }
-    }
+    var labelFetch = $('labelFetch');
+    if (labelFetch) labelFetch.textContent = '一鍵抓取（免費可用，直接按）';
   }
   const urlParams = new URLSearchParams(window.location.search);
   const paid = urlParams.get('paid');
@@ -273,19 +224,13 @@
   var justExpired = clearPaidIfExpired();
   refreshVersionUI();
   if (justExpired && outEl) {
-    outEl.textContent = '您的抖內已到期，感謝您的支持。如需繼續使用全網共識儀表板，請再次抖內。';
+    outEl.textContent = '感謝您過去的支持，全站已開放免費使用。';
   }
 
   (function setupUpgradeLink() {
     const link = $('linkUpgrade');
     if (!link) return;
-    link.href = PAYMENT_URL;
-    link.onclick = function(e) {
-      if (isPro()) return;
-      e.preventDefault();
-      const returnUrl = window.location.origin + window.location.pathname + '?paid=1';
-      window.location.href = PAYMENT_URL + '?return=' + encodeURIComponent(returnUrl);
-    };
+    link.href = PAYMENT_URL || 'pay.html';
   })();
 
   (function setupResetFreeLink() {
@@ -317,7 +262,6 @@
       outEl.textContent = '請在上方輸入抓取服務網址，或重新整理頁面（會預填網址）。';
       return;
     }
-    if (isPro()) localStorage.setItem(LS_API_BASE, base);
     const n = Math.max(1, Math.min(parseInt(periodsEl.value, 10) || 20, 200));
     outEl.textContent = `正在抓取 ${mode === '539' ? '今彩539' : '大樂透'} 最近 ${n} 期…`;
     const url = base + '/' + mode + '?periods=' + encodeURIComponent(n);
