@@ -741,5 +741,50 @@
   };
 })();
   </script>
+  <!-- 虛擬 AI 土地公（Coze Web Chat） -->
+  <!-- 1. 載入 Coze Web SDK -->
+  <script src="https://sf-cdn.coze.com/obj/unpkg-va/flow-platform/chat-app-sdk/1.2.0-beta.10/libs/oversea/index.js"></script>
+  <!-- 2. 初始化聊天視窗 -->
+  <script>
+  new CozeWebSDK.WebChatClient({
+    config: {
+      type: 'bot',
+      bot_id: '7616597706999775285',
+      isIframe: false,
+    },
+    auth: {
+      type: 'unauth',
+    },
+    userInfo: {
+      id: 'web_user',
+      url: 'https://sf-coze-web-cdn.coze.com/obj/eden-sg/lm-lgvj/ljhwZthlaukjlkulzlp/coze/coze-logo.png',
+      nickname: '訪客',
+    },
+    ui: {
+      base: {
+        icon: 'https://sf-coze-web-cdn.coze.com/obj/eden-sg/lm-lgvj/ljhwZthlaukjlkulzlp/coze/chatsdk-logo.png',
+        layout: 'pc',
+        lang: 'zh-CN',
+        zIndex: 2000
+      },
+      header: {
+        isShow: true,
+        isNeedClose: true,
+      },
+      asstBtn: {
+        isNeed: true
+      },
+      footer: {
+        isShow: true,
+        expressionText: 'Powered by Coze',
+      },
+      chatBot: {
+        title: '虛擬 AI 土地公',
+        uploadable: false,
+        width: 390,
+      },
+    },
+  });
+  </script>
 </body>
 </html>
