@@ -80,6 +80,7 @@
     <a href="dashboard.html" class="btn btn-secondary" id="linkDashboard" style="text-align:center;text-decoration:none;margin-top:8px;display:block;">📡 全網共識儀表板</a>
     <a href="live.html" class="btn btn-secondary" style="text-align:center;text-decoration:none;margin-top:8px;display:block;">📺 開獎直播</a>
     <a href="chat.html" class="btn btn-secondary" style="text-align:center;text-decoration:none;margin-top:8px;display:block;">💬 討論區</a>
+    <a href="https://www.coze.com/store/agent/7616597706999775285?bot_id=true" class="btn btn-secondary" style="text-align:center;text-decoration:none;margin-top:8px;display:block;" target="_blank" rel="noopener">🙏 虛擬 AI 土地公（Coze）</a>
     <!-- 廣告區：可貼上 Google AdSense 或其他廣告代碼 -->
     <div class="ad-slot" id="adIndex"><!-- 在此貼上廣告代碼 --></div>
     <div id="out"></div>
@@ -740,51 +741,6 @@
     outEl.innerHTML = runTrendChart(draws, n, maxNum);
   };
 })();
-  </script>
-  <!-- 虛擬 AI 土地公（Coze Web Chat） -->
-  <!-- 1. 載入 Coze Web SDK -->
-  <script src="https://sf-cdn.coze.com/obj/unpkg-va/flow-platform/chat-app-sdk/1.2.0-beta.10/libs/oversea/index.js"></script>
-  <!-- 2. 初始化聊天視窗 -->
-  <script>
-  new CozeWebSDK.WebChatClient({
-    config: {
-      type: 'bot',
-      bot_id: '7616597706999775285',
-      isIframe: false,
-    },
-    auth: {
-      type: 'unauth',
-    },
-    userInfo: {
-      id: 'web_user',
-      url: 'https://sf-coze-web-cdn.coze.com/obj/eden-sg/lm-lgvj/ljhwZthlaukjlkulzlp/coze/coze-logo.png',
-      nickname: '訪客',
-    },
-    ui: {
-      base: {
-        icon: 'https://sf-coze-web-cdn.coze.com/obj/eden-sg/lm-lgvj/ljhwZthlaukjlkulzlp/coze/chatsdk-logo.png',
-        layout: 'pc',
-        lang: 'zh-CN',
-        zIndex: 2000
-      },
-      header: {
-        isShow: true,
-        isNeedClose: true,
-      },
-      asstBtn: {
-        isNeed: true
-      },
-      footer: {
-        isShow: true,
-        expressionText: 'Powered by Coze',
-      },
-      chatBot: {
-        title: '虛擬 AI 土地公',
-        uploadable: false,
-        width: 390,
-      },
-    },
-  });
   </script>
 </body>
 </html>
