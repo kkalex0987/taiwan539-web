@@ -57,13 +57,14 @@
   <div class="ad-slot-bottom" id="adSlotBottom">廣告投放區</div>
 
   <!-- Firebase：請替換成你自己的設定，見 Firebase聊天室設定教學.md -->
+  <!-- 若曾撤銷過 API Key，請到 Google Cloud 同專案建立新金鑰，貼到下方 apiKey -->
   <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-database-compat.js"></script>
   <script>
 (function() {
   var firebaseConfig = {
-    apiKey: "AIzaSyBGaHE5bFaIzZRLfOMpidYSI5AHLZOdu3M",
+    apiKey: "AIzaSyCtVpa6SXRo5cNx-Zsr2lGOTKBkZdOmYD4",
     authDomain: "lotto539-chat.firebaseapp.com",
     databaseURL: "https://lotto539-chat-default-rtdb.asia-southeast1.firebasedatabase.app",
     projectId: "lotto539-chat",
@@ -198,7 +199,14 @@
       showStatus('已連線');
       messagesRef.limitToLast(MAX_MSG).on('value', renderMessages);
     }).catch(function(err) {
-      showStatus('登入失敗：請在 Firebase 控制台啟用「匿名登入」');
+      var msg = err.message || err.code || '';
+      if (msg.indexOf('API key') !== -1 || msg.indexOf('invalid') !== -1 || err.code === 'auth/invalid-api-key') {
+        showStatus('登入失敗：API Key 已失效，請到 Google Cloud 建立新金鑰並更新 chat.html 的 apiKey（見下方說明）');
+      } else if (err.code === 'auth/operation-not-allowed') {
+        showStatus('登入失敗：請在 Firebase 控制台啟用「匿名登入」');
+      } else {
+        showStatus('登入失敗：' + (msg || '請檢查 Firebase 設定與授權網域'));
+      }
       sendBtn.disabled = true;
     });
 
