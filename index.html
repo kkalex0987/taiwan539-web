@@ -281,6 +281,10 @@
     outEl.textContent = '感謝您過去的支持，全站已開放免費使用。';
   }
 
+  // 初始化虛擬土地公區塊
+  renderLandgodFortune();
+  bindLandgodComfort();
+
   (function setupUpgradeLink() {
     const link = $('linkUpgrade');
     if (!link) return;
