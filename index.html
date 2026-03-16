@@ -68,7 +68,14 @@
       <div class="title">🙏 虛擬土地公：今日籤詩（僅供娛樂，不保證中獎）</div>
       <div id="landgodFortune" style="font-size:0.9rem;color:#e2e8f0;line-height:1.5;margin-bottom:8px;"></div>
       <button type="button" class="btn btn-tertiary" id="btnLandgodComfort" style="margin-top:4px;">聽土地公安慰一句</button>
-      <p class="help" style="margin-top:6px;">※ 籤詩與安慰話語僅為娛樂與心態提醒，請量力而為。</p>
+      <p id="landgodWealth" style="font-size:0.85rem;color:#fbbf24;margin-top:6px;"></p>
+      <div style="margin-top:8px;">
+        <label for="dreamInput" class="help" style="display:block;margin-bottom:4px;">簡易解夢／測字（輸入關鍵字，例：錢、掉牙、蛇）</label>
+        <input type="text" id="dreamInput" placeholder="輸入夢境或一兩個關鍵字" style="width:100%;padding:8px;border-radius:6px;border:1px solid #333;background:#0f172a;color:#e2e8f0;font-size:0.9rem;">
+        <button type="button" class="btn btn-tertiary" id="btnDreamInterpret" style="margin-top:6px;">請土地公小小指點</button>
+        <p id="dreamResult" class="help" style="margin-top:6px;"></p>
+      </div>
+      <p class="help" style="margin-top:6px;">※ 籤詩、財氣分數與解夢僅為娛樂與心態提醒，請量力而為。</p>
     </div>
     <label>分析期數（取最近幾期）</label>
     <input type="number" id="periods" value="20" min="5" max="200">
@@ -206,7 +213,7 @@
     if (titleEl) titleEl.textContent = m === '649' ? '🍀 今日幸運號（大樂透 6 碼，僅供娛樂）' : '🍀 今日幸運號（今彩539 5 碼，僅供娛樂）';
   }
 
-  // 虛擬土地公：今日籤詩＋安慰語（純前端、僅供娛樂）
+  // 虛擬土地公：今日籤詩＋財氣分數＋安慰語＋簡易解夢（純前端、僅供娛樂）
   var LANDGOD_FORTUNES = [
     '見好就收，手氣好時也要懂得休息。',
     '貪多必失，小注小玩，長久才是福。',
@@ -228,6 +235,18 @@
     '土地公說：睡飽、吃好，比熬夜對牌還重要。'
   ];
 
+  // 關鍵字簡易解夢／測字（極簡版，僅供參考）
+  var LANDGOD_DREAM_MAP = [
+    { key: '錢', text: '夢到錢，多半是對壓力與安全感的投射，不代表一定會發大財，反而提醒你要好好管理手邊的資源。' },
+    { key: '中獎', text: '夢見中獎，常常是日有所思夜有所夢，與其期待一夕致富，不如穩健配置自己的風險。' },
+    { key: '掉牙', text: '掉牙的夢多半和焦慮、形象、家人有關，提醒你照顧好身體與情緒，不要勉強自己。' },
+    { key: '蛇', text: '蛇在傳統解夢裡有時被當作財運，也可能是壓力和不安的象徵，重點是別因此加大賭注。' },
+    { key: '水', text: '水代表情緒與流動，水清澈多為好徵兆，水太混濁則提醒你最近要冷靜，不要情緒化下注。' },
+    { key: '火', text: '火象徵衝動與能量，最近若有煩躁或急著翻本的感覺，更要踩煞車、慢下來。' },
+    { key: '親人', text: '夢到親人，多半和關心、牽掛有關，比起運勢，更提醒你多陪陪重要的人。' },
+    { key: '追趕', text: '被追趕的夢通常是壓力累積，建議先讓自己休息一陣子，再來面對風險決策。' }
+  ];
+
   function getLandgodDailyIndex(max) {
     var d = new Date();
     var seed = d.getFullYear() * 10000 + (d.getMonth() + 1) * 100 + d.getDate();
@@ -244,6 +263,26 @@
     box.textContent = LANDGOD_FORTUNES[idx];
   }
 
+  function renderLandgodWealth() {
+    var el = document.getElementById('landgodWealth');
+    if (!el) return;
+    var d = new Date();
+    // 以日期＋星期做簡單財氣分數（0–100），所有人同一天一樣
+    var seed = d.getFullYear() * 10000 + (d.getMonth() + 1) * 100 + d.getDate() + d.getDay() * 13;
+    var s = seed % 2147483647;
+    s = (s * 48271) % 2147483647;
+    var score = s % 101; // 0–100
+    var level;
+    if (score >= 80) {
+      level = '偏旺，但仍建議以小注娛樂為主。';
+    } else if (score >= 50) {
+      level = '普通，適合照原本的節奏，不必特別加碼。';
+    } else {
+      level = '偏弱，今天更適合練牌路、做記錄，少押或不押。';
+    }
+    el.textContent = '今日財氣指數：約 ' + score + ' 分（' + level + '）';
+  }
+
   function bindLandgodComfort() {
     var btn = document.getElementById('btnLandgodComfort');
     if (!btn) return;
@@ -251,6 +290,42 @@
       if (!Array.isArray(LANDGOD_COMFORTS) || LANDGOD_COMFORTS.length === 0) return;
       var idx = Math.floor(Math.random() * LANDGOD_COMFORTS.length);
       alert(LANDGOD_COMFORTS[idx]);
+    });
+  }
+
+  function bindLandgodDream() {
+    var input = document.getElementById('dreamInput');
+    var btn = document.getElementById('btnDreamInterpret');
+    var result = document.getElementById('dreamResult');
+    if (!input || !btn || !result) return;
+
+    function interpret() {
+      var text = (input.value || '').trim();
+      if (!text) {
+        result.textContent = '請先輸入一兩個關鍵字，例如「錢」、「掉牙」、「蛇」。';
+        return;
+      }
+      var lower = text.toLowerCase();
+      var found = null;
+      for (var i = 0; i < LANDGOD_DREAM_MAP.length; i++) {
+        if (text.indexOf(LANDGOD_DREAM_MAP[i].key) !== -1 || lower.indexOf(LANDGOD_DREAM_MAP[i].key) !== -1) {
+          found = LANDGOD_DREAM_MAP[i].text;
+          break;
+        }
+      }
+      if (!found) {
+        result.textContent = '這個夢境暫時沒有對應的小抄，可以把它當作提醒：先照顧好生活與情緒，再考慮要不要下注。';
+      } else {
+        result.textContent = found;
+      }
+    }
+
+    btn.addEventListener('click', interpret);
+    input.addEventListener('keydown', function(e) {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        interpret();
+      }
     });
   }
 
@@ -283,7 +358,9 @@
 
   // 初始化虛擬土地公區塊
   renderLandgodFortune();
+  renderLandgodWealth();
   bindLandgodComfort();
+  bindLandgodDream();
 
   (function setupUpgradeLink() {
     const link = $('linkUpgrade');
