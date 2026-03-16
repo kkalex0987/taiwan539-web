@@ -268,8 +268,28 @@
     var el = document.getElementById('landgodWealth');
     if (!el) return;
     var d = new Date();
-    // 以日期＋星期做簡單財氣分數（0–100），所有人同一天一樣
-    var seed = d.getFullYear() * 10000 + (d.getMonth() + 1) * 100 + d.getDate() + d.getDay() * 13;
+    // 以日期＋裝置專用 ID 做簡單財氣分數（0–100），同一天同一支手機固定
+    var deviceIdKey = 'landgod_device_id_v1';
+    var deviceId = null;
+    try {
+      deviceId = localStorage.getItem(deviceIdKey);
+    } catch (e) {
+      deviceId = null;
+    }
+    if (!deviceId) {
+      deviceId = String(Math.floor(Math.random() * 1000000) + 1);
+      try {
+        localStorage.setItem(deviceIdKey, deviceId);
+      } catch (e) {
+        // ignore
+      }
+    }
+    var seed =
+      d.getFullYear() * 10000 +
+      (d.getMonth() + 1) * 100 +
+      d.getDate() +
+      (d.getDay() + 1) * 17 +
+      parseInt(deviceId, 10);
     var s = seed % 2147483647;
     s = (s * 48271) % 2147483647;
     var score = s % 101; // 0–100
