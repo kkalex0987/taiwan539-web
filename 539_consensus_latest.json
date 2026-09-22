@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-09-21T23:57:12.527216+00:00",
+  "generated_at": "2026-09-22T04:39:01.655898+00:00",
   "description": "539 全網數據聚合 — 當日共識得分與過度對齊號碼",
   "sources": [
     {
@@ -20,86 +20,86 @@
     }
   ],
   "frequency_count": {
-    "3": 26,
-    "5": 25,
-    "11": 17,
-    "13": 15,
-    "16": 10,
-    "21": 26,
-    "22": 15,
-    "23": 18,
-    "25": 15,
-    "19": 52,
-    "26": 15,
-    "37": 7,
-    "2": 62,
-    "28": 13,
-    "33": 10,
-    "36": 9,
-    "30": 11,
-    "35": 12,
-    "4": 59,
-    "9": 24,
-    "39": 2,
-    "18": 49,
-    "38": 10,
-    "12": 14,
-    "14": 17,
-    "32": 9,
-    "34": 6,
-    "29": 17,
-    "8": 39,
-    "31": 15,
-    "27": 8,
     "1": 52,
-    "15": 11,
-    "10": 14,
-    "17": 30,
-    "7": 20,
-    "20": 11,
-    "6": 41,
-    "24": 8
+    "5": 25,
+    "7": 26,
+    "24": 11,
+    "33": 12,
+    "3": 26,
+    "34": 8,
+    "36": 7,
+    "39": 6,
+    "4": 59,
+    "27": 9,
+    "30": 10,
+    "10": 17,
+    "14": 22,
+    "35": 12,
+    "11": 14,
+    "19": 48,
+    "25": 13,
+    "17": 32,
+    "20": 13,
+    "26": 14,
+    "8": 39,
+    "32": 7,
+    "16": 10,
+    "18": 48,
+    "21": 24,
+    "2": 64,
+    "12": 12,
+    "9": 22,
+    "13": 9,
+    "37": 6,
+    "23": 19,
+    "31": 14,
+    "6": 44,
+    "22": 18,
+    "38": 6,
+    "28": 12,
+    "29": 15,
+    "15": 9
   },
   "consensus_scores": {
-    "1": 83.9,
+    "1": 81.2,
     "2": 100.0,
-    "3": 41.9,
-    "4": 95.2,
-    "5": 40.3,
-    "6": 66.1,
-    "7": 32.3,
-    "8": 62.9,
-    "9": 38.7,
-    "10": 22.6,
-    "11": 27.4,
-    "12": 22.6,
-    "13": 24.2,
-    "14": 27.4,
-    "15": 17.7,
-    "16": 16.1,
-    "17": 48.4,
-    "18": 79.0,
-    "19": 83.9,
-    "20": 17.7,
-    "21": 41.9,
-    "22": 24.2,
-    "23": 29.0,
-    "24": 12.9,
-    "25": 24.2,
-    "26": 24.2,
-    "27": 12.9,
-    "28": 21.0,
-    "29": 27.4,
-    "30": 17.7,
-    "31": 24.2,
-    "32": 14.5,
-    "33": 16.1,
-    "34": 9.7,
-    "35": 19.4,
-    "36": 14.5,
-    "37": 11.3,
-    "38": 16.1,
-    "39": 3.2
+    "3": 40.6,
+    "4": 92.2,
+    "5": 39.1,
+    "6": 68.8,
+    "7": 40.6,
+    "8": 60.9,
+    "9": 34.4,
+    "10": 26.6,
+    "11": 21.9,
+    "12": 18.8,
+    "13": 14.1,
+    "14": 34.4,
+    "15": 14.1,
+    "16": 15.6,
+    "17": 50.0,
+    "18": 75.0,
+    "19": 75.0,
+    "20": 20.3,
+    "21": 37.5,
+    "22": 28.1,
+    "23": 29.7,
+    "24": 17.2,
+    "25": 20.3,
+    "26": 21.9,
+    "27": 14.1,
+    "28": 18.8,
+    "29": 23.4,
+    "30": 15.6,
+    "31": 21.9,
+    "32": 10.9,
+    "33": 18.8,
+    "34": 12.5,
+    "35": 18.8,
+    "36": 10.9,
+    "37": 9.4,
+    "38": 9.4,
+    "39": 9.4
   },
   "over_aligned_numbers": [
     {
@@ -108,132 +108,127 @@
     },
     {
       "number": 4,
-      "consensus_score": 95.2
+      "consensus_score": 92.2
     },
     {
       "number": 1,
-      "consensus_score": 83.9
-    },
-    {
-      "number": 19,
-      "consensus_score": 83.9
+      "consensus_score": 81.2
     },
     {
       "number": 18,
-      "consensus_score": 79.0
+      "consensus_score": 75.0
+    },
+    {
+      "number": 19,
+      "consensus_score": 75.0
     },
     {
       "number": 6,
-      "consensus_score": 66.1
+      "consensus_score": 68.8
     },
     {
       "number": 8,
-      "consensus_score": 62.9
+      "consensus_score": 60.9
     }
   ],
   "over_aligned_threshold": 60,
   "cold_calm_numbers": [
     {
       "number": 37,
-      "consensus_score": 11.3,
+      "consensus_score": 9.4,
       "omission_days": 14
     },
     {
       "number": 23,
-      "consensus_score": 29.0,
+      "consensus_score": 29.7,
       "omission_days": 13
     },
     {
       "number": 31,
-      "consensus_score": 24.2,
+      "consensus_score": 21.9,
       "omission_days": 12
     },
     {
       "number": 39,
-      "consensus_score": 3.2,
+      "consensus_score": 9.4,
       "omission_days": 12
     },
     {
       "number": 33,
-      "consensus_score": 16.1,
+      "consensus_score": 18.8,
       "omission_days": 11
     },
     {
       "number": 34,
-      "consensus_score": 9.7,
+      "consensus_score": 12.5,
       "omission_days": 11
     },
     {
       "number": 24,
-      "consensus_score": 12.9,
+      "consensus_score": 17.2,
       "omission_days": 10
     },
     {
       "number": 28,
-      "consensus_score": 21.0,
+      "consensus_score": 18.8,
       "omission_days": 10
     },
     {
       "number": 20,
-      "consensus_score": 17.7,
+      "consensus_score": 20.3,
       "omission_days": 8
     },
     {
       "number": 25,
-      "consensus_score": 24.2,
+      "consensus_score": 20.3,
       "omission_days": 8
     },
     {
       "number": 35,
-      "consensus_score": 19.4,
+      "consensus_score": 18.8,
       "omission_days": 8
     },
     {
-      "number": 14,
-      "consensus_score": 27.4,
-      "omission_days": 7
-    },
-    {
       "number": 13,
-      "consensus_score": 24.2,
+      "consensus_score": 14.1,
       "omission_days": 6
     },
     {
       "number": 16,
-      "consensus_score": 16.1,
+      "consensus_score": 15.6,
       "omission_days": 6
     },
     {
       "number": 27,
-      "consensus_score": 12.9,
+      "consensus_score": 14.1,
       "omission_days": 6
     },
     {
       "number": 22,
-      "consensus_score": 24.2,
+      "consensus_score": 28.1,
       "omission_days": 5
     }
   ],
   "top5_omission": [
     {
+      "number": 15,
+      "omission_periods": 25
+    },
+    {
+      "number": 29,
+      "omission_periods": 22
+    },
+    {
+      "number": 28,
+      "omission_periods": 20
+    },
+    {
+      "number": 38,
+      "omission_periods": 14
+    },
+    {
       "number": 6,
-      "omission_periods": 25
-    },
-    {
-      "number": 20,
-      "omission_periods": 25
-    },
-    {
-      "number": 24,
-      "omission_periods": 25
-    },
-    {
-      "number": 7,
-      "omission_periods": 19
-    },
-    {
-      "number": 10,
-      "omission_periods": 15
+      "omission_periods": 12
     }
   ],
   "master_backtest": [
