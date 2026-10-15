@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-10-15T16:39:53.084093+00:00",
+  "generated_at": "2026-10-15T21:07:58.064817+00:00",
   "description": "539 全網數據聚合 — 當日共識得分與過度對齊號碼",
   "sources": [
     {
@@ -12,7 +12,7 @@
     },
     {
       "name": "PTT樂透板_報牌討論",
-      "sample_size": 239
+      "sample_size": 236
     },
     {
       "name": "樂透堂_報號統計",
@@ -20,17 +20,17 @@
     }
   ],
   "frequency_count": {
-    "1": 57,
+    "1": 56,
     "13": 27,
     "14": 28,
     "29": 12,
     "31": 11,
-    "2": 65,
+    "2": 64,
     "3": 27,
     "28": 12,
     "34": 8,
     "4": 61,
-    "15": 24,
+    "15": 23,
     "26": 17,
     "32": 10,
     "37": 9,
@@ -61,45 +61,45 @@
     "22": 18
   },
   "consensus_scores": {
-    "1": 87.7,
+    "1": 87.5,
     "2": 100.0,
-    "3": 41.5,
-    "4": 93.8,
-    "5": 44.6,
-    "6": 67.7,
-    "7": 18.5,
-    "8": 64.6,
-    "9": 20.0,
-    "10": 32.3,
-    "11": 20.0,
-    "12": 47.7,
-    "13": 41.5,
-    "14": 43.1,
-    "15": 36.9,
-    "16": 30.8,
-    "17": 40.0,
-    "18": 46.2,
-    "19": 41.5,
-    "20": 41.5,
-    "21": 20.0,
-    "22": 27.7,
-    "23": 21.5,
-    "24": 18.5,
-    "25": 16.9,
-    "26": 26.2,
-    "27": 15.4,
-    "28": 18.5,
-    "29": 18.5,
-    "30": 18.5,
-    "31": 16.9,
-    "32": 15.4,
-    "33": 12.3,
-    "34": 12.3,
-    "35": 7.7,
-    "36": 13.8,
-    "37": 13.8,
-    "38": 7.7,
-    "39": 13.8
+    "3": 42.2,
+    "4": 95.3,
+    "5": 45.3,
+    "6": 68.8,
+    "7": 18.8,
+    "8": 65.6,
+    "9": 20.3,
+    "10": 32.8,
+    "11": 20.3,
+    "12": 48.4,
+    "13": 42.2,
+    "14": 43.8,
+    "15": 35.9,
+    "16": 31.2,
+    "17": 40.6,
+    "18": 46.9,
+    "19": 42.2,
+    "20": 42.2,
+    "21": 20.3,
+    "22": 28.1,
+    "23": 21.9,
+    "24": 18.8,
+    "25": 17.2,
+    "26": 26.6,
+    "27": 15.6,
+    "28": 18.8,
+    "29": 18.8,
+    "30": 18.8,
+    "31": 17.2,
+    "32": 15.6,
+    "33": 12.5,
+    "34": 12.5,
+    "35": 7.8,
+    "36": 14.1,
+    "37": 14.1,
+    "38": 7.8,
+    "39": 14.1
   },
   "over_aligned_numbers": [
     {
@@ -108,86 +108,86 @@
     },
     {
       "number": 4,
-      "consensus_score": 93.8
+      "consensus_score": 95.3
     },
     {
       "number": 1,
-      "consensus_score": 87.7
+      "consensus_score": 87.5
     },
     {
       "number": 6,
-      "consensus_score": 67.7
+      "consensus_score": 68.8
     },
     {
       "number": 8,
-      "consensus_score": 64.6
+      "consensus_score": 65.6
     }
   ],
   "over_aligned_threshold": 60,
   "cold_calm_numbers": [
     {
       "number": 37,
-      "consensus_score": 13.8,
+      "consensus_score": 14.1,
       "omission_days": 14
     },
     {
       "number": 9,
-      "consensus_score": 20.0,
+      "consensus_score": 20.3,
       "omission_days": 13
     },
     {
       "number": 23,
-      "consensus_score": 21.5,
+      "consensus_score": 21.9,
       "omission_days": 13
     },
     {
       "number": 31,
-      "consensus_score": 16.9,
+      "consensus_score": 17.2,
       "omission_days": 12
     },
     {
       "number": 39,
-      "consensus_score": 13.8,
+      "consensus_score": 14.1,
       "omission_days": 12
     },
     {
       "number": 33,
-      "consensus_score": 12.3,
+      "consensus_score": 12.5,
       "omission_days": 11
     },
     {
       "number": 34,
-      "consensus_score": 12.3,
+      "consensus_score": 12.5,
       "omission_days": 11
     },
     {
       "number": 24,
-      "consensus_score": 18.5,
+      "consensus_score": 18.8,
       "omission_days": 10
     },
     {
       "number": 28,
-      "consensus_score": 18.5,
+      "consensus_score": 18.8,
       "omission_days": 10
     },
     {
       "number": 25,
-      "consensus_score": 16.9,
+      "consensus_score": 17.2,
       "omission_days": 8
     },
     {
       "number": 35,
-      "consensus_score": 7.7,
+      "consensus_score": 7.8,
       "omission_days": 8
     },
     {
       "number": 27,
-      "consensus_score": 15.4,
+      "consensus_score": 15.6,
       "omission_days": 6
     },
     {
       "number": 22,
-      "consensus_score": 27.7,
+      "consensus_score": 28.1,
       "omission_days": 5
     }
   ],
